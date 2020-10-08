@@ -17,3 +17,28 @@ install.packages("devtools")
 library(devtools)
 install_github("RaphaelHartmann/WienR")
 ```
+
+
+# Examples
+```
+t <- .75
+response <- "upper"
+a <- 1
+v <- 4
+w <- .5
+
+WienerPDF(t, response, a, v, w)
+WienerCDF(t, response, a, v, w)
+
+dtWienerPDF(t, response, a, v, w)
+daWienerPDF(t, response, a, v, w)
+dvWienerPDF(t, response, a, v, w)
+dwWienerPDF(t, response, a, v, w)
+
+daWienerCDF(t, response, a, v, w)
+dvWienerCDF(t, response, a, v, w)
+dwWienerCDF(t, response, a, v, w)
+
+gradWienerPDF(t, response, a, v, w)
+gradWienerCDF(t, response, a, v, w)
+```
