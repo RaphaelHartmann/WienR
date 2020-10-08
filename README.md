@@ -2,7 +2,7 @@
 
 
 # WienR
-Calculation of the partial derivatives of the PDF and CDF of the Wiener diffusion model
+*R* package for the calculation of the partial derivatives of the PDF and CDF of the Wiener drift diffusion model
 
 
 # Description
