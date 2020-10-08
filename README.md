@@ -22,6 +22,29 @@ install_github("RaphaelHartmann/WienR")
 # Usage
 Since there is already a package that proviides the PDF and CDF for the Wiener drift diffusion model we decided not to follow the convention for PDFs (`dnorm`, `dunif`, etc.) and CDFs (`pnorm`, `punif`, etc.). Instead the PDF is called by `WienerPDF` and the CDF with `WienerCDF`. The derivative functions are named with a leading `dt`, `da`, `dv`, or `dw` indicating the partial derivative with respect to the first-passage time, the upper barrier, the drift rate, or the relative starting point, respectively. E.g. `daWienerPDF` is the function for the derivative of the PDF with respect to the upper barrier. The gradient functions are named with a leading `grad`.
 
+There are five main arguments, all vectorized:
+
+`t`: the first-passage time
+
+`response`: "upper" or "lower"
+
+`a`: the upper barrier
+
+`v`: the drift rate
+
+`w`: the relative starting point
+
+The length of all arguments must match, except the length is one. In case one argument has length one it will be replicated to match the length of the others.
+
+And three optional arguments:
+
+`precision`: the precision with which the calculation is done. The calculated value is guaranteed to be closer to the true value than this value.
+
+`K`: number of components evaluated from the infinite sums for the formulae.
+
+`n.threads`: number of threads for multithreading.
+
+If only neither `precision` nor `K` is used, then a default precision of 12e-10 is used to calculate the number of components that guarantee the precision. If `precision` is used but not `K` the same happens but with the provided precision value. If both are provided the number of components that guarantees the precision is calculated and used, except if `K` is larger. If only `K` is provided then this is used as fixed number of components.
 
 # Examples
 ```
