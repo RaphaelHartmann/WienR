@@ -1,0 +1,18 @@
+Package: WienR
+Version: 0.1-5
+Title: Derivatives of the Wiener diffusion density and cumulative distribution function
+Authors@R: c(person("Raphael", "Hartmann", email = "raphael.hartmann@protonmail.com", role = c("aut", "cre")),
+             person("Karl C.", "Klauer", email="christoph.klauer@psychologie.uni-freiburg.de", role=c("cph", "aut", "ctb", "ths")),
+             person("Jean M.", "Linhart", email="jlinhart@stata.com", role=c("ctb")))
+Author: Raphael Hartmann [aut, cre],
+  Karl C. Klauer [cph, aut, ctb, ths],
+  Jean M. Linhart [ctb]
+Maintainer: Raphael Hartmann <raphael.hartmann@protonmail.com>
+Depends: R (>= 4.0.0)
+NeedsCompilation: yes
+Description: Calculate the partial derivative of the Wiener diffusion probability density (PDF) oder cumulative distribution function (CDF)
+		with respect to the relative starting point w, the upper bound a, the drift rate v, and the first-passage time t (only for PDF).
+		In addition the PDF and CDF themselves are also provided. All calculations are done by using the logarithm, which makes it more stable.
+License: GPL (>= 2)
+Encoding: UTF-8
+RoxygenNote: 7.1.1
