@@ -11,7 +11,7 @@ Maintainer: Raphael Hartmann <raphael.hartmann@protonmail.com>
 Depends: R (>= 4.0.0)
 NeedsCompilation: yes
 Description: Calculate the partial derivative of the Wiener diffusion probability density (PDF) oder cumulative distribution function (CDF)
-		with respect to the relative starting point w, the upper bound a, the drift rate v, and the first-passage time t (only for PDF).
+		with respect to the the upper barrier a, the drift rate v, relative starting point w, and the first-passage time t (only for PDF).
 		In addition the PDF and CDF themselves are also provided. All calculations are done by using the logarithm, which makes it more stable.
 License: GPL (>= 2)
 Encoding: UTF-8
