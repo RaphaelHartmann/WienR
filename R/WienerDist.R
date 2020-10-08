@@ -1,15 +1,15 @@
 
 #' Wiener diffusion cumulative distribution function
-#' 
+#'
 #' Calculate the Wiener diffusion cumulative distribution function.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
-#' @param a Upper bound. Numeric vector.
+#' @param a Upper barrier. Numeric vector.
 #' @param v Drift rate. Numeric vector.
 #' @param w Relative starting point. Numeric vector.
 #' @param precision Optional numeric value. Precision of the CDF. Numeric value. Default is \code{NULL}, which takes default value 1e-12.
-#' @param K Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}. 
+#' @param K Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}.
 #'   \itemize{
 #'     \item \code{precision = NULL} and \code{K = NULL}: Default \code{precision = 1e-12} used to calculate internal K.
 #'     \item \code{precision != NULL} and \code{K = NULL}: \code{precision} is used to calculate internal K,
@@ -18,17 +18,17 @@
 #'   }
 #'   We recommend using either default (\code{precision = K = NULL}) or only \code{precision}.
 #' @param n.threads Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.
-#' @return A list of the class \code{Wiener_dist} containing 
+#' @return A list of the class \code{Wiener_dist} containing
 #'   \itemize{
 #'     \item \code{pdf}: the CDF,
-#'     \item \code{logpdf}: the log-transformed CDF, 
+#'     \item \code{logpdf}: the log-transformed CDF,
 #'     \item \code{call}: the function call.
 #'   }
 #' @references
 #' Blurton, S. P., Kesselmeier, M., & Gondan, M. (2012). Fast and accurate calculations for cumulative first-passage time distributions in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 56(6)}, 470–475. doi:10.1016/j.jmp.2012.09.002
-#' 
+#'
 #' Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. \emph{Journal of Mathematical Psychology, 60}, 20–22. doi:10.1016/j.jmp.2014.05.002
-#' @examples 
+#' @examples
 #' WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 #' @author Raphael Hartmann
 #' @useDynLib "WienR", .registration=TRUE
@@ -41,12 +41,12 @@ WienerCDF <- function(t,
                       precision = NULL,
                       K = NULL,
                       n.threads = FALSE) {
-  
-  
-  
-  
+
+
+
+
   # ---- VALUE CHECKS ---- #
-  
+
   # general checks
   lengths <- c(length(t), length(response), length(a), length(v), length(w))
   max_len <- max(lengths)
@@ -56,42 +56,42 @@ WienerCDF <- function(t,
   if(length(a) != max_len) a <- rep(a, max_len)
   if(length(v) != max_len) v <- rep(v, max_len)
   if(length(w) != max_len) w <- rep(w, max_len)
-  
+
   # t a v w checks
   if(!is.numeric(t) | !is.numeric(a) | !is.numeric(v) | !is.numeric(w)) stop("t, a, v, and w must be numeric")
   if(any(t <= 0) | any(a <= 0) | any(w <= 0)) stop("t, a, and w must be positive")
   if(any(w >= 1)) stop("w must be lower than one")
-  
+
   # response checks
   if(!is.character(response) & !is.numeric(response)) stop("response must be a character with the values \"upper\" and/or \"lower\" OR numerics with the values 1=\"lower\" or 2=\"upper\"")
   if(!all(response %in% c("upper", "lower")) & !all(response %in% c(1,2)) ) stop("response must cannot include values other than \"upper\" and/or \"lower\" OR 1=\"lower\" or 2=\"upper\"")
   resps <- ifelse(response == "lower" | response == 1, 0, 1)
-  
+
   # K checks
   if(!is.numeric(K) & !is.null(K)) stop("K must either be NULL or some numeric value")
   if(!is.null(K)) {
     if(length(K)!=1) stop("K must be of length one")
     if(K %% 1 != 0) stop("K must be an integer") else K <- as.integer(round(K))
   }
-  
+
   # precision checks
   if(!is.numeric(precision) & !is.null(precision)) stop("precision must either be NULL or some numeric value")
   if(length(precision)!=1 & !is.null(precision)) stop("precision must be of length one")
-  
+
   PRECISION_FLAG <- TRUE
   if(is.null(precision)) PRECISION_FLAG <- FALSE
-  
+
   if(is.null(K)) K <- 0
   if(is.null(precision)) precision <- 0
-  
+
   # thread checks
   if(!is.numeric(n.threads) & !is.logical(n.threads)) stop("n.threads must either be numerical or logical")
   if(is.numeric(n.threads)) if(n.threads %% 1 != 0) stop("n.threads must be an integer") else n.threads <- as.integer(n.threads)
   if(is.logical(n.threads)) n.threads <- ifelse(n.threads == TRUE, 99999, 0)
   if(n.threads < 2) n.threads <- 0
-  
-  
-  
+
+
+
   # --- C++ FUNCTION CALL ---- #
 
   out <- .Call("pWiener",
@@ -106,20 +106,13 @@ WienerCDF <- function(t,
                as.integer(n.threads),
                as.logical(PRECISION_FLAG)
   )
-  
+
   #print(out)
-  
+
   outcome <- list(value = out$cdf, logvalue = out$logcdf, call = match.call())
-  
+
   # output
   class(outcome) <- "Wiener_cdf"
   return(outcome)
-  
+
 }
-
-
-
-
-
-
-
