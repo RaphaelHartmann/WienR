@@ -21,7 +21,7 @@ daWienerPDF(
 \item{response}{Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 \code{1}=lower and \code{2}=upper.}
 
-\item{a}{Upper bound. Numeric vector.}
+\item{a}{Upper barrier. Numeric vector.}
 
 \item{v}{Drift rate. Numeric vector.}
 
@@ -29,7 +29,7 @@ daWienerPDF(
 
 \item{precision}{Optional numeric value. Precision of the partial derivative. Numeric value. Default is \code{NULL}, which takes default value 1e-12.}
 
-\item{K}{Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}. 
+\item{K}{Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}.
 \itemize{
   \item \code{precision = NULL} and \code{K = NULL}: Default \code{precision = 1e-12} used to calculate internal K.
   \item \code{precision != NULL} and \code{K = NULL}: \code{precision} is used to calculate internal K,
@@ -41,10 +41,10 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 \item{n.threads}{Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.}
 }
 \value{
-A list of the class \code{Wiener_deriv} containing 
+A list of the class \code{Wiener_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the PDF with respect to a,
-    \item \code{derivln}: the derivatives of the log-transformed PDF with respect to a, 
+    \item \code{derivln}: the derivatives of the log-transformed PDF with respect to a,
     \item \code{call}: the function call.
   }
 }
