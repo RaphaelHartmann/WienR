@@ -12,7 +12,7 @@ Calculate the partial derivative of the probability density (PDF) oder cumulativ
 # Installation
 
 ## Requirements:
-For the installation there are a few requirements. First of all, the *R* version must be 4.0 or above (https://cran.r-project.org/). Second, use `update.packages()` to update your packages for compatibility with *R* version 4.0 or above. The argument `ask=FALSE` can be used to update all packages without asking. Third, Windows users might have to install Rtools40 (https://cran.r-project.org/bin/windows/Rtools/).
+For the installation there are a few requirements. First of all, the *R* version must be 4.0 or above (https://cran.r-project.org/). Second, use `update.packages()` to update your packages for compatibility with *R* version 4.0 or above. The argument `ask=FALSE` can be used to update all packages without asking each time. Third, Windows users might have to install Rtools40 (https://cran.r-project.org/bin/windows/Rtools/).
 
 ## Installation from GitHub:
 First `devtools` needs to be installed and then `WienR` can be installed by using the `install_github()` function with the full GitHub path "RaphaelHartmann/WienR":
