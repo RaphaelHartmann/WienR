@@ -25,7 +25,7 @@ First `devtools` needs to be installed and then `WienR` can be installed by usin
 
 
 # Usage
-Since there is already a package that proviides the PDF and CDF for the Wiener drift diffusion model we decided not to follow the convention for PDFs (`dnorm`, `dunif`, etc.) and CDFs (`pnorm`, `punif`, etc.). Instead the PDF is called by `WienerPDF` and the CDF with `WienerCDF`. The derivative functions are named with a leading `dt`, `da`, `dv`, or `dw` indicating the partial derivative with respect to the first-passage time, the upper barrier, the drift rate, or the relative starting point, respectively. E.g. `daWienerPDF` is the function for the derivative of the PDF with respect to the upper barrier. The gradient functions are named with a leading `grad`.
+Since there is already a package that proviides the PDF and CDF for the Wiener diffusion model we decided not to follow the convention for PDFs (`dnorm`, `dunif`, etc.) and CDFs (`pnorm`, `punif`, etc.). Instead the PDF is called by `WienerPDF` and the CDF with `WienerCDF`. The derivative functions are named with a leading `dt`, `da`, `dv`, or `dw` indicating the partial derivative with respect to the first-passage time, the upper barrier, the drift rate, or the relative starting point, respectively. E.g. `daWienerPDF` is the function for the derivative of the PDF with respect to the upper barrier. The gradient functions are named with a leading `grad`.
 
 There are five main arguments, all vectorized:
 
