@@ -6,7 +6,7 @@
 
 
 # Description
-Calculate the partial derivative of the first-passage time probability density (PDF) or cumulative distribution function (CDF) of the Wiener diffusion model with respect to the first-passage time `t` (only for PDF), the upper barrier `a`, the drift rate `v`, and the relative starting point `w`. In addition the PDF and CDF themselves are also provided. All calculations are done by using the logarithm, which makes it more stable.
+Calculate the partial derivative of the first-passage time probability density (PDF) or cumulative distribution function (CDF) of the Wiener diffusion model with respect to the first-passage time `t` (only for PDF), the upper barrier `a`, the drift rate `v`, and the relative starting point `w`. In addition the PDF and CDF themselves are also provided. Almost all calculations are done by using the logarithm, which makes it more stable.
 
 
 # Installation
