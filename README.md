@@ -2,11 +2,11 @@
 
 
 # WienR
-*R* package for the calculation of the partial derivatives of the first-passage time PDF and CDF of the Wiener diffusion model
+*R* package for the calculation of the partial derivatives of the first-passage time PDF and CDF of the Wiener diffusion model with 3 to 7 parameters
 
 
 # Description
-Calculate the partial derivative of the first-passage time probability density (PDF) or cumulative distribution function (CDF) of the Wiener diffusion model with respect to the first-passage time `t` (only for PDF), the upper barrier `a`, the drift rate `v`, and the relative starting point `w`. In addition the PDF and CDF themselves are also provided. Almost all calculations are done by using the logarithm, which makes it more stable.
+Calculate the partial derivative of the first-passage time probability density (PDF) or cumulative distribution function (CDF) of the Wiener diffusion model with respect to the first-passage time `t` (only for PDF), the upper barrier `a`, the drift rate `v`, the relative starting point `w`, and in addition the non-decision time `t0`, the inter-trial variability of the drift rate `sv`, the inter-trial variability of the relative starting point `sw`, the inter-trial variability of the non-decision time `st0`. In addition the PDF and CDF themselves are also provided. Almost all calculations are done by using the logarithm, which makes it more stable.
 
 
 # Installation
@@ -25,9 +25,9 @@ First `devtools` needs to be installed and then `WienR` can be installed by usin
 
 
 # Usage
-Since there is already a package that proviides the PDF and CDF for the Wiener diffusion model we decided not to follow the convention for PDFs (`dnorm`, `dunif`, etc.) and CDFs (`pnorm`, `punif`, etc.). Instead the PDF is called by `WienerPDF` and the CDF with `WienerCDF`. The derivative functions are named with a leading `dt`, `da`, `dv`, or `dw` indicating the partial derivative with respect to the first-passage time, the upper barrier, the drift rate, or the relative starting point, respectively. E.g. `daWienerPDF` is the function for the derivative of the PDF with respect to the upper barrier. The gradient functions are named with a leading `grad`.
+Since there is already a package that proviides the PDF and CDF for the Wiener diffusion model (with 4 parameters) we decided not to follow the convention for PDFs (`dnorm`, `dunif`, etc.) and CDFs (`pnorm`, `punif`, etc.). Instead the PDF is called by `WienerPDF` and the CDF with `WienerCDF`. The derivative functions are named with a leading `dt`, `da`, `dv`, `dw`, `dt0`, `dsv`, `dsw`, or `dst0` indicating the partial derivative with respect to the first-passage time, the upper barrier, the drift rate, the relative starting point, the non-decision time, the inter-trial variability of the drift rate, the inter-trial variability of the relative starting point, the inter-trial variability of the non-decision time, respectively. E.g. `daWienerPDF` is the function for the derivative of the PDF with respect to the upper barrier. The gradient functions are named with a leading `grad`.
 
-There are five main arguments, all vectorized:
+There are nine main arguments, all vectorized:
 
 `t`: the first-passage time
 
@@ -39,7 +39,16 @@ There are five main arguments, all vectorized:
 
 `w`: the relative starting point
 
-The length of all arguments must match, except the length is one. In case one argument has length one it will be replicated to match the length of the others.
+`t0`: the non-decision time
+
+`sv`: the inter-trial variability of the drift rate
+
+`sw`: the inter-trial variability of the relative starting point
+
+`st0`: the inter-trial variability of the non-decision time
+
+
+The length of all arguments must match, except if the length of one is used. In case one argument has length one it will be replicated to match the length of the others.
 
 And three optional arguments:
 
@@ -49,7 +58,7 @@ And three optional arguments:
 
 `n.threads`: number of threads for multithreading.
 
-If only neither `precision` nor `K` is used, then a default precision of 12e-10 is used to calculate the number of components that guarantee the precision. If `precision` is used but not `K` the same happens but with the provided precision value. If both are provided the number of components that guarantees the precision is calculated and used, except if `K` is larger. If only `K` is provided then this is used as fixed number of components.
+If neither `precision` nor `K` is used, then a default precision of 1e-12 is used to calculate the number of components that guarantee the precision. If `precision` is used but not `K` the same happens but with the provided precision value. If both are provided the number of components that guarantees the precision is calculated and used, except if `K` is larger. If only `K` is provided then this is used as fixed number of components.
 
 # Examples
 ```
@@ -58,19 +67,31 @@ response <- "upper"
 a <- 1
 v <- 4
 w <- .5
+t0 <- .5
+sv <- .1
+sw <- .1
+st0 <- .1
 
-WienerPDF(t, response, a, v, w)
-WienerCDF(t, response, a, v, w)
+WienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 
-dtWienerPDF(t, response, a, v, w)
-daWienerPDF(t, response, a, v, w)
-dvWienerPDF(t, response, a, v, w)
-dwWienerPDF(t, response, a, v, w)
+dtWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+daWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+dvWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+dwWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+dt0WienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+dsvWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+dswWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+dst0WienerPDF(t, response, a, v, w, t0, sv, sw, st0)
 
-daWienerCDF(t, response, a, v, w)
-dvWienerCDF(t, response, a, v, w)
-dwWienerCDF(t, response, a, v, w)
+daWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+dvWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+dwWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+dt0WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+dsvWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+dswWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+dst0WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 
-gradWienerPDF(t, response, a, v, w)
-gradWienerCDF(t, response, a, v, w)
+gradWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+gradWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 ```
