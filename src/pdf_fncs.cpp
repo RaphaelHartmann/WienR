@@ -167,10 +167,9 @@ void logdtfl(double q, double w, int K, double &erg, int &newsign) {
 }
 
 /* calculate derivative of density with respect to t */
-void dtdwiener(double q, double a, double v, double w, double ld, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
+void dtdwiener(double q, double a, double v, double w, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
-		*derivlnF = 0.0/0.0;
 	} else {
 		double kll, kss, ans;
 		if(!epsFLAG && K==0) {
@@ -189,12 +188,12 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 
 
 		/* calculate the number of terms needed for short t */
-	  double es = err - lg1 + ld;
+	  double es = err - lg1;// + ld;
 	  es = es + la;
 		kss = dtaks(q_asq, w, es);
 		/* calculate the number of terms needed for large t */
-	  double el = (err - lg1 + ld) ;
-	  el = el +la;
+	  double el = err - lg1;// + ld;
+	  el = el + la;
 	  kll = dtakl(q_asq, v, a, el);
 
 	  // if small t is better
@@ -212,7 +211,6 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 	    ans = ans0 - newsign * exp(factor + 3.0*M_LNPI - M_LN2 + erg - ld);
 	  }
 	  //return ans;
-		*derivlnF = ans;
 		*derivF = ans*exp(ld);
 	}
 }
@@ -224,10 +222,9 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 /* d/da DENSITY */
 
 /* calculate derivative of density with respect to a */
-void dadwiener(double q, double a, double vn, double wn, double ld, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
+void dadwiener(double q, double a, double vn, double wn, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
-		*derivlnF = 0.0/0.0;
 	} else {
 		double kll, kss, ans, v, w;
 		if(!epsFLAG && K==0) {
@@ -256,12 +253,12 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 		double factor = lg1 - 3.0*la;
 
 		/* calculate the number of terms needed for short t */
-		double es = err - lg1 + ld;
+		double es = err - lg1;// + ld;
 		es = es + la;
 		es = es -  M_LN2 + 2.0*la - lq;
 		kss = dtaks(q_asq, w, es);
 		/* calculate the number of terms needed for large t */
-		double el = err - lg1 + ld;
+		double el = err - lg1;// + ld;
 		el = el + la;
 		el = el - M_LN2 + 2.0*la - lq;
 		kll = dtakl(q_asq, v, a, el);
@@ -281,7 +278,6 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 			ans = ans0 - 2.0 / a + newsign * exp(lq + factor + 3.0*M_LNPI + erg - ld);
 		}
 		//return ans;
-		*derivlnF = ans;
 		*derivF = ans*exp(ld);
 	}
 }
@@ -292,10 +288,9 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 /* d/dv DENSITY */
 
 /* calculate derivative of density with respect to v */
-void dvdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double *derivlnF) {
+void dvdwiener(double q, double a, double vn, double wn, double ld, double *derivF) {
 	if (q == 0.0) {
 		*derivF = 0.0;
-		*derivlnF = 0.0/0.0;
 	} else {
 		double ans, v, w;
 		int sign = 1;
@@ -313,7 +308,6 @@ void dvdwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 		ans =  sign*(- a * w - v * q);
 
-		*derivlnF = ans;
 		*derivF = ans*exp(ld);
 	}
 }
@@ -378,10 +372,9 @@ void logdwfl(double q, double v,  double w, int K, double &erg, int &sign) {
 }
 
 /* calculate derivative of density with respect to w */
-void dwdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
+void dwdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
-		*derivlnF = 0.0/0.0;
 	} else {
 		double kll, kss, ans, v, w;
 		if(!epsFLAG && K==0) {
@@ -412,8 +405,8 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 		double ll = -lg1 + ld;
 
 		/* calculate the number of terms needed for short t and large t */
-		kss = dwks(q_asq, w, err+ls);
-		kll = dwkl(q_asq, v, err+ll);
+		kss = dwks(q_asq, w, err-lg1);
+		kll = dwkl(q_asq, v, err-lg1);
 
 		// if small t is better
 		if (2 * kss < kll) {
@@ -430,7 +423,6 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 			ans = sign*(ans0 + newsign * exp(erg - ll + 2.0 * M_LNPI));
 		}
 		//return ans*sign;
-		*derivlnF = ans;
 		*derivF = ans*exp(ld);
 	}
 }
@@ -546,19 +538,16 @@ void logdxfl(double q, double w, int Kal, int Kwl, double &erg_a, double &erg_w,
 }
 
 /* calculate derivative of density with respect to w */
-void dxdwiener(double q, double a, double vn, double wn, double ld, double err, int K, int epsFLAG, double *da, double *da_ln, double *dv, double *dv_ln, double *dw, double *dw_ln) {
+void dxdwiener(double q, double a, double vn, double wn, double ld, double err, int K, int epsFLAG, double *da, double *dv, double *dw) {
 
 	if (q == 0.0) {
 		// -----------d/da------------
-		*da_ln = 0.0/0.0;
 		*da = 0.0;
 
 		// -----------d/dv------------
-		*dv_ln = 0.0/0.0;
 		*dv = 0.0;
 
 		// -----------d/dw------------
-		*dw_ln = 0.0/0.0;
 		*dw = 0.0;
 	} else {
 		double v, w, kal, kas, kwl, kws;
@@ -590,7 +579,7 @@ void dxdwiener(double q, double a, double vn, double wn, double ld, double err, 
 		double la = log(a);
 		double lq = log(q);
 		double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - 2.0*la;
-		double es = err - lg1 + ld;
+		double es = err - lg1;// + ld;
 		double el = es;
 
 		double factor_a = lg1 - 3.0*la;
@@ -619,15 +608,12 @@ void dxdwiener(double q, double a, double vn, double wn, double ld, double err, 
 		}
 
 		// -----------d/da------------
-		*da_ln = ans_a;
 		*da = ans_a*exp(ld);
 
 		// -----------d/dv------------
-		*dv_ln = ans_v;
 		*dv = ans_v*exp(ld);
 
 		// -----------d/dw------------
-		*dw_ln = ans_w*sign;
 		*dw = (ans_w*sign)*exp(ld);
 	}
 

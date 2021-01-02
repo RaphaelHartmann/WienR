@@ -31,8 +31,7 @@ int int_ddiff(unsigned dim, const double *x, void *p, unsigned fdim, double *ret
 	double errorW = (params->errorW);
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
-	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
+	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -71,7 +70,6 @@ int int_daddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -87,7 +85,7 @@ int int_daddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dadwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dadwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, errorW, K, epsFLAG);
 		double dda = val_ptr[0];
 
 		double integrand = dda * exp(temp2);
@@ -113,7 +111,6 @@ int int_dvddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -129,7 +126,7 @@ int int_dvddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dvdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, valln_ptr);
+		dvdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr);
 
 		double integrand = val_ptr[0] * exp(temp2);
 
@@ -154,7 +151,6 @@ int int_dt0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -173,7 +169,7 @@ int int_dt0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
-		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = -val_ptr[0] * exp(temp2);
 
@@ -198,7 +194,6 @@ int int_dwddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -214,7 +209,7 @@ int int_dwddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dwdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dwdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = val_ptr[0] * exp(temp2);
 
@@ -239,7 +234,6 @@ int int_dswddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -256,7 +250,7 @@ int int_dswddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dwdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dwdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = temp_sw * val_ptr[0] * exp(temp2);
 
@@ -281,7 +275,6 @@ int int_dsvddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = pow(x[0], 2);
@@ -296,7 +289,7 @@ int int_dsvddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 
 		double temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dvdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr, valln_ptr);
+		dvdwiener(low_or_up * (t-tau), a, nu, omega, ldW, val_ptr);
 
 		double integrand = y * val_ptr[0] * exp(temp2);
 
@@ -321,7 +314,6 @@ int int_dst0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -341,7 +333,7 @@ int int_dst0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
-		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = temp_st0 * val_ptr[0] * exp(temp2);
 
@@ -366,7 +358,6 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -385,7 +376,7 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
-		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = val_ptr[0] * exp(temp2);
 
@@ -395,19 +386,18 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 }
 
 /* calculate density for 7-param diffusion */
-void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF, double *derivlnF) {
+void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF) {
 
 	//double result;
 	//double error;
 
 	double value;
-	double valueln;
+	// double valueln;
 
 	double *val_ptr = &value;
-	double *valln_ptr = &valueln;
 	double errorW = myerr ? myerr*.1 : 1.e-12*.1;
 
-	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr, valln_ptr};
+	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr};
 
 	int dim = (sw!=0)+(sv!=0)+(st!=0);
 
@@ -435,10 +425,8 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	double val, err;
 
 	//	printf("%u-dim integral, tolerance = %g\n", dim, tol);
-	hcubature(1, int_ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
-	double dens = val;
 	switch (choice) {
-		//case 0: hcubature(1, int_ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 0: hcubature(1, int_ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 	  case 1: hcubature(1, int_daddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 2: hcubature(1, int_dvddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 3: hcubature(1, int_dt0ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
@@ -452,9 +440,6 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	free(xmin); free(xmax);
 	*derivF = val;
-	if (choice != 0) {
-		*derivlnF = val/dens;
-	}
 
 }
 
@@ -479,8 +464,7 @@ int int_pdiff(unsigned dim, const double *x, void *p, unsigned fdim, double *ret
 	double errorW = (params->errorW);
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
-	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
+	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -522,7 +506,6 @@ int int_dapdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -541,7 +524,7 @@ int int_dapdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dapwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dapwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = val_ptr[0] * exp(temp2);
 //if(std::isnan(integrand)) Rprintf("t-tau, a, v, w, lp:%8g%8g%8g%8g%8g\n", t-tau, a, nu, omega, lpW);
@@ -566,7 +549,6 @@ int int_dvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -585,7 +567,7 @@ int int_dvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dvpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dvpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = val_ptr[0] * exp(temp2);
 
@@ -609,8 +591,7 @@ int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	double errorW = (params->errorW);
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
-	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
+	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -649,7 +630,6 @@ int int_dwpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -668,7 +648,7 @@ int int_dwpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dwpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dwpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = val_ptr[0] * exp(temp2);
 
@@ -693,7 +673,6 @@ int int_dswpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -713,7 +692,7 @@ int int_dswpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dwpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dwpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = temp_sw * val_ptr[0] * exp(temp2);
 
@@ -738,7 +717,6 @@ int int_dsvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
 	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -758,7 +736,7 @@ int int_dsvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dvpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, valln_ptr, errorW, K, epsFLAG);
+		dvpwiener(low_or_up, (t-tau), a, nu, omega, lpW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = y * val_ptr[0] * exp(temp2);
 
@@ -782,8 +760,7 @@ int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	double errorW = (params->errorW);
 	int K = (params->K);
 	int epsFLAG = (params->epsFLAG);
-	double *val_ptr = (params->val_ptr);
-	double *valln_ptr = (params->valln_ptr);
+	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
@@ -808,19 +785,18 @@ int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 }
 
 /* calculate distribution for 7-param diffusion */
-void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF, double *derivlnF) {
+void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF) {
 
 	//ouble result;
 	//double error;
 
 	double value;
-	double valueln;
+	// double valueln;
 
 	double *val_ptr = &value;
-	double *valln_ptr = &valueln;
 	double errorW = myerr ? myerr*.1 : 1.e-12*.1;
 
-	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr, valln_ptr};
+	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr};
 
 	int dim = (sw!=0)+(sv!=0)+(st!=0);
 
@@ -848,10 +824,8 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	double val, err;
 
 	//	printf("%u-dim integral, tolerance = %g\n", dim, tol);
-	hcubature(1, int_pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
-	double dist = val;
 	switch (choice) {
-		//case 0: hcubature(1, int_pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 0: hcubature(1, int_pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 	  case 1: hcubature(1, int_dapdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 2: hcubature(1, int_dvpdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 3: hcubature(1, int_dt0pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
@@ -862,9 +836,7 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	}
 
 
+	free(xmin); free(xmax);
 	*derivF = val;
-	if (choice != 0) {
-		*derivlnF = val/dist;
-	}
 
 }

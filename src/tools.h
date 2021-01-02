@@ -82,7 +82,6 @@ struct my_params {
 	int K;
 	int epsFLAG;
 	double *val_ptr;
-	double *valln_ptr;
 };
 
 

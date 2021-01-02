@@ -52,19 +52,19 @@ double pwiener(double, double, double, double, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/da DISTRIBUTION */
-void dapwiener(int, double, double, double, double, double, double *, double *, double, int, int);
+void dapwiener(int, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dv DISTRIBUTION */
-void dvpwiener(int, double, double, double, double, double, double *, double *, double, int, int);
+void dvpwiener(int, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dw DISTRIBUTION */
-void dwpwiener(int, double, double, double, double, double, double *, double *, double, int, int);
+void dwpwiener(int, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dt d/da d/dv d/dw DISTRIBUTION */
-void dxpwiener(int, double, double, double, double, double, double, int, int, double *, double *, double *, double *, double *, double *);
+void dxpwiener(int, double, double, double, double, double, double, int, int, double *, double *, double *);
 /*-----------------------------------------------*/
 
 

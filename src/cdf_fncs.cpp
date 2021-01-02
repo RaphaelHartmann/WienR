@@ -147,11 +147,11 @@ double davlogP(int pm, double a, double v, double w) {
 		double temp = log1p(-exp(ew)) - log1p(-exp(e));
 		if (log(w) > temp) {
 			tt += logdiff(log(w), temp);
-			tt = exp(tt);
+			tt = rexp(tt);
 		}
 		else {
 			tt += logdiff(temp, log(w));
-			tt = -exp(tt);
+			tt = -rexp(tt);
 		}
 
 
@@ -162,11 +162,11 @@ double davlogP(int pm, double a, double v, double w) {
 		double temp = logdiff(emw, e) - log1p(-exp(e));
 		if (log(w) > temp) {
 			tt += logdiff(log(w), temp);
-			tt = -exp(tt);
+			tt = -rexp(tt);
 		}
 		else {
 			tt += logdiff(temp, log(w));
-			tt = exp(tt);
+			tt = rexp(tt);
 		}
 	}
 	if (std::isfinite(tt)) return(tt);
@@ -217,14 +217,14 @@ void dakL(double q, double a, double v, double w, double err, double &Kal) {
 }
 
 /* calculate terms of the sum for short t */
-void logdaFs(int pm, int Ksa, double t, double a, double v, double w, double &derlnF, double lp) {
+void logdaFs(int pm, int Ksa, double t, double a, double v, double w, double &derF, double lp) {
 	if (pm == 1) {
 		v = -v;
 		w = 1 - w;
 	}
 
 	double Fj = 0.0;
-	derlnF = 0.0;
+	derF = 0.0;
 
 	double sqt = sqrt(t), vt = v * t;
 
@@ -258,33 +258,33 @@ void logdaFs(int pm, int Ksa, double t, double a, double v, double w, double &de
 		temp3 = temp * vt - sqt * temp2;
 		ta4 = -temp3 * (2 * k + 2.0 - w);
 
-		derlnF = (ta1 + ta2 + ta3 + ta4) + derlnF;
+		derF = (ta1 + ta2 + ta3 + ta4) + derF;
 
 	}
 
 //	Fj = rexp(lp + v * a * w + 0.5 * pow(v, 2) * t);
-//	derlnF = -v * w + derlnF / t / Fj;
+//	derF = -v * w + derF / t / Fj;
 	Fj = rexp(v * a * w + 0.5 * pow(v, 2) * t);
-	derlnF = -v * w * exp(lp) + derlnF / t/ Fj;
+	derF = -v * w * exp(lp) + derF / t/ Fj;
 /*	if(Fj == 0) {Rprintf("One derivative d/da had to be calculated numerically\n");
 		double epsilon = .00000000001;
 		double tempL = logdiff(logsum(lp, log(epsilon)), logdiff(lp, log(epsilon)))-log(2*epsilon);
-		derlnF = exp(tempL-lp);
+		derF = exp(tempL-lp);
 	}*/
 }
 
 /* calculate terms of the sum for large t */
-void logdaFl(int pm,  int Kal, double q, double a, double v, double w, double &derlnF, double lp) {
+void logdaFl(int pm,  int Kal, double q, double a, double v, double w, double &derF, double lp) {
 	if (pm == 1) {
 		v = -v;
 		w = 1 - w;
 	}
 
-	derlnF = 0.0;
+	derF = 0.0;
 	for (int k = Kal; k >= 1; k--) {
 		double sin1 = sin(M_PI * k * w), kpi = k * M_PI, kpia2 = pow((kpi / a), 2), ekpia2q = exp(-0.5 * kpia2 * q), denom = 1.0 / (pow(v, 2) + kpia2), denomk = k * denom;
 		double last = pow(kpi, 2) / pow(a, 3) * (q + 2.0 * denom) * denomk * ekpia2q;
-		derlnF = derlnF - last * sin1;
+		derF = derF - last * sin1;
 	}
 
 	double evaw = exp(-v * a * w - 0.5 * pow(v, 2) * q);
@@ -294,21 +294,21 @@ void logdaFl(int pm,  int Kal, double q, double a, double v, double w, double &d
 
 	lp = exp(lp);
 	double tempa = dalogP(0, a, v, w, dav) * temp;
-	derlnF = (-2 / a - v * w) * (lp-temp) + derlnF * pia2 * evaw;
-	derlnF = tempa + derlnF;
-	//derlnF /= p;
+	derF = (-2 / a - v * w) * (lp-temp) + derF * pia2 * evaw;
+	derF = tempa + derF;
+	//derF /= p;
 
 }
 
 /* calculate derivative of distribution with respect to a */
-void dapwiener(int pm, double q, double a, double v, double w, double lp, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
+void dapwiener(int pm, double q, double a, double v, double w, double lp, double *derivF, double err, int K, int epsFLAG) {
   if(!epsFLAG && K==0) {
 		err = -27.63102; // exp(err) = 1.e-12
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-  err = err + lp;
+  err = err;// + lp;
 
 	double Kal, Kas;
 	if (pm == -1) dakL(q, a, v, w, err, Kal); else dakL(q, a, -v, 1.0 - w, err, Kal);
@@ -323,7 +323,6 @@ void dapwiener(int pm, double q, double a, double v, double w, double lp, double
     if((epsFLAG && Kas<K) || !epsFLAG) Kas = K;
     logdaFs(pm, static_cast<int>(Kas), q, a, v, w, erg, lp);
   }
-	*derivlnF = erg/exp(lp);
   *derivF = erg;
 }
 /*-----------------------------------------------*/
@@ -375,7 +374,7 @@ void dvkL(double q, double a, double v, double w, double err, double &Kvl) {
 }
 
 /* calculate terms of the sum for short t */
-void logdvFs(int pm, int Ksv, double t, double a, double v, double w, double &derlnF, double lp)
+void logdvFs(int pm, int Ksv, double t, double a, double v, double w, double &derF, double lp)
 {
 	double sign = 1.0;
 	if (pm == 1) {
@@ -385,7 +384,7 @@ void logdvFs(int pm, int Ksv, double t, double a, double v, double w, double &de
 	}
 
 	double Fj = 0.0;
-	derlnF = 0.0;
+	derF = 0.0;
 
 	double sqt = sqrt(t);
 
@@ -397,34 +396,34 @@ void logdvFs(int pm, int Ksv, double t, double a, double v, double w, double &de
 		double dj = lognormal(rj / sqt);
 
 		double x = rj - v * t, xsqt = x / sqt;
-		double temp = exp(dj + logMill(xsqt));
+		double temp = rexp(dj + logMill(xsqt));
 		tv1 = -temp * x;
 
 		x = rj + v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		tv2 = temp * x;
 
 		rj = (2 * k + 1) * a + a * (1 - w);
 		dj = lognormal(rj / sqt);
 		x = rj - v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		tv3 = temp * x;
 
 		x = rj + v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		tv4 = -temp * x;
 
-		derlnF = (tv1 + tv2 + tv3 + tv4) + derlnF;
+		derF = (tv1 + tv2 + tv3 + tv4) + derF;
 	}
 
 //	Fj = rexp(lp + v * a * w + 0.5 * pow(v, 2) * t);
-//	derlnF = ((-w * a - v * t) + derlnF / Fj) * sign;
+//	derF = ((-w * a - v * t) + derF / Fj) * sign;
 	Fj = rexp(v * a * w + 0.5 * pow(v, 2) * t);
-	derlnF = ((-w * a - v * t) * exp(lp) + derlnF / Fj) * sign;
+	derF = ((-w * a - v * t) * exp(lp) + derF / Fj) * sign;
 }
 
 /* calculate terms of the sum for large t */
-void logdvFl(int pm,  int Kvl, double q, double a, double v, double w, double &derlnF, double lp) {
+void logdvFl(int pm,  int Kvl, double q, double a, double v, double w, double &derF, double lp) {
 	double sign = 1.0;
 	if (pm == 1) {
 		v = -v;
@@ -432,11 +431,11 @@ void logdvFl(int pm,  int Kvl, double q, double a, double v, double w, double &d
 		sign = -1.0;
 	}
 
-	derlnF = 0.0;
+	derF = 0.0;
 	for (int k = Kvl; k >= 1; k--) {
 		double sin1 = sin(M_PI * k * w), kpi = k * M_PI, kpia2 = pow((kpi / a), 2), ekpia2q = exp(-0.5 * kpia2 * q), denom = 1.0 / (pow(v, 2) + kpia2), denomk = k * denom;
 		double last = denomk * denom * ekpia2q;
-		derlnF = derlnF - last * sin1;
+		derF = derF - last * sin1;
 	}
 
 	double evaw = exp(-v * a * w - 0.5 * pow(v, 2) * q);
@@ -446,20 +445,20 @@ void logdvFl(int pm,  int Kvl, double q, double a, double v, double w, double &d
 
 	lp = exp(lp);
 	double tempv = dvlogP(0, a, v, w, dav) * temp;
-	derlnF = (-w * a - v * q) * (lp-temp) + derlnF * (-2 * v) * pia2 * evaw;
-	derlnF = (tempv + derlnF) * sign;
-//	derlnF /= lp;
+	derF = (-w * a - v * q) * (lp-temp) + derF * (-2 * v) * pia2 * evaw;
+	derF = (tempv + derF) * sign;
+//	derF /= lp;
 }
 
 /* calculate derivative of distribution with respect to v */
-void dvpwiener(int pm, double q, double a, double v, double w, double lp, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
+void dvpwiener(int pm, double q, double a, double v, double w, double lp, double *derivF, double err, int K, int epsFLAG) {
 	if(!epsFLAG && K==0) {
 		err = -27.63102; // exp(err) = 1.e-12
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-  err = err + lp;
+  err = err;// + lp;
 
 	double Kvl, Kvs;
 	if (pm == -1) dvkL(q, a, v, w, err, Kvl); else dvkL(q, a, -v, 1.0 - w, err, Kvl);
@@ -474,7 +473,6 @@ void dvpwiener(int pm, double q, double a, double v, double w, double lp, double
 	 	if((epsFLAG && Kvs<K) || !epsFLAG) Kvs = K;
 	 	logdvFs(pm, static_cast<int>(Kvs), q, a, v, w, erg, lp);
 	}
-	*derivlnF = erg/exp(lp);
 	*derivF = erg;
 }
 /*-----------------------------------------------*/
@@ -532,7 +530,7 @@ void dwkL(double q, double a, double v, double w, double err, double &Kwl) {
 }
 
 /* calculate terms of the sum for short t */
-void logdwFs(int pm, int Ksw, double t, double a, double v, double w, double &derlnF, double lp)
+void logdwFs(int pm, int Ksw, double t, double a, double v, double w, double &derF, double lp)
 {
 	double sign = 1.0;
 	if (pm == 1) {
@@ -542,7 +540,7 @@ void logdwFs(int pm, int Ksw, double t, double a, double v, double w, double &de
 	}
 
 	double Fj = 0.0;
-	derlnF = 0.0;
+	derF = 0.0;
 
 	double sqt = sqrt(t), vt = v * t;
 	for (int k = Ksw; k >= 0; k--)
@@ -554,38 +552,38 @@ void logdwFs(int pm, int Ksw, double t, double a, double v, double w, double &de
 		double dj = lognormal(rj / sqt);
 
 		double x = rj - v * t, xsqt = x / sqt;
-		double temp = exp(dj + logMill(xsqt)), temp2 = exp(dj);
+		double temp = rexp(dj + logMill(xsqt)), temp2 = exp(dj);
 		temp3 = temp * (-vt) - sqt * temp2;
 		tw1 = temp3 * a;
 
 		x = rj + v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		temp3 = temp * vt - sqt * temp2;
 		tw2 = temp3 * a;
 
 		rj = (2 * k + 1) * a + a * (1 - w);
 		dj = lognormal(rj / sqt);
 		x = rj - v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt)), temp2 = exp(dj);
+		temp = rexp(dj + logMill(xsqt)), temp2 = exp(dj);
 		temp3 = temp * (-vt) - sqt * temp2;
 		tw3 = -temp3 * (-a);
 
 		x = rj + v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		temp3 = temp * vt - sqt * temp2;
 		tw4 = -temp3 * (-a);
 
-		derlnF = (tw1 + tw2 + tw3 + tw4) + derlnF;
+		derF = (tw1 + tw2 + tw3 + tw4) + derF;
 	}
 
 //	Fj = rexp(lp + v * a * w + 0.5 * pow(v, 2) * t);
-//	derlnF = (-v * a + derlnF / t / Fj) * sign;
+//	derF = (-v * a + derF / t / Fj) * sign;
 	Fj = rexp(v * a * w + 0.5 * pow(v, 2) * t);
-	derlnF = (-v * a * exp(lp) + derlnF / t / Fj) * sign;
+	derF = (-v * a * exp(lp) + derF / t / Fj) * sign;
 }
 
 /* calculate terms of the sum for large t */
-void logdwFl(int pm,  int Kwl, double q, double a, double v, double w, double &derlnF, double lp) {
+void logdwFl(int pm,  int Kwl, double q, double a, double v, double w, double &derF, double lp) {
 	double sign = 1.0;
 	if (pm == 1) {
 		v = -v;
@@ -593,11 +591,11 @@ void logdwFl(int pm,  int Kwl, double q, double a, double v, double w, double &d
 		sign = -1.0;
 	}
 
-	derlnF = 0.0;
+	derF = 0.0;
 	for (int k = Kwl; k >= 1; k--) {
 		double kpi = k * M_PI, kpia2 = pow((kpi / a), 2), ekpia2q = exp(-0.5 * kpia2 * q), denom = 1.0 / (pow(v, 2) + kpia2), denomk = k * denom;
 		double last = k * M_PI * denomk * ekpia2q;
-		derlnF = derlnF - last * cos(kpi * w);
+		derF = derF - last * cos(kpi * w);
 	}
 
 	double evaw = exp(-v * a * w - 0.5 * pow(v, 2) * q);
@@ -606,20 +604,20 @@ void logdwFl(int pm,  int Kwl, double q, double a, double v, double w, double &d
 	double pia2 = 2 * M_PI / pow(a, 2);
 
 	lp = exp(lp);
-	derlnF = -v * a * (lp-temp) + derlnF * pia2 * evaw;
-	derlnF = (tempw + derlnF) * sign;
-//	derlnF /= lp;
+	derF = -v * a * (lp-temp) + derF * pia2 * evaw;
+	derF = (tempw + derF) * sign;
+//	derF /= lp;
 }
 
 /* calculate derivative of distribution with respect to w */
-void dwpwiener(int pm, double q, double a, double v, double w, double lp, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
+void dwpwiener(int pm, double q, double a, double v, double w, double lp, double *derivF, double err, int K, int epsFLAG) {
 	if(!epsFLAG && K==0) {
 		err = -27.63102; // exp(err) = 1.e-12
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-  err = err + lp;
+  err = err;// + lp;
 
 	double Kwl, Kws;
 	if (pm == -1) dwkL(q, a, v, w, err, Kwl); else dwkL(q, a, -v, 1.0 - w, err, Kwl);
@@ -634,7 +632,6 @@ void dwpwiener(int pm, double q, double a, double v, double w, double lp, double
 	 	if((epsFLAG && Kws<K) || !epsFLAG) Kws = K;
 	 	logdwFs(pm, static_cast<int>(Kws), q, a, v, w, erg, lp);
 	}
-	*derivlnF = erg/exp(lp);
 	*derivF = erg;
 }
 /*-----------------------------------------------*/
@@ -721,14 +718,14 @@ void logdxFs(int pm, int Ksa, int Ksv, int Ksw, double t, double a, double v, do
 		double dj = lognormal(rj / sqt);
 
 		double x = rj - v * t, xsqt = x / sqt;
-		double temp = exp(dj + logMill(xsqt)), temp2 = exp(dj);
+		double temp = rexp(dj + logMill(xsqt)), temp2 = exp(dj);
 		if (k <= Ksv) tv1 = -temp * x;
 		if (k <= Kaw) temp3 = temp * (-vt) - sqt * temp2;
 		if (k <= Ksa) ta1 =  temp3 * (2 * k + w);
 		if (k <= Ksw) tw1 = temp3 * a;
 
 		x = rj + v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		if (k <= Ksv) tv2 = temp * x;
 		if (k <= Kaw) temp3 = temp * vt - sqt * temp2;
 		if (k <= Ksa) ta2 = temp3 * (2 * k + w);
@@ -737,14 +734,14 @@ void logdxFs(int pm, int Ksa, int Ksv, int Ksw, double t, double a, double v, do
 		rj = (2 * k + 1) * a + a * (1 - w);
 		dj = lognormal(rj / sqt);
 		x = rj - v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt)), temp2 = exp(dj);
+		temp = rexp(dj + logMill(xsqt)), temp2 = exp(dj);
 		if (k <= Ksv) tv3 = temp * x;
 		if (k <= Kaw) temp3 = temp * (-vt) - sqt * temp2;
 		if (k <= Ksa) ta3 = -temp3 * (2 * k + 2.0 - w);
 		if (k <= Ksw) tw3 = -temp3 * (-a);
 
 		x = rj + v * t, xsqt = x / sqt;
-		temp = exp(dj + logMill(xsqt));
+		temp = rexp(dj + logMill(xsqt));
 		if (k <= Ksv) tv4 = -temp * x;
 		if (k <= Kaw) temp3 = temp * vt - sqt * temp2;
 		if (k <= Ksa) ta4 = -temp3 * (2 * k + 2.0 - w);
@@ -818,14 +815,14 @@ void logdxFl(int pm, int Kal, int Kvl, int Kwl, double q, double a, double v, do
 }
 
 /* calculate derivative of distribution with respect to a */
-void dxpwiener(int pm, double q, double a, double v, double w, double lp, double err, int K, int epsFLAG, double *da, double *da_ln, double *dv, double *dv_ln, double *dw, double *dw_ln) {
+void dxpwiener(int pm, double q, double a, double v, double w, double lp, double err, int K, int epsFLAG, double *da, double *dv, double *dw) {
 	if(!epsFLAG && K==0) {
 		err = -27.63102; // exp(err) = 1.e-12
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-	err = err + lp;
+	err = err;// + lp;
 
 	double Kal, Kvl, Kwl;
 	double Kas, Kvs, Kws;
@@ -845,15 +842,12 @@ void dxpwiener(int pm, double q, double a, double v, double w, double lp, double
 		logdxFs(pm, static_cast<int>(Kas), static_cast<int>(Kvs), static_cast<int>(Kws), q, a, v, w, lp, Fa, Fv, Fw);
 	}
 	// -----------d/da------------
-	*da_ln = Fa/exp(lp);
 	*da = Fa;
 
 	// -----------d/dv------------
-	*dv_ln = Fv/exp(lp);
 	*dv = Fv;
 
 	// -----------d/dw------------
-	*dw_ln = Fw/exp(lp);
 	*dw = Fw;
 
 }

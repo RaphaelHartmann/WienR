@@ -92,31 +92,26 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 
 		/* calculate the derivatives */
-		dtPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		dtPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -155,31 +150,26 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 
 		/* calculate the derivatives */
-		daPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		daPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -218,31 +208,26 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 
 		/* calculate the derivatives */
-		dvPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		dvPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -281,31 +266,26 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 
 		/* calculate the derivatives */
-		dwPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		dwPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -407,30 +387,25 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 		/* calculate the derivatives */
-		daCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		daCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -469,31 +444,26 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 
 		/* calculate the derivatives */
-		dvCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		dvCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -532,31 +502,26 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP deriv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
 
 		/* declare C++ pointers for R objects */
 		double *Rderiv = REAL(deriv);
-		double *Rderiv_ln = REAL(deriv_ln);
 
 
 		/* calculate the derivatives */
-		dwCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, Rderiv_ln, NThreads);
+		dwCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,deriv);
-		SET_VECTOR_ELT(out,1,deriv_ln);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
-		SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -595,15 +560,9 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP da = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP da_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dw = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dw_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
@@ -611,35 +570,26 @@ extern "C" {
 
 		/* declare C++ pointers for R objects */
 		double *Rda = REAL(da);
-		double *Rda_ln = REAL(da_ln);
 		double *Rdv = REAL(dv);
-		double *Rdv_ln = REAL(dv_ln);
 		double *Rdw = REAL(dw);
-		double *Rdw_ln = REAL(dw_ln);
 
 
 		/* calculate the derivatives */
-		dxPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rda, Rda_ln, Rdv, Rdv_ln, Rdw, Rdw_ln, NThreads);
+		dxPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,da);
-		SET_VECTOR_ELT(out,1,da_ln);
-		SET_VECTOR_ELT(out,2,dv);
-		SET_VECTOR_ELT(out,3,dv_ln);
-		SET_VECTOR_ELT(out,4,dw);
-		SET_VECTOR_ELT(out,5,dw_ln);
+		SET_VECTOR_ELT(out,1,dv);
+		SET_VECTOR_ELT(out,2,dw);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("da"));
-		SET_STRING_ELT(names,1,Rf_mkChar("da_ln"));
-		SET_STRING_ELT(names,2,Rf_mkChar("dv"));
-		SET_STRING_ELT(names,3,Rf_mkChar("dv_ln"));
-		SET_STRING_ELT(names,4,Rf_mkChar("dw"));
-		SET_STRING_ELT(names,5,Rf_mkChar("dw_ln"));
+		SET_STRING_ELT(names,1,Rf_mkChar("dv"));
+		SET_STRING_ELT(names,2,Rf_mkChar("dw"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -678,15 +628,9 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP da = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP da_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dw = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dw_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
@@ -694,35 +638,26 @@ extern "C" {
 
 		/* declare C++ pointers for R objects */
 		double *Rda = REAL(da);
-		double *Rda_ln = REAL(da_ln);
 		double *Rdv = REAL(dv);
-		double *Rdv_ln = REAL(dv_ln);
 		double *Rdw = REAL(dw);
-		double *Rdw_ln = REAL(dw_ln);
 
 
 		/* calculate the derivatives */
-		dxCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rda, Rda_ln, Rdv, Rdv_ln, Rdw, Rdw_ln, NThreads);
+		dxCDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,da);
-		SET_VECTOR_ELT(out,1,da_ln);
-		SET_VECTOR_ELT(out,2,dv);
-		SET_VECTOR_ELT(out,3,dv_ln);
-		SET_VECTOR_ELT(out,4,dw);
-		SET_VECTOR_ELT(out,5,dw_ln);
+		SET_VECTOR_ELT(out,1,dv);
+		SET_VECTOR_ELT(out,2,dw);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("da"));
-		SET_STRING_ELT(names,1,Rf_mkChar("da_ln"));
-		SET_STRING_ELT(names,2,Rf_mkChar("dv"));
-		SET_STRING_ELT(names,3,Rf_mkChar("dv_ln"));
-		SET_STRING_ELT(names,4,Rf_mkChar("dw"));
-		SET_STRING_ELT(names,5,Rf_mkChar("dw_ln"));
+		SET_STRING_ELT(names,1,Rf_mkChar("dv"));
+		SET_STRING_ELT(names,2,Rf_mkChar("dw"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -797,6 +732,7 @@ extern "C" {
 			SET_STRING_ELT(names,0,Rf_mkChar("pdf"));
 			SET_STRING_ELT(names,1,Rf_mkChar("logpdf"));
 		} else {
+			Rvalue_ln = nullptr;
 			SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
 			SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 		}
@@ -869,6 +805,7 @@ extern "C" {
 			SET_STRING_ELT(names,0,Rf_mkChar("cdf"));
 			SET_STRING_ELT(names,1,Rf_mkChar("logcdf"));
 		} else {
+			Rvalue_ln = nullptr;
 			SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
 			SET_STRING_ELT(names,1,Rf_mkChar("deriv_ln"));
 		}
@@ -915,31 +852,17 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP da = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP da_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dv = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dv_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP dt0 = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dt0_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dw = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dw_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP dsw = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dsw_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dsv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dsv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dst = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dst_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
@@ -947,59 +870,38 @@ extern "C" {
 
 		/* declare C++ pointers for R objects */
 		double *Rda = REAL(da);
-		double *Rda_ln = REAL(da_ln);
 		double *Rdv = REAL(dv);
-		double *Rdv_ln = REAL(dv_ln);
 		double *Rdt0 = REAL(dt0);
-		double *Rdt0_ln = REAL(dt0_ln);
 		double *Rdw = REAL(dw);
-		double *Rdw_ln = REAL(dw_ln);
 		double *Rdsw = REAL(dsw);
-		double *Rdsw_ln = REAL(dsw_ln);
 		double *Rdsv = REAL(dsv);
-		double *Rdsv_ln = REAL(dsv_ln);
 		double *Rdst = REAL(dst);
-		double *Rdst_ln = REAL(dst_ln);
 
 
 		/* calculate the derivatives */
-		dxPDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rda_ln, Rdv, Rdv_ln, Rdt0, Rdt0_ln, Rdw, Rdw_ln, Rdsw, Rdsw_ln, Rdsv, Rdsv_ln, Rdst, Rdst_ln, NThreads);
+		dxPDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rdv, Rdt0, Rdw, Rdsw, Rdsv, Rdst, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,da);
-		SET_VECTOR_ELT(out,1,da_ln);
-		SET_VECTOR_ELT(out,2,dv);
-		SET_VECTOR_ELT(out,3,dv_ln);
-		SET_VECTOR_ELT(out,4,dt0);
-		SET_VECTOR_ELT(out,5,dt0_ln);
-		SET_VECTOR_ELT(out,6,dw);
-		SET_VECTOR_ELT(out,7,dw_ln);
-		SET_VECTOR_ELT(out,8,dsw);
-		SET_VECTOR_ELT(out,9,dsw_ln);
-		SET_VECTOR_ELT(out,10,dsv);
-		SET_VECTOR_ELT(out,11,dsv_ln);
-		SET_VECTOR_ELT(out,12,dst);
-		SET_VECTOR_ELT(out,13,dst_ln);
+		SET_VECTOR_ELT(out,1,dv);
+		SET_VECTOR_ELT(out,2,dt0);
+		SET_VECTOR_ELT(out,3,dw);
+		SET_VECTOR_ELT(out,4,dsw);
+		SET_VECTOR_ELT(out,5,dsv);
+		SET_VECTOR_ELT(out,6,dst);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("da"));
-		SET_STRING_ELT(names,1,Rf_mkChar("da_ln"));
-		SET_STRING_ELT(names,2,Rf_mkChar("dv"));
-		SET_STRING_ELT(names,3,Rf_mkChar("dv_ln"));
-		SET_STRING_ELT(names,4,Rf_mkChar("dt0"));
-		SET_STRING_ELT(names,5,Rf_mkChar("dt0_ln"));
-		SET_STRING_ELT(names,6,Rf_mkChar("dw"));
-		SET_STRING_ELT(names,7,Rf_mkChar("dw_ln"));
-		SET_STRING_ELT(names,8,Rf_mkChar("dsw"));
-		SET_STRING_ELT(names,9,Rf_mkChar("dsw_ln"));
-		SET_STRING_ELT(names,10,Rf_mkChar("dsv"));
-		SET_STRING_ELT(names,11,Rf_mkChar("dsv_ln"));
-		SET_STRING_ELT(names,12,Rf_mkChar("dst"));
-		SET_STRING_ELT(names,13,Rf_mkChar("dst_ln"));
+		SET_STRING_ELT(names,1,Rf_mkChar("dv"));
+		SET_STRING_ELT(names,2,Rf_mkChar("dt0"));
+		SET_STRING_ELT(names,3,Rf_mkChar("dw"));
+		SET_STRING_ELT(names,4,Rf_mkChar("dsw"));
+		SET_STRING_ELT(names,5,Rf_mkChar("dsv"));
+		SET_STRING_ELT(names,6,Rf_mkChar("dst"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
@@ -1042,31 +944,17 @@ extern "C" {
 		int outCnt = 0, prtCnt = 0;
 		SEXP da = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP da_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dv = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dv_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP dt0 = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dt0_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dw = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dw_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP dsw = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dsw_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dsv = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
-		SEXP dsv_ln = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
 		SEXP dst = PROTECT(Rf_allocVector(REALSXP, N));
-		outCnt++;
-		SEXP dst_ln = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
@@ -1074,59 +962,38 @@ extern "C" {
 
 		/* declare C++ pointers for R objects */
 		double *Rda = REAL(da);
-		double *Rda_ln = REAL(da_ln);
 		double *Rdv = REAL(dv);
-		double *Rdv_ln = REAL(dv_ln);
 		double *Rdt0 = REAL(dt0);
-		double *Rdt0_ln = REAL(dt0_ln);
 		double *Rdw = REAL(dw);
-		double *Rdw_ln = REAL(dw_ln);
 		double *Rdsw = REAL(dsw);
-		double *Rdsw_ln = REAL(dsw_ln);
 		double *Rdsv = REAL(dsv);
-		double *Rdsv_ln = REAL(dsv_ln);
 		double *Rdst = REAL(dst);
-		double *Rdst_ln = REAL(dst_ln);
 
 
 		/* calculate the derivatives */
-		dxCDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rda_ln, Rdv, Rdv_ln, Rdt0, Rdt0_ln, Rdw, Rdw_ln, Rdsw, Rdsw_ln, Rdsv, Rdsv_ln, Rdst, Rdst_ln, NThreads);
+		dxCDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rdv, Rdt0, Rdw, Rdsw, Rdsv, Rdst, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,da);
-		SET_VECTOR_ELT(out,1,da_ln);
-		SET_VECTOR_ELT(out,2,dv);
-		SET_VECTOR_ELT(out,3,dv_ln);
-		SET_VECTOR_ELT(out,4,dt0);
-		SET_VECTOR_ELT(out,5,dt0_ln);
-		SET_VECTOR_ELT(out,6,dw);
-		SET_VECTOR_ELT(out,7,dw_ln);
-		SET_VECTOR_ELT(out,8,dsw);
-		SET_VECTOR_ELT(out,9,dsw_ln);
-		SET_VECTOR_ELT(out,10,dsv);
-		SET_VECTOR_ELT(out,11,dsv_ln);
-		SET_VECTOR_ELT(out,12,dst);
-		SET_VECTOR_ELT(out,13,dst_ln);
+		SET_VECTOR_ELT(out,1,dv);
+		SET_VECTOR_ELT(out,2,dt0);
+		SET_VECTOR_ELT(out,3,dw);
+		SET_VECTOR_ELT(out,4,dsw);
+		SET_VECTOR_ELT(out,5,dsv);
+		SET_VECTOR_ELT(out,6,dst);
 
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
 		prtCnt++;
 		SET_STRING_ELT(names,0,Rf_mkChar("da"));
-		SET_STRING_ELT(names,1,Rf_mkChar("da_ln"));
-		SET_STRING_ELT(names,2,Rf_mkChar("dv"));
-		SET_STRING_ELT(names,3,Rf_mkChar("dv_ln"));
-		SET_STRING_ELT(names,4,Rf_mkChar("dt0"));
-		SET_STRING_ELT(names,5,Rf_mkChar("dt0_ln"));
-		SET_STRING_ELT(names,6,Rf_mkChar("dw"));
-		SET_STRING_ELT(names,7,Rf_mkChar("dw_ln"));
-		SET_STRING_ELT(names,8,Rf_mkChar("dsw"));
-		SET_STRING_ELT(names,9,Rf_mkChar("dsw_ln"));
-		SET_STRING_ELT(names,10,Rf_mkChar("dsv"));
-		SET_STRING_ELT(names,11,Rf_mkChar("dsv_ln"));
-		SET_STRING_ELT(names,12,Rf_mkChar("dst"));
-		SET_STRING_ELT(names,13,Rf_mkChar("dst_ln"));
+		SET_STRING_ELT(names,1,Rf_mkChar("dv"));
+		SET_STRING_ELT(names,2,Rf_mkChar("dt0"));
+		SET_STRING_ELT(names,3,Rf_mkChar("dw"));
+		SET_STRING_ELT(names,4,Rf_mkChar("dsw"));
+		SET_STRING_ELT(names,5,Rf_mkChar("dsv"));
+		SET_STRING_ELT(names,6,Rf_mkChar("dst"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
