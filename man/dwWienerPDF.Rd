@@ -31,6 +31,14 @@ dwWienerPDF(
 
 \item{w}{Relative starting point. Numeric vector.}
 
+\item{t0}{Non-decision time. Numeric vector}
+
+\item{sv}{Inter-trial variability of drift rate. Numeric vector. Standard deviation of a normal distribution \code{N(v, sv)}.}
+
+\item{sw}{Inter-trial variability of relative starting point. Numeric vector. Range of uniform distribution \code{U(w-0.5*sw, w+0.5*sw)}.}
+
+\item{st0}{Inter-trial variability of non-decision time. Numeric vector. Range of uniform distribution \code{U(t0, t0+st0)}.}
+
 \item{precision}{Optional numeric value. Precision of the partial derivative. Numeric value. Default is \code{NULL}, which takes default value 1e-12.}
 
 \item{K}{Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}.

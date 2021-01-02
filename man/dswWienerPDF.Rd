@@ -64,7 +64,7 @@ A list of the class \code{Diffusion_deriv} containing
 Calculate the partial derivative of the first-passage time probability density function of the diffusion model with respect to the inter-trial variability of the relative starting point sw.
 }
 \examples{
-dswWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sw = .2, precision = NULL, K = NULL)
+dswWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sw = .2)
 }
 \author{
 Raphael Hartmann

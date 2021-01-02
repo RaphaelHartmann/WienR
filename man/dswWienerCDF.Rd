@@ -64,7 +64,7 @@ A list of the class \code{Diffusion_deriv} containing
 Calculate the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the relative starting point sw.
 }
 \examples{
-dswWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+dswWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sw = .1)
 }
 \author{
 Raphael Hartmann

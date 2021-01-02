@@ -64,7 +64,7 @@ A list of the class \code{Diffusion_deriv} containing
 Calculate the partial derivative of the first-passage time probability density function of the diffusion model with respect to the inter-trial variability of the non-decision time st0.
 }
 \examples{
-dst0WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, st0 = .2, precision = NULL, K = NULL)
+dst0WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, st0 = .2)
 }
 \author{
 Raphael Hartmann

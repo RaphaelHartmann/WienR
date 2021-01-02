@@ -64,7 +64,8 @@ A list of the class \code{Diffusion_deriv} containing
 Calculate the gradient of the first-passage time cumulative distribution function.
 }
 \examples{
-gradWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+gradWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6,
+              t0 = .3, sv = .1, sw = .1, st0 = .1)
 }
 \author{
 Raphael Hartmann
