@@ -1,12 +1,16 @@
 #' @export
 print.Diffusion_deriv <- function(x, ...) {
-  der <- c("dt", "da", "dv", "dw", "grad")
+  der <- c("dt", "da", "dv", "dw", "dt0", "dsv", "dsw", "dst0", "grad")
   cll <- as.character(x$call[1])
   fnc <- ifelse(grepl("PDF", cll), "PDF", "CDF")
-  der <- ifelse(grepl("dt", cll), "t", 
+  der <- ifelse(grepl("dtW", cll), "t", 
                 ifelse(grepl("da", cll), "a", 
                        ifelse(grepl("dv", cll), "v", 
-                              ifelse(grepl("dw", cll), "w", "all params")))
+                              ifelse(grepl("dw", cll), "w", 
+                                     ifelse(grepl("dt0", cll), "t0", 
+                                            ifelse(grepl("dsv", cll), "sv", 
+                                                   ifelse(grepl("dsw", cll), "sw", 
+                                                          ifelse(grepl("st0", cll), "st0", "all params")))))))
   )
   
   grepl("grad", cll)
