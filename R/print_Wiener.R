@@ -13,9 +13,6 @@ print.Diffusion_deriv <- function(x, ...) {
   cat(paste0("\nPartial derivative of ", fnc, " with respect to ", der, "\n\n"))
   print(x$deriv)
   cat("\n---------------------------\n")
-  cat(paste0("\nPartial derivative of log(", fnc, ") with respect to ", der, "\n\n"))
-  print(x$derivln)
-  cat("\n---------------------------\n\n")
 }
 
 #' @export

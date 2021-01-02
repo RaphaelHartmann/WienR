@@ -108,11 +108,11 @@ dt0WienerCDF <- function(t,
   indW <- which(sw==0 & sv==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
   
-  out <- list(deriv = rep(NA, max_len), deriv_ln = rep(NA, max_len))
+  out <- list(deriv = rep(NA, max_len))
   
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
-    temp <- .Call("dtpWiener",
+    temp <- .Call("dWiener",
                   as.numeric(ifelse(tt<0, 0, tt)),
                   as.numeric(a[indW]),
                   as.numeric(v[indW]),
@@ -124,8 +124,7 @@ dt0WienerCDF <- function(t,
                   as.integer(n.threads),
                   as.logical(PRECISION_FLAG)
     )
-    out$deriv[indW] <- -temp$deriv
-    out$deriv_ln[indW] <- -temp$deriv_ln
+    out$deriv[indW] <- -temp$pdf
   } 
   if (length(indD) > 0){
     temp <- .Call("pDiffusion7",
@@ -146,13 +145,12 @@ dt0WienerCDF <- function(t,
                   as.logical(PRECISION_FLAG)
     )
     out$deriv[indD] <- temp$deriv
-    out$deriv_ln[indD] <- temp$deriv_ln
   }
   
   
   #print(out)
   
-  derivative <- list(deriv = out$deriv, derivln = out$deriv_ln, call = match.call())
+  derivative <- list(deriv = out$deriv, call = match.call())
   
   # output
   class(derivative) <- "Diffusion_deriv"

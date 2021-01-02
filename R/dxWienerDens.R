@@ -29,7 +29,8 @@
 #'     \item \code{call}: the function call.
 #'   }
 #' @examples
-#' gradWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' gradWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6,
+#'               t0 = .3, sv = .1, sw = .1, st0 = .1)
 #' @author Raphael Hartmann
 #' @useDynLib "WienR", .registration=TRUE
 #' @export
@@ -106,10 +107,9 @@ gradWienerPDF <- function(t,
 
   indW <- which(sw==0 & sv==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
-  
-  out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len),
-              da_ln = rep(NaN, max_len), dv_ln = rep(NaN, max_len), dw_ln = rep(NaN, max_len), dt0_ln = rep(NaN, max_len), dsv_ln = rep(NaN, max_len), dsw_ln = rep(NaN, max_len), dst_ln = rep(NaN, max_len))
-  
+
+  out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len))
+
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
     temp <- .Call("dxdWiener",
@@ -136,9 +136,8 @@ gradWienerPDF <- function(t,
                   as.integer(n.threads),
                   as.logical(PRECISION_FLAG)
     )
-    out$da[indW] <- temp$da; out$dv[indW] <- temp$dv; out$dw[indW] <- temp$dw; out$dt0[indW] <- -temp2$deriv; out$dsv[indW] <- 0; out$dsw[indW] <- 0; out$dst[indW] <- 0; 
-    out$da_ln[indW] <- temp$da_ln; out$dv_ln[indW] <- temp$dv_ln; out$dw_ln[indW] <- temp$dw_ln; out$dt0_ln[indW] <- temp2$deriv_ln;
-  } 
+    out$da[indW] <- temp$da; out$dv[indW] <- temp$dv; out$dw[indW] <- temp$dw; out$dt0[indW] <- -temp2$deriv; out$dsv[indW] <- 0; out$dsw[indW] <- 0; out$dst[indW] <- 0;
+  }
   if (length(indD) > 0){
     temp <- .Call("dxdDiffusion7",
                   as.numeric(t[indD]),
@@ -156,13 +155,11 @@ gradWienerPDF <- function(t,
                   as.integer(n.threads),
                   as.logical(PRECISION_FLAG)
     )
-    out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD] <- temp$dsv; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst; 
-    out$da_ln[indD] <- temp$da_ln; out$dv_ln[indD] <- temp$dv_ln; out$dw_ln[indD] <- temp$dw_ln; out$dt0_ln[indD] <- temp$dt0_ln; out$dsv_ln[indD] <- temp$dsv_ln; out$dsw_ln[indD] <- temp$dsw_ln; out$dst_ln[indD] <- temp$dst_ln; 
+    out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD] <- temp$dsv; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst;
   }
 
 
   derivative <- list(deriv = data.frame(da = out$da, dv = out$dv, dw = out$dw, dt0 = out$dt0, dsv = out$dsv, dsw = out$dsw, dst0 = out$dst),
-                     derivln = data.frame(da_ln = out$da_ln, dv_ln = out$dv_ln, dw_ln = out$dw_ln, dt0_ln = out$dt0_ln, dsv_ln = out$dsv_ln, dsw_ln = out$dsw_ln, dst0_ln = out$dst_ln),
                      call = match.call())
 
   # output
