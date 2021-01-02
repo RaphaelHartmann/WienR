@@ -1,7 +1,7 @@
 
-#' Gradient of the first-passage time cumulative distribution function
+#' Partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the drift rate
 #'
-#' Calculate the gradient of the first-passage time cumulative distribution function.
+#' Calculate the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the drift rate sv.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
@@ -24,27 +24,27 @@
 #' @param n.threads Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.
 #' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
-#'     \item \code{deriv}: the derivatives of the CDF with respect to a, v, w, t0, sv, sw, and st0,
-#'     \item \code{derivln}: the derivatives of the log-transformed CDF with respect to a, v, w, t0, sv, sw, and st0,
+#'     \item \code{deriv}: the derivatives of the CDF with respect to w,
+#'     \item \code{derivln}: the derivatives of the log-transformed CDF with respect to w,
 #'     \item \code{call}: the function call.
 #'   }
 #' @examples
-#' gradWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' dsvWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 #' @author Raphael Hartmann
 #' @useDynLib "WienR", .registration=TRUE
 #' @export
-gradWienerCDF <- function(t,
-                          response,
-                          a,
-                          v,
-                          w,
-                          t0,
-                          sv,
-                          sw,
-                          st0,
-                          precision = NULL,
-                          K = NULL,
-                          n.threads = FALSE) {
+dsvWienerCDF <- function(t,
+                         response,
+                         a,
+                         v,
+                         w,
+                         t0 = 0,
+                         sv,
+                         sw = 0,
+                         st0 = 0,
+                         precision = NULL,
+                         K = NULL,
+                         n.threads = FALSE) {
   
   
   
@@ -71,10 +71,11 @@ gradWienerCDF <- function(t,
   if(any(t0 < 0) | any(sw < 0) | any(sv < 0) | any(st0 < 0)) stop("t0, sw, sv, and st0 must be positive or zero")
   if(any(w >= 1)) stop("w must be lower than one")
   if(any(w-0.5*sw <= 0) | any(w+0.5*sw >= 1)) stop("w-0.5*sw must be greater than zero and w+0.5*sw must be lower than one")
+  if(any(sv<=0)) stop("sv must be larger than zero for this partial derivative (d/dsv)")
   
   # response checks
   if(!is.character(response) & !is.numeric(response)) stop("response must be a character with the values \"upper\" and/or \"lower\" OR numerics with the values 1=\"lower\" or 2=\"upper\"")
-  if(!all(response %in% c("upper", "lower")) & !all(response %in% c(1,2)) ) stop("response must cannot include values other than \"upper\" and/or \"lower\" OR 1=\"lower\" or 2=\"upper\"")
+  if(!all(response %in% c("upper", "lower")) & !all(response %in% c(1,2)) ) stop("response cannot include values other than \"upper\" and/or \"lower\" OR 1=\"lower\" or 2=\"upper\"")
   resps <- ifelse(response == "lower" | response == 1, 0, 1)
   
   # K checks
@@ -104,66 +105,28 @@ gradWienerCDF <- function(t,
   
   # --- C++ FUNCTION CALL ---- #
   
-  indW <- which(sw==0 & sv==0 & st0==0)
-  if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
-  
-  out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len),
-              da_ln = rep(NaN, max_len), dv_ln = rep(NaN, max_len), dw_ln = rep(NaN, max_len), dt0_ln = rep(NaN, max_len), dsv_ln = rep(NaN, max_len), dsw_ln = rep(NaN, max_len), dst_ln = rep(NaN, max_len))
-  
-  if (length(indW) > 0) {
-    tt <- t[indW]-t0[indW]
-    temp <- .Call("dxpWiener",
-                  as.numeric(ifelse(tt<0, 0, tt)),
-                  as.numeric(a[indW]),
-                  as.numeric(v[indW]),
-                  as.numeric(w[indW]),
-                  as.numeric(precision),
-                  as.integer(resps[indW]),
-                  as.integer(K),
-                  as.integer(length(indW)),
-                  as.integer(n.threads),
-                  as.logical(PRECISION_FLAG)
-    )
-    temp2 <- .Call("dtpWiener",
-                   as.numeric(ifelse(tt<0, 0, tt)),
-                   as.numeric(a[indW]),
-                   as.numeric(v[indW]),
-                   as.numeric(w[indW]),
-                   as.numeric(precision),
-                   as.integer(resps[indW]),
-                   as.integer(K),
-                   as.integer(length(indW)),
-                   as.integer(n.threads),
-                   as.logical(PRECISION_FLAG)
-    )
-    out$da[indW] <- temp$da; out$dv[indW] <- temp$dv; out$dw[indW] <- temp$dw; out$dt0[indW] <- -temp2$deriv; out$dsv[indW] <- 0; out$dsw[indW] <- 0; out$dst[indW] <- 0; 
-    out$da_ln[indW] <- temp$da_ln; out$dv_ln[indW] <- temp$dv_ln; out$dw_ln[indW] <- temp$dw_ln; out$dt0_ln[indW] <- temp2$deriv_ln;
-  } 
-  if (length(indD) > 0){
-    temp <- .Call("dxpDiffusion7",
-                  as.numeric(t[indD]),
-                  as.numeric(a[indD]),
-                  as.numeric(v[indD]),
-                  as.numeric(t0[indD]),
-                  as.numeric(w[indD]),
-                  as.numeric(sw[indD]),
-                  as.numeric(sv[indD]),
-                  as.numeric(st0[indD]),
-                  as.numeric(precision),
-                  as.integer(resps),
-                  as.integer(K),
-                  as.integer(length(indD)),
-                  as.integer(n.threads),
-                  as.logical(PRECISION_FLAG)
-    )
-    out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD] <- temp$dsv; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst; 
-    out$da_ln[indD] <- temp$da_ln; out$dv_ln[indD] <- temp$dv_ln; out$dw_ln[indD] <- temp$dw_ln; out$dt0_ln[indD] <- temp$dt0_ln; out$dsv_ln[indD] <- temp$dsv_ln; out$dsw_ln[indD] <- temp$dsw_ln; out$dst_ln[indD] <- temp$dst_ln; 
-  }
+  out <- .Call("pDiffusion7",
+               as.numeric(t),
+               as.numeric(a),
+               as.numeric(v),
+               as.numeric(t0),
+               as.numeric(w),
+               as.numeric(sw),
+               as.numeric(sv),
+               as.numeric(st0),
+               as.numeric(precision),
+               as.integer(resps),
+               as.integer(K),
+               as.integer(max_len),
+               as.integer(n.threads),
+               as.integer(6),
+               as.logical(PRECISION_FLAG)
+  )
   
   
-  derivative <- list(deriv = data.frame(da = out$da, dv = out$dv, dw = out$dw, dt0 = out$dt0, dsv = out$dsv, dsw = out$dsw, dst0 = out$dst),
-                     derivln = data.frame(da_ln = out$da_ln, dv_ln = out$dv_ln, dw_ln = out$dw_ln, dt0_ln = out$dt0_ln, dsv_ln = out$dsv_ln, dsw_ln = out$dsw_ln, dst0_ln = out$dst_ln),
-                     call = match.call())
+  #print(out)
+  
+  derivative <- list(deriv = out$deriv, derivln = out$deriv_ln, call = match.call())
   
   # output
   class(derivative) <- "Diffusion_deriv"

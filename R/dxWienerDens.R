@@ -1,13 +1,17 @@
 
-#' Gradient of the Wiener diffusion probability density function
+#' Gradient of the first-passage time probability density function
 #'
-#' Calculate the gradient of the Wiener diffusion probability density function.
+#' Calculate the gradient of the first-passage time probability density function.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
 #' @param a Upper barrier. Numeric vector.
 #' @param v Drift rate. Numeric vector.
 #' @param w Relative starting point. Numeric vector.
+#' @param t0 Non-decision time. Numeric vector
+#' @param sv Inter-trial variability of drift rate. Numeric vector. Standard deviation of a normal distribution \code{N(v, sv)}.
+#' @param sw Inter-trial variability of relative starting point. Numeric vector. Range of uniform distribution \code{U(w-0.5*sw, w+0.5*sw)}.
+#' @param st0 Inter-trial variability of non-decision time. Numeric vector. Range of uniform distribution \code{U(t0, t0+st0)}.
 #' @param precision Optional numeric value. Precision of the partial derivative. Numeric value. Default is \code{NULL}, which takes default value 1e-12.
 #' @param K Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}.
 #'   \itemize{
@@ -18,10 +22,10 @@
 #'   }
 #'   We recommend using either default (\code{precision = K = NULL}) or only \code{precision}.
 #' @param n.threads Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.
-#' @return A list of the class \code{Wiener_deriv} containing
+#' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
-#'     \item \code{deriv}: the derivatives of the PDF with respect to t, a, v, and w,
-#'     \item \code{derivln}: the derivatives of the log-transformed PDF with respect to t, a, v, and w,
+#'     \item \code{deriv}: the derivatives of the PDF with respect to a, v, w, t0, sv, sw, and st0,
+#'     \item \code{derivln}: the derivatives of the log-transformed PDF with respect to a, v, w, t0, sv, sw, and st0,
 #'     \item \code{call}: the function call.
 #'   }
 #' @examples
@@ -34,6 +38,10 @@ gradWienerPDF <- function(t,
                           a,
                           v,
                           w,
+                          t0,
+                          sv,
+                          sw,
+                          st0,
                           precision = NULL,
                           K = NULL,
                           n.threads = FALSE) {
@@ -44,19 +52,25 @@ gradWienerPDF <- function(t,
   # ---- VALUE CHECKS ---- #
 
   # general checks
-  lengths <- c(length(t), length(response), length(a), length(v), length(w))
+  lengths <- c(length(t), length(response), length(a), length(v), length(w), length(t0), length(sv), length(sw), length(st0))
   max_len <- max(lengths)
-  if(any(lengths != max_len & lengths != 1)) stop("t, response, a, v, and w must have same length (except length one)")
+  if(any(lengths != max_len & lengths != 1)) stop("t, response, a, v, w, t0, sv, sw, and st0 must have same length (except length one)")
   if(length(t) != max_len) t <- rep(t, max_len)
   if(length(response) != max_len) response <- rep(response, max_len)
   if(length(a) != max_len) a <- rep(a, max_len)
   if(length(v) != max_len) v <- rep(v, max_len)
   if(length(w) != max_len) w <- rep(w, max_len)
+  if(length(t0) != max_len) t0 <- rep(t0, max_len)
+  if(length(sv) != max_len) sv <- rep(sv, max_len)
+  if(length(sw) != max_len) sw <- rep(sw, max_len)
+  if(length(st0) != max_len) st0 <- rep(st0, max_len)
 
-  # t a v w checks
-  if(!is.numeric(t) | !is.numeric(a) | !is.numeric(v) | !is.numeric(w)) stop("t, a, v, and w must be numeric")
-  if(any(t <= 0) | any(a <= 0) | any(w <= 0)) stop("t, a, and w must be positive")
+  # t a v w t0 sw sv st0 checks
+  if(!is.numeric(t) | !is.numeric(a) | !is.numeric(v) | !is.numeric(w) | !is.numeric(t0) | !is.numeric(sv) | !is.numeric(sw) | !is.numeric(st0)) stop("t, a, v, w, t0, sv, sw, and st0 must be numeric")
+  if(any(t <= 0) | any(a <= 0) | any(w <= 0)) stop("t, a, and w must be strictly positive")
+  if(any(t0 < 0) | any(sw < 0) | any(sv < 0) | any(st0 < 0)) stop("t0, sw, sv, and st0 must be positive or zero")
   if(any(w >= 1)) stop("w must be lower than one")
+  if(any(w-0.5*sw <= 0) | any(w+0.5*sw >= 1)) stop("w-0.5*sw must be greater than zero and w+0.5*sw must be lower than one")
 
   # response checks
   if(!is.character(response) & !is.numeric(response)) stop("response must be a character with the values \"upper\" and/or \"lower\" OR numerics with the values 1=\"lower\" or 2=\"upper\"")
@@ -90,29 +104,69 @@ gradWienerPDF <- function(t,
 
   # --- C++ FUNCTION CALL ---- #
 
-  out <- .Call("dxdWiener",
-               as.numeric(t),
-               as.numeric(a),
-               as.numeric(v),
-               as.numeric(w),
-               as.numeric(precision),
-               as.integer(resps),
-               as.integer(K),
-               as.integer(max_len),
-               as.integer(n.threads),
-               as.logical(PRECISION_FLAG)
-  )
+  indW <- which(sw==0 & sv==0 & st0==0)
+  if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
+  
+  out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len),
+              da_ln = rep(NaN, max_len), dv_ln = rep(NaN, max_len), dw_ln = rep(NaN, max_len), dt0_ln = rep(NaN, max_len), dsv_ln = rep(NaN, max_len), dsw_ln = rep(NaN, max_len), dst_ln = rep(NaN, max_len))
+  
+  if (length(indW) > 0) {
+    tt <- t[indW]-t0[indW]
+    temp <- .Call("dxdWiener",
+                  as.numeric(ifelse(tt<0, 0, tt)),
+                  as.numeric(a[indW]),
+                  as.numeric(v[indW]),
+                  as.numeric(w[indW]),
+                  as.numeric(precision),
+                  as.integer(resps[indW]),
+                  as.integer(K),
+                  as.integer(length(indW)),
+                  as.integer(n.threads),
+                  as.logical(PRECISION_FLAG)
+    )
+    temp2 <- .Call("dtdWiener",
+                  as.numeric(ifelse(tt<0, 0, tt)),
+                  as.numeric(a[indW]),
+                  as.numeric(v[indW]),
+                  as.numeric(w[indW]),
+                  as.numeric(precision),
+                  as.integer(resps[indW]),
+                  as.integer(K),
+                  as.integer(length(indW)),
+                  as.integer(n.threads),
+                  as.logical(PRECISION_FLAG)
+    )
+    out$da[indW] <- temp$da; out$dv[indW] <- temp$dv; out$dw[indW] <- temp$dw; out$dt0[indW] <- -temp2$deriv; out$dsv[indW] <- 0; out$dsw[indW] <- 0; out$dst[indW] <- 0; 
+    out$da_ln[indW] <- temp$da_ln; out$dv_ln[indW] <- temp$dv_ln; out$dw_ln[indW] <- temp$dw_ln; out$dt0_ln[indW] <- temp2$deriv_ln;
+  } 
+  if (length(indD) > 0){
+    temp <- .Call("dxdDiffusion7",
+                  as.numeric(t[indD]),
+                  as.numeric(a[indD]),
+                  as.numeric(v[indD]),
+                  as.numeric(t0[indD]),
+                  as.numeric(w[indD]),
+                  as.numeric(sw[indD]),
+                  as.numeric(sv[indD]),
+                  as.numeric(st0[indD]),
+                  as.numeric(precision),
+                  as.integer(resps),
+                  as.integer(K),
+                  as.integer(length(indD)),
+                  as.integer(n.threads),
+                  as.logical(PRECISION_FLAG)
+    )
+    out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD] <- temp$dsv; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst; 
+    out$da_ln[indD] <- temp$da_ln; out$dv_ln[indD] <- temp$dv_ln; out$dw_ln[indD] <- temp$dw_ln; out$dt0_ln[indD] <- temp$dt0_ln; out$dsv_ln[indD] <- temp$dsv_ln; out$dsw_ln[indD] <- temp$dsw_ln; out$dst_ln[indD] <- temp$dst_ln; 
+  }
 
-  #print(out)
-  # deriv <- data.frame(da = out$da, dv = out$dv, dw = out$dw)
-  # deriv_ln <- data.frame(da_ln = out$da_ln, dv_ln = out$dv_ln, dw_ln = out$dw_ln)
 
-  derivative <- list(deriv = data.frame(da = out$da, dv = out$dv, dw = out$dw),
-                     derivln = data.frame(da_ln = out$da_ln, dv_ln = out$dv_ln, dw_ln = out$dw_ln),
+  derivative <- list(deriv = data.frame(da = out$da, dv = out$dv, dw = out$dw, dt0 = out$dt0, dsv = out$dsv, dsw = out$dsw, dst0 = out$dst),
+                     derivln = data.frame(da_ln = out$da_ln, dv_ln = out$dv_ln, dw_ln = out$dw_ln, dt0_ln = out$dt0_ln, dsv_ln = out$dsv_ln, dsw_ln = out$dsw_ln, dst0_ln = out$dst_ln),
                      call = match.call())
 
   # output
-  class(derivative) <- "Wiener_deriv"
+  class(derivative) <- "Diffusion_deriv"
   return(derivative)
 
 }
