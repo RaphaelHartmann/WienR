@@ -42,5 +42,24 @@
 /* ------------------------------------------------ */
 
 
+/* PDF and CDF of 7-param diffusion */
+  /* PDF */
+  void PDF7(int, double *, int *, double *, double *, double *, double *, double *, double *, double *, double, int, int, int, double *, double *, int);
+
+  /* CDF */
+  void CDF7(int, double *, int *, double *, double *, double *, double *, double *, double *, double *, double, int, int, int, double *, double *, int);
+/* ------------------------------------------------ */
+
+/* gradient of PDF and CDF */
+  /* derivative of PDF with respect to all params */
+  void dxPDF7(double *, int *, double *, double *, double *, double *, double *, double *, double *, double, int, int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, int);
+  /* derivative of CDF with respect to all params */
+  void dxCDF7(double *, int *, double *, double *, double *, double *, double *, double *, double *, double, int, int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, int);
+/* ------------------------------------------------ */
+
+
+
+
+
 
 #endif

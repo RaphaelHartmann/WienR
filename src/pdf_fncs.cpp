@@ -15,7 +15,7 @@
 double ks(double t, double w, double eps) {
 	double K1 = (sqrt(2.0 * t) + w) / 2.0;
 	double u_eps = fmin(-1.0, M_LN2 + M_LNPI + 2.0 * log(t) + 2.0 * (eps));
-	double	arg = -t * (u_eps - sqrt(-2 * u_eps - 2.0));
+	double	arg = -t * (u_eps - sqrt(-2.0 * u_eps - 2.0));
 	double 	K2 = (arg > 0) ? 0.5 * (sqrt(arg) - w) : K1;
 	return ceil(fmax(K1, K2));
 }
@@ -52,13 +52,16 @@ double logfl(double q, double v, double w, int K) {
 		double temp = k * M_PI;
 		double check = sin(temp * w);
 		if (check > 0) fplus = logsum(log(k) - pow(temp, 2) * halfq + log(check), fplus);
-		else if (check < 0) fminus = logsum(log(k) - pow(temp, 2) * halfq + log(-check), fminus);
+		else fminus = logsum(log(k) - pow(temp, 2) * halfq + log(-check), fminus);
 	}
 	return	logdiff(fplus, fminus) + M_LNPI;
 }
 
 /* calculate density */
 double dwiener(double q, double a, double vn, double wn, double err, int K, int epsFLAG) {
+	if (q == 0.0) {
+		return -INFINITY;
+	}
 	double kll, kss, ans, v, w;
 	if(!epsFLAG && K==0) {
 		err = -27.63102;  // exp(err) = 1.e-12
@@ -89,7 +92,7 @@ double dwiener(double q, double a, double vn, double wn, double err, int K, int 
 	kll = kl(q_asq, v, w, el);
 
 	// if small t is better
-	if (2 * kss < kll) {
+	if (2 * kss <= kll) {
 		if((epsFLAG && kss<K) || !epsFLAG) kss = K;
 		ans = lg1 + logfs(q_asq, w, static_cast<int>(kss));
 	}
@@ -165,48 +168,53 @@ void logdtfl(double q, double w, int K, double &erg, int &newsign) {
 
 /* calculate derivative of density with respect to t */
 void dtdwiener(double q, double a, double v, double w, double ld, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
-  double kll, kss, ans;
-	if(!epsFLAG && K==0) {
-		err = -27.63102; // exp(err) = 1.e-12
-		epsFLAG = 1;
+	if (q == 0.0) {
+		*derivF = 0.0;
+		*derivlnF = 0.0/0.0;
+	} else {
+		double kll, kss, ans;
+		if(!epsFLAG && K==0) {
+			err = -27.63102; // exp(err) = 1.e-12
+			epsFLAG = 1;
+		}
+		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
+		else if(epsFLAG) err = log(err);
+
+		/* prepare some variables */
+	  double q_asq = q / pow(a, 2);
+	  double ans0 = -pow(v, 2) / 2.0;
+	  double la = 2.0*log(a);
+	  double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	  double factor = lg1 - la;
+
+
+		/* calculate the number of terms needed for short t */
+	  double es = err - lg1 + ld;
+	  es = es + la;
+		kss = dtaks(q_asq, w, es);
+		/* calculate the number of terms needed for large t */
+	  double el = (err - lg1 + ld) ;
+	  el = el +la;
+	  kll = dtakl(q_asq, v, a, el);
+
+	  // if small t is better
+	  if (2*kss < kll) {
+			if((epsFLAG && kss<K) || !epsFLAG) kss = K;
+	    double erg; int newsign;
+	    logdtfs(q_asq, w, static_cast<int>(kss), erg, newsign);
+	    ans = ans0 - 1.5 / q + newsign * exp(factor - 1.5 * M_LN2 - M_LN_SQRT_PI - 3.5 * log(q_asq) + erg - ld);
+	  }
+	  // if large t is better...
+	  else {
+			if((epsFLAG && kll<K) || !epsFLAG) kll = K;
+	    double erg; int newsign;
+	    logdtfl(q_asq, w, static_cast<int>(kll), erg, newsign);
+	    ans = ans0 - newsign * exp(factor + 3.0*M_LNPI - M_LN2 + erg - ld);
+	  }
+	  //return ans;
+		*derivlnF = ans;
+		*derivF = ans*exp(ld);
 	}
-	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
-
-	/* prepare some variables */
-  double q_asq = q / pow(a, 2);
-  double ans0 = -pow(v, 2) / 2.0;
-  double la = 2.0*log(a);
-  double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
-  double factor = lg1 - la;
-
-
-	/* calculate the number of terms needed for short t */
-  double es = err - lg1 + ld;
-  es = es + la;
-	kss = dtaks(q_asq, w, es);
-	/* calculate the number of terms needed for large t */
-  double el = (err - lg1 + ld) ;
-  el = el +la;
-  kll = dtakl(q_asq, v, a, el);
-
-  // if small t is better
-  if (2*kss < kll) {
-		if((epsFLAG && kss<K) || !epsFLAG) kss = K;
-    double erg; int newsign;
-    logdtfs(q_asq, w, static_cast<int>(kss), erg, newsign);
-    ans = ans0 - 1.5 / q + newsign * exp(factor - 1.5 * M_LN2 - M_LN_SQRT_PI - 3.5 * log(q_asq) + erg - ld);
-  }
-  // if large t is better...
-  else {
-		if((epsFLAG && kll<K) || !epsFLAG) kll = K;
-    double erg; int newsign;
-    logdtfl(q_asq, w, static_cast<int>(kll), erg, newsign);
-    ans = ans0 - newsign * exp(factor + 3.0*M_LNPI - M_LN2 + erg - ld);
-  }
-  //return ans;
-	*derivlnF = ans;
-	*derivF = ans*exp(ld);
 }
 
 /*-----------------------------------------------*/
@@ -217,60 +225,65 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 
 /* calculate derivative of density with respect to a */
 void dadwiener(double q, double a, double vn, double wn, double ld, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
-	double kll, kss, ans, v, w;
-	if(!epsFLAG && K==0) {
-		err = -27.63102; // exp(err) = 1.e-12
-		epsFLAG = 1;
-	}
-	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	if (q == 0.0) {
+		*derivF = 0.0;
+		*derivlnF = 0.0/0.0;
+	} else {
+		double kll, kss, ans, v, w;
+		if(!epsFLAG && K==0) {
+			err = -27.63102; // exp(err) = 1.e-12
+			epsFLAG = 1;
+		}
+		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
+		else if(epsFLAG) err = log(err);
 
-	if (q >= 0) {
-		w = 1.0 - wn;
-		v = -vn;
-	}
-	else {
-		q = fabs(q);
-		w = wn;
-		v = vn;
-	}
+		if (q >= 0) {
+			w = 1.0 - wn;
+			v = -vn;
+		}
+		else {
+			q = fabs(q);
+			w = wn;
+			v = vn;
+		}
 
-	double la = log(a), lq = log(q);
+		double la = log(a), lq = log(q);
 
-	/* prepare some variables */
-	double q_asq = q / pow(a, 2);
-	double ans0 =  - v * w;
-	double lg1 = -v * a*w - pow(v, 2)*q / 2.0 - 2.0*la;
-	double factor = lg1 - 3.0*la;
+		/* prepare some variables */
+		double q_asq = q / pow(a, 2);
+		double ans0 =  - v * w;
+		double lg1 = -v * a*w - pow(v, 2)*q / 2.0 - 2.0*la;
+		double factor = lg1 - 3.0*la;
 
-	/* calculate the number of terms needed for short t */
-	double es = err - lg1 + ld;
-	es = es + la;
-	es = es -  M_LN2 + 2.0*la - lq;
-	kss = dtaks(q_asq, w, es);
-	/* calculate the number of terms needed for large t */
-	double el = err - lg1 + ld;
-	el = el + la;
-	el = el - M_LN2 + 2.0*la - lq;
-	kll = dtakl(q_asq, v, a, el);
+		/* calculate the number of terms needed for short t */
+		double es = err - lg1 + ld;
+		es = es + la;
+		es = es -  M_LN2 + 2.0*la - lq;
+		kss = dtaks(q_asq, w, es);
+		/* calculate the number of terms needed for large t */
+		double el = err - lg1 + ld;
+		el = el + la;
+		el = el - M_LN2 + 2.0*la - lq;
+		kll = dtakl(q_asq, v, a, el);
 
-	// if small t is better
-	if (2 * kss < kll) {
-		if((epsFLAG && kss<K) || !epsFLAG) kss = K;
-		double erg; int newsign;
-		logdtfs(q_asq, w, static_cast<int>(kss), erg, newsign);
-		ans = ans0 + 1.0 / a - newsign * exp(-0.5*M_LN2 - M_LN_SQRT_PI - 2.5*lq + 4.0*la + lg1 + erg - ld);
+		// if small t is better
+		if (2 * kss < kll) {
+			if((epsFLAG && kss<K) || !epsFLAG) kss = K;
+			double erg; int newsign;
+			logdtfs(q_asq, w, static_cast<int>(kss), erg, newsign);
+			ans = ans0 + 1.0 / a - newsign * exp(-0.5*M_LN2 - M_LN_SQRT_PI - 2.5*lq + 4.0*la + lg1 + erg - ld);
+		}
+		// if large t is better...
+		else {
+			if((epsFLAG && kll<K) || !epsFLAG) kll = K;
+			double erg; int newsign;
+			logdtfl(q_asq, w, static_cast<int>(kll), erg, newsign);
+			ans = ans0 - 2.0 / a + newsign * exp(lq + factor + 3.0*M_LNPI + erg - ld);
+		}
+		//return ans;
+		*derivlnF = ans;
+		*derivF = ans*exp(ld);
 	}
-	// if large t is better...
-	else {
-		if((epsFLAG && kll<K) || !epsFLAG) kll = K;
-		double erg; int newsign;
-		logdtfl(q_asq, w, static_cast<int>(kll), erg, newsign);
-		ans = ans0 - 2.0 / a + newsign * exp(lq + factor + 3.0*M_LNPI + erg - ld);
-	}
-	//return ans;
-	*derivlnF = ans;
-	*derivF = ans*exp(ld);
 }
 /*-----------------------------------------------*/
 
@@ -280,24 +293,29 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 /* calculate derivative of density with respect to v */
 void dvdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double *derivlnF) {
-	double ans, v, w;
-	int sign = 1;
+	if (q == 0.0) {
+		*derivF = 0.0;
+		*derivlnF = 0.0/0.0;
+	} else {
+		double ans, v, w;
+		int sign = 1;
 
-	if (q >= 0) {
-		w = 1.0 - wn;
-		v = -vn;
-		sign = -1;
+		if (q >= 0) {
+			w = 1.0 - wn;
+			v = -vn;
+			sign = -1;
+		}
+		else {
+			q = fabs(q);
+			w = wn;
+			v = vn;
+		}
+
+		ans =  sign*(- a * w - v * q);
+
+		*derivlnF = ans;
+		*derivF = ans*exp(ld);
 	}
-	else {
-		q = fabs(q);
-		w = wn;
-		v = vn;
-	}
-
-	ans =  sign*(- a * w - v * q);
-
-	*derivlnF = ans;
-	*derivF = ans*exp(ld);
 }
 /*-----------------------------------------------*/
 
@@ -361,55 +379,60 @@ void logdwfl(double q, double v,  double w, int K, double &erg, int &sign) {
 
 /* calculate derivative of density with respect to w */
 void dwdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double *derivlnF, double err, int K, int epsFLAG) {
-	double kll, kss, ans, v, w;
-	if(!epsFLAG && K==0) {
-		err = -27.63102; // exp(err) = 1.e-12
-		epsFLAG = 1;
-	}
-	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	if (q == 0.0) {
+		*derivF = 0.0;
+		*derivlnF = 0.0/0.0;
+	} else {
+		double kll, kss, ans, v, w;
+		if(!epsFLAG && K==0) {
+			err = -27.63102; // exp(err) = 1.e-12
+			epsFLAG = 1;
+		}
+		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
+		else if(epsFLAG) err = log(err);
 
-	int sign = 1;
+		int sign = 1;
 
-	if (q>=0) {
-		w = 1.0 - wn;
-		v = -vn;
-		sign = -1;
-	}
-	else {
-		q = fabs(q);
-		w = wn;
-		v = vn;
-	}
+		if (q>=0) {
+			w = 1.0 - wn;
+			v = -vn;
+			sign = -1;
+		}
+		else {
+			q = fabs(q);
+			w = wn;
+			v = vn;
+		}
 
-	/* prepare some variables */
-	double q_asq = q / pow(a, 2);
-	double ans0 = -v * a;
-	double lg1 = (-v * a*w - pow(v, 2)*(q) / 2.0) - 2.0*log(a);
-	double ls = -lg1 + ld;
-	double ll = -lg1 + ld;
+		/* prepare some variables */
+		double q_asq = q / pow(a, 2);
+		double ans0 = -v * a;
+		double lg1 = (-v * a*w - pow(v, 2)*(q) / 2.0) - 2.0*log(a);
+		double ls = -lg1 + ld;
+		double ll = -lg1 + ld;
 
-	/* calculate the number of terms needed for short t and large t */
-	kss = dwks(q_asq, w, err+ls);
-	kll = dwkl(q_asq, v, err+ll);
+		/* calculate the number of terms needed for short t and large t */
+		kss = dwks(q_asq, w, err+ls);
+		kll = dwkl(q_asq, v, err+ll);
 
-	// if small t is better
-	if (2 * kss < kll) {
-		if((epsFLAG && kss<K) || !epsFLAG) kss = K;
-		double erg; int newsign;
-		logdwfs(q_asq, w, static_cast<int>(kss), erg, newsign);
-		ans = sign*(ans0 - newsign * exp(erg - ls - 2.5 * log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI));
+		// if small t is better
+		if (2 * kss < kll) {
+			if((epsFLAG && kss<K) || !epsFLAG) kss = K;
+			double erg; int newsign;
+			logdwfs(q_asq, w, static_cast<int>(kss), erg, newsign);
+			ans = sign*(ans0 - newsign * exp(erg - ls - 2.5 * log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI));
+		}
+		// if large t is better...
+		else {
+			if((epsFLAG && kll<K) || !epsFLAG) kll = K;
+	  	double erg; int newsign;
+			logdwfl(q_asq, v, w, static_cast<int>(kll), erg, newsign);
+			ans = sign*(ans0 + newsign * exp(erg - ll + 2.0 * M_LNPI));
+		}
+		//return ans*sign;
+		*derivlnF = ans;
+		*derivF = ans*exp(ld);
 	}
-	// if large t is better...
-	else {
-		if((epsFLAG && kll<K) || !epsFLAG) kll = K;
-  	double erg; int newsign;
-		logdwfl(q_asq, v, w, static_cast<int>(kll), erg, newsign);
-		ans = sign*(ans0 + newsign * exp(erg - ll + 2.0 * M_LNPI));
-	}
-	//return ans*sign;
-	*derivlnF = ans;
-	*derivF = ans*exp(ld);
 }
 /*-----------------------------------------------*/
 
@@ -525,74 +548,88 @@ void logdxfl(double q, double w, int Kal, int Kwl, double &erg_a, double &erg_w,
 /* calculate derivative of density with respect to w */
 void dxdwiener(double q, double a, double vn, double wn, double ld, double err, int K, int epsFLAG, double *da, double *da_ln, double *dv, double *dv_ln, double *dw, double *dw_ln) {
 
-	double v, w, kal, kas, kwl, kws;
-	int sign = 1;
-	if(!epsFLAG && K==0) {
-		err = -27.63102; // exp(err) = 1.e-12
-		epsFLAG = 1;
+	if (q == 0.0) {
+		// -----------d/da------------
+		*da_ln = 0.0/0.0;
+		*da = 0.0;
+
+		// -----------d/dv------------
+		*dv_ln = 0.0/0.0;
+		*dv = 0.0;
+
+		// -----------d/dw------------
+		*dw_ln = 0.0/0.0;
+		*dw = 0.0;
+	} else {
+		double v, w, kal, kas, kwl, kws;
+		int sign = 1;
+		if(!epsFLAG && K==0) {
+			err = -27.63102; // exp(err) = 1.e-12
+			epsFLAG = 1;
+		}
+		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
+		else if(epsFLAG) err = log(err);
+
+		if (q >= 0) {
+			w = 1.0 - wn;
+			v = -vn;
+			sign = -1;
+		}
+		else {
+			q = fabs(q);
+			w = wn;
+			v = vn;
+		}
+
+		double q_asq = q / pow(a, 2);
+
+		double ans_a, ans0_a =  - v * w;
+		double ans_w, ans0_w = -v * a;
+		double ans_v = sign*(- a * w - v * q);
+
+		double la = log(a);
+		double lq = log(q);
+		double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - 2.0*la;
+		double es = err - lg1 + ld;
+		double el = es;
+
+		double factor_a = lg1 - 3.0*la;
+		double factor_w = -lg1 + ld;
+
+		dxks(q_asq, q, w, a, es, kas, kws);
+		dxkl(q_asq, q, v, a, el, kal, kwl);
+
+		double S = kas + kws;
+		double L = kal + kwl;
+
+		if (2*S < L) {
+			if((epsFLAG && S < 2*K) || !epsFLAG) kas = kws = K;
+			double erg_a, erg_w; int newsign_a, newsign_w;
+			logdxfs(q_asq, w, static_cast<int>(kas), static_cast<int>(kws), erg_a, erg_w, newsign_a, newsign_w);
+			ans_a = ans0_a + 1.0 / a - newsign_a * exp(-0.5*M_LN2 - M_LN_SQRT_PI - 2.5*lq + 4 * la + lg1 + erg_a - ld);
+			ans_w = ans0_w - newsign_w * exp(erg_w - factor_w - 2.5 * log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI);
+		}
+		// if large t is better...
+		else {
+			if((epsFLAG && L < 2*K) || !epsFLAG) kal = kwl = K;
+			double erg_a, erg_w; int newsign_a, newsign_w;
+			logdxfl(q_asq, w, static_cast<int>(kal), static_cast<int>(kwl), erg_a, erg_w, newsign_a, newsign_w);
+			ans_a = ans0_a - 2.0 / a + newsign_a * exp(lq + factor_a + 3 * M_LNPI + erg_a - ld);
+			ans_w = ans0_w + newsign_w * exp(erg_w - factor_w + 2.0 * M_LNPI);
+		}
+
+		// -----------d/da------------
+		*da_ln = ans_a;
+		*da = ans_a*exp(ld);
+
+		// -----------d/dv------------
+		*dv_ln = ans_v;
+		*dv = ans_v*exp(ld);
+
+		// -----------d/dw------------
+		*dw_ln = ans_w*sign;
+		*dw = (ans_w*sign)*exp(ld);
 	}
-	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
-
-	if (q >= 0) {
-		w = 1.0 - wn;
-		v = -vn;
-		sign = -1;
-	}
-	else {
-		q = fabs(q);
-		w = wn;
-		v = vn;
-	}
-
-	double q_asq = q / pow(a, 2);
-
-	double ans_a, ans0_a =  - v * w;
-	double ans_w, ans0_w = -v * a;
-	double ans_v = sign*(- a * w - v * q);
-
-	double la = log(a);
-	double lq = log(q);
-	double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - 2.0*la;
-	double es = err - lg1 + ld;
-	double el = es;
-
-	double factor_a = lg1 - 3.0*la;
-	double factor_w = -lg1 + ld;
-
-	dxks(q_asq, q, w, a, es, kas, kws);
-	dxkl(q_asq, q, v, a, el, kal, kwl);
-
-	double S = kas + kws;
-	double L = kal + kwl;
-
-	if (2*S < L) {
-		if((epsFLAG && S < 2*K) || !epsFLAG) kas = kws = K;
-		double erg_a, erg_w; int newsign_a, newsign_w;
-		logdxfs(q_asq, w, static_cast<int>(kas), static_cast<int>(kws), erg_a, erg_w, newsign_a, newsign_w);
-		ans_a = ans0_a + 1.0 / a - newsign_a * exp(-0.5*M_LN2 - M_LN_SQRT_PI - 2.5*lq + 4 * la + lg1 + erg_a - ld);
-		ans_w = ans0_w - newsign_w * exp(erg_w - factor_w - 2.5 * log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI);
-	}
-	// if large t is better...
-	else {
-		if((epsFLAG && L < 2*K) || !epsFLAG) kal = kwl = K;
-		double erg_a, erg_w; int newsign_a, newsign_w;
-		logdxfl(q_asq, w, static_cast<int>(kal), static_cast<int>(kwl), erg_a, erg_w, newsign_a, newsign_w);
-		ans_a = ans0_a - 2.0 / a + newsign_a * exp(lq + factor_a + 3 * M_LNPI + erg_a - ld);
-		ans_w = ans0_w + newsign_w * exp(erg_w - factor_w + 2.0 * M_LNPI);
-	}
-
-	// -----------d/da------------
-	*da_ln = ans_a;
-	*da = ans_a*exp(ld);
-
-	// -----------d/dv------------
-	*dv_ln = ans_v;
-	*dv = ans_v*exp(ld);
-
-	// -----------d/dw------------
-	*dw_ln = ans_w*sign;
-	*dw = (ans_w*sign)*exp(ld);
 
 }
 /*-----------------------------------------------*/

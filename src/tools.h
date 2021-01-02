@@ -68,4 +68,23 @@ double tail(double);
 double gsl_cdf_ugaussian_Pinv(const double);
 /* -------------------------------------------------------- */
 
+struct my_params {
+	double t;
+	int low_or_up;
+	double a;
+	double v;
+	double t0;
+	double w;
+	double sw;
+	double sv;
+	double st;
+	double errorW;
+	int K;
+	int epsFLAG;
+	double *val_ptr;
+	double *valln_ptr;
+};
+
+
+
 #endif

@@ -22,6 +22,13 @@ extern SEXP dwpWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP dxdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dxpWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
+extern SEXP dDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP pDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+
+extern SEXP dxdDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP dxpDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+
+
 static const R_CallMethodDef CallEntries[] = {
     {"dWiener", (DL_FUNC) &dWiener, 10},
     {"dtdWiener", (DL_FUNC) &dtdWiener, 10},
@@ -35,6 +42,13 @@ static const R_CallMethodDef CallEntries[] = {
 
     {"dxdWiener", (DL_FUNC) &dxdWiener, 10},
     {"dxpWiener", (DL_FUNC) &dxpWiener, 10},
+
+    {"dDiffusion7", (DL_FUNC) &dDiffusion7, 15},
+    {"pDiffusion7", (DL_FUNC) &pDiffusion7, 15},
+
+    {"dxdDiffusion7", (DL_FUNC) &dxdDiffusion7, 14},
+    {"dxpDiffusion7", (DL_FUNC) &dxpDiffusion7, 14},
+
     {NULL, NULL, 0}
 };
 

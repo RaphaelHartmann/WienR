@@ -5,6 +5,7 @@
 #include "cstdio"
 #include "pdf_fncs.h"
 #include "cdf_fncs.h"
+#include "fncs_seven.h"
 #include "tools.h"
 #include "Rinternals.h"
 #include <thread>
@@ -648,3 +649,246 @@ void dxCDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
 
 }
 /* ------------------------------------------------ */
+
+
+
+/* PDF and CDF of 7-param diffusion */
+  /* PDF of 7-param diffusion */
+void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, int NThreads) {
+
+  if (NThreads) {
+    /* prepare threads */
+    int maxThreads = std::thread::hardware_concurrency();
+    if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+    int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+    int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+    int NperThread = N / AmntOfThreads;
+    std::vector<std::thread> threads(AmntOfThreads-1);
+
+    /* calculate derivative with parallelization */
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j] = std::thread([=]() {
+        for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+          ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rlogval[i]);
+          if (choice == 0) {
+            Rlogval[i] = log(Rval[i]);
+          }
+        }
+      });
+    }
+
+    int last = NperThread * (AmntOfThreads-1);
+    for (int i = last; i < N; i++) {
+      double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+      ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rlogval[i]);
+      if (choice == 0) {
+        Rlogval[i] = log(Rval[i]);
+      }
+    }
+
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j].join();
+    }
+
+  } else {
+    /* calculate derivative without parallelization */
+    for(int i = 0; i < N; i++) {
+      double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+      ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rlogval[i]);
+      if (choice == 0) {
+        Rlogval[i] = log(Rval[i]);
+      }
+    }
+  }
+
+}
+
+
+
+  /* CDF of 7-param diffusion */
+void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, int NThreads) {
+
+  if (NThreads) {
+    /* prepare threads */
+    int maxThreads = std::thread::hardware_concurrency();
+    if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+    int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+    int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+    int NperThread = N / AmntOfThreads;
+    std::vector<std::thread> threads(AmntOfThreads-1);
+
+    /* calculate derivative with parallelization */
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j] = std::thread([=]() {
+        for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+          pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rlogval[i]);
+          if (choice == 0) {
+            Rlogval[i] = log(Rval[i]);
+          }
+        }
+      });
+    }
+
+    int last = NperThread * (AmntOfThreads-1);
+    for (int i = last; i < N; i++) {
+      double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+      pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rlogval[i]);
+      if (choice == 0) {
+        Rlogval[i] = log(Rval[i]);
+      }
+    }
+
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j].join();
+    }
+
+  } else {
+    /* calculate derivative without parallelization */
+    for(int i = 0; i < N; i++) {
+      double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+      pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rlogval[i]);
+      if (choice == 0) {
+        Rlogval[i] = log(Rval[i]);
+      }
+    }
+  }
+}
+
+  /* gradient of CDF */
+void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rda, double *Rda_ln, double *Rdv, double *Rdv_ln, double *Rdt0, double *Rdt0_ln, double *Rdw, double *Rdw_ln, double *Rdsw, double *Rdsw_ln, double *Rdsv, double *Rdsv_ln, double *Rdst, double *Rdst_ln, int NThreads) {
+
+    if (NThreads) {
+      /* prepare threads */
+      int maxThreads = std::thread::hardware_concurrency();
+      if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+      int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+      int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+      int NperThread = N / AmntOfThreads;
+      std::vector<std::thread> threads(AmntOfThreads-1);
+
+      /* calculate derivative with parallelization */
+      for (int j = 0; j < AmntOfThreads-1; j++) {
+        threads[j] = std::thread([=]() {
+          for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+            double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+            ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rda_ln[i]);
+            ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rdv_ln[i]);
+            ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rdt0_ln[i]);
+            ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rdw_ln[i]);
+            if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rdsw_ln[i]);
+            else Rdsw[i] = Rdsw_ln[i] = NAN;
+            if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rdsv_ln[i]);
+            else Rdsv[i] = Rdsv_ln[i] = NAN;
+            if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rdst_ln[i]);
+            else Rdst[i] = Rdst_ln[i] = NAN;
+          }
+        });
+      }
+
+      int last = NperThread * (AmntOfThreads-1);
+      for (int i = last; i < N; i++) {
+        double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+        ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rda_ln[i]);
+        ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rdv_ln[i]);
+        ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rdt0_ln[i]);
+        ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rdw_ln[i]);
+        if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rdsw_ln[i]);
+        else Rdsw[i] = Rdsw_ln[i] = NAN;
+        if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rdsv_ln[i]);
+        else Rdsv[i] = Rdsv_ln[i] = NAN;
+        if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rdst_ln[i]);
+        else Rdst[i] = Rdst_ln[i] = NAN;
+      }
+
+      for (int j = 0; j < AmntOfThreads-1; j++) {
+        threads[j].join();
+      }
+
+    } else {
+      /* calculate derivative without parallelization */
+      for(int i = 0; i < N; i++) {
+        double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+        ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rda_ln[i]);
+        ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rdv_ln[i]);
+        ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rdt0_ln[i]);
+        ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rdw_ln[i]);
+        if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rdsw_ln[i]);
+        else Rdsw[i] = Rdsw_ln[i] = NAN;
+        if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rdsv_ln[i]);
+        else Rdsv[i] = Rdsv_ln[i] = NAN;
+        if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rdst_ln[i]);
+        else Rdst[i] = Rdst_ln[i] = NAN;
+      }
+    }
+
+  }
+
+void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rda, double *Rda_ln, double *Rdv, double *Rdv_ln, double *Rdt0, double *Rdt0_ln, double *Rdw, double *Rdw_ln, double *Rdsw, double *Rdsw_ln, double *Rdsv, double *Rdsv_ln, double *Rdst, double *Rdst_ln, int NThreads) {
+
+    if (NThreads) {
+      /* prepare threads */
+      int maxThreads = std::thread::hardware_concurrency();
+      if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+      int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+      int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+      int NperThread = N / AmntOfThreads;
+      std::vector<std::thread> threads(AmntOfThreads-1);
+
+      /* calculate derivative with parallelization */
+      for (int j = 0; j < AmntOfThreads-1; j++) {
+        threads[j] = std::thread([=]() {
+          for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+            double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+            pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rda_ln[i]);
+            pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rdv_ln[i]);
+            pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rdt0_ln[i]);
+            pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rdw_ln[i]);
+            if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rdsw_ln[i]);
+            else Rdsw[i] = Rdsw_ln[i] = NAN;
+            if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rdsv_ln[i]);
+            else Rdsv[i] = Rdsv_ln[i] = NAN;
+            if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rdst_ln[i]);
+            else Rdst[i] = Rdst_ln[i] = NAN;
+          }
+        });
+      }
+
+      int last = NperThread * (AmntOfThreads-1);
+      for (int i = last; i < N; i++) {
+        double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+        pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rda_ln[i]);
+        pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rdv_ln[i]);
+        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rdt0_ln[i]);
+        pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rdw_ln[i]);
+        if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rdsw_ln[i]);
+        else Rdsw[i] = Rdsw_ln[i] = NAN;
+        if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rdsv_ln[i]);
+        else Rdsv[i] = Rdsv_ln[i] = NAN;
+        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rdst_ln[i]);
+        else Rdst[i] = Rdst_ln[i] = NAN;
+      }
+
+      for (int j = 0; j < AmntOfThreads-1; j++) {
+        threads[j].join();
+      }
+
+    } else {
+      /* calculate derivative without parallelization */
+      for(int i = 0; i < N; i++) {
+        double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
+        pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rda_ln[i]);
+        pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rdv_ln[i]);
+        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rdt0_ln[i]);
+        pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rdw_ln[i]);
+        if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rdsw_ln[i]);
+        else Rdsw[i] = Rdsw_ln[i] = NAN;
+        if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rdsv_ln[i]);
+        else Rdsv[i] = Rdsv_ln[i] = NAN;
+        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rdst_ln[i]);
+        else Rdst[i] = Rdst_ln[i] = NAN;
+      }
+    }
+
+  }
