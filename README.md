@@ -65,31 +65,25 @@ If neither `precision` nor `K` is used, then a default precision of 1e-12 is use
 t <- .75
 response <- "upper"
 a <- 1
-v <- 4
-w <- .5
-t0 <- .5
-sv <- .1
-sw <- .1
-st0 <- .1
+v <- .7
+w <- t0 <- .5
+sv <- sw <- st0 <- .1
 
+WienerPDF(t, response, a, v, w)
+WienerPDF(t, response, a, v, w, t0)
+WienerPDF(t, response, a, v, w, t0, sv)
+WienerPDF(t, response, a, v, w, t0, sv, sw)
 WienerPDF(t, response, a, v, w, t0, sv, sw, st0)
-WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 
-dtWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
-daWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
-dvWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
-dwWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
+WienerCDF(t, response, a, v, w, t0, st0)
+
+dtWienerPDF(t, response, a, v, w)
+daWienerPDF(t, response, a, v, w, t0)
+dvWienerPDF(t, response, a, v, w, t0, sv)
+dwWienerPDF(t, response, a, v, w, t0, sv, sw)
 dt0WienerPDF(t, response, a, v, w, t0, sv, sw, st0)
-dsvWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
 dswWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
-dst0WienerPDF(t, response, a, v, w, t0, sv, sw, st0)
 
-daWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
-dvWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
-dwWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
-dt0WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
-dsvWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
-dswWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 dst0WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 
 gradWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
