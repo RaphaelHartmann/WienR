@@ -2,7 +2,7 @@
 % Please edit documentation in R/daWienerDens.R
 \name{daWienerPDF}
 \alias{daWienerPDF}
-\title{Partial derivative of the Wiener diffusion probability density function with respect to the upper barrier}
+\title{Partial derivative of the first-passage time probability density function of the diffusion model with respect to the upper barrier}
 \usage{
 daWienerPDF(
   t,
@@ -10,6 +10,10 @@ daWienerPDF(
   a,
   v,
   w,
+  t0 = 0,
+  sv = 0,
+  sw = 0,
+  st0 = 0,
   precision = NULL,
   K = NULL,
   n.threads = FALSE
@@ -27,6 +31,14 @@ daWienerPDF(
 
 \item{w}{Relative starting point. Numeric vector.}
 
+\item{t0}{Non-decision time. Numeric vector}
+
+\item{sv}{Inter-trial variability of drift rate. Numeric vector. Standard deviation of a normal distribution \code{N(v, sv)}.}
+
+\item{sw}{Inter-trial variability of relative starting point. Numeric vector. Range of uniform distribution \code{U(w-0.5*sw, w+0.5*sw)}.}
+
+\item{st0}{Inter-trial variability of non-decision time. Numeric vector. Range of uniform distribution \code{U(t0, t0+st0)}.}
+
 \item{precision}{Optional numeric value. Precision of the partial derivative. Numeric value. Default is \code{NULL}, which takes default value 1e-12.}
 
 \item{K}{Optional. Number of iterations to calculate the infinite sums. Numeric value (integer). Default is \code{NULL}.
@@ -41,7 +53,7 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 \item{n.threads}{Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.}
 }
 \value{
-A list of the class \code{Wiener_deriv} containing
+A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the PDF with respect to a,
     \item \code{derivln}: the derivatives of the log-transformed PDF with respect to a,
@@ -49,7 +61,7 @@ A list of the class \code{Wiener_deriv} containing
   }
 }
 \description{
-Calculate the partial derivative of the Wiener diffusion probability density function with respect to the upper barrier a.
+Calculate the partial derivative of the first-passage time probability density function of the diffusion model with respect to the upper barrier a.
 }
 \examples{
 daWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)

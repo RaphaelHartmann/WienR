@@ -2,7 +2,7 @@
 % Please edit documentation in R/dwWienerDens.R
 \name{dwWienerPDF}
 \alias{dwWienerPDF}
-\title{Partial derivative of the Wiener diffusion probability density function with respect to the relative starting point}
+\title{Partial derivative of the first-passage time probability density function of the diffusion model with respect to the relative starting point}
 \usage{
 dwWienerPDF(
   t,
@@ -10,6 +10,10 @@ dwWienerPDF(
   a,
   v,
   w,
+  t0 = 0,
+  sv = 0,
+  sw = 0,
+  st0 = 0,
   precision = NULL,
   K = NULL,
   n.threads = FALSE
@@ -41,7 +45,7 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 \item{n.threads}{Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.}
 }
 \value{
-A list of the class \code{Wiener_deriv} containing
+A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the PDF with respect to w,
     \item \code{derivln}: the derivatives of the log-transformed PDF with respect to w,
@@ -49,7 +53,7 @@ A list of the class \code{Wiener_deriv} containing
   }
 }
 \description{
-Calculate the partial derivative of the Wiener diffusion probability density function with respect to the relative starting point w.
+Calculate the partial derivative of the first-passage time probability density function of the diffusion model with respect to the relative starting point w.
 }
 \examples{
 dwWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
