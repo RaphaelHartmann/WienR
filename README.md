@@ -60,6 +60,8 @@ And three optional arguments:
 
 If neither `precision` nor `K` is used, then a default precision of 1e-12 is used to calculate the number of components that guarantee the precision. If `precision` is used but not `K` the same happens but with the provided precision value. If both are provided the number of components that guarantees the precision is calculated and used, except if `K` is larger. If only `K` is provided then this is used as fixed number of components.
 
+Note: With the use of `sv`, `sw`, and/or `st0` numerical integration is needed. This is done using the *C* library `cubature` by Steven G. Johnson (https://github.com/stevengj/cubature). This numerical integration allows for specifying the absolute (and relative) error. In the package we use the absolute error. Nevertheless, using numerical integration always takes some time, especially with a low absolute error. Therefore, the calculations of the PDF, CDF as well as their derivatives takes longer when using the additional parameters `sv`, `sw`, and/or `st0`.
+
 # Examples
 ```
 t <- .75
