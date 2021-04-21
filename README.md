@@ -1,5 +1,5 @@
 [![License](https://img.shields.io/badge/license-GPL(>=2)-C11B17.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
-[![cubature](https://img.shields.io/badge/cubature(v1.0.3)-C11B17.svg)](https://github.com/stevengj/cubature)
+[![cubature](https://img.shields.io/static/v1?label=cubature&message=cubature&color=C11B17)](https://github.com/stevengj/cubature)
 
 
 # WienR
