@@ -1,22 +1,33 @@
 Package: WienR
-Version: 0.1-8
+Version: 0.1-9
 Title: Derivatives of the Diffusion Density and Cumulative Distribution Function
 Authors@R: c(person("Raphael", "Hartmann", email = "raphael.hartmann@protonmail.com", role = c("aut", "cre")),
              person("Karl C.", "Klauer", email="christoph.klauer@psychologie.uni-freiburg.de", role=c("cph", "aut", "ctb", "ths")),
+             person("Steven G.", "Johnson", email="stevenj@math.mit.edu", role=c("ctb")),
              person("Jean M.", "Linhart", email="jlinhart@stata.com", role=c("ctb")),
-             person("Steven G.", "Johnson", email="stevenj@math.mit.edu", role=c("ctb")))
+             person("Brian", "Gough", role=c("ctb")),
+             person("Gerard", "Jungman", role=c("ctb")),
+             person("Rudolf", "Schuerer", role=c("ctb")),
+             person("Przemyslaw", "Sliwa", role=c("ctb")),
+             person("Jason H.", "Stover", role=c("ctb")))
 Author: Raphael Hartmann [aut, cre],
   Karl C. Klauer [cph, aut, ctb, ths],
+  Steven G. Johnson [ctb],
   Jean M. Linhart [ctb],
-  Steven G. Johnson [ctb]
+  Brian Gough [ctb],
+  Gerard Jungman [ctb],
+  Rudolf Schuerer [ctb],
+  Przemyslaw Sliwa [ctb],
+  Jason H. Stover [ctb]
 Maintainer: Raphael Hartmann <raphael.hartmann@protonmail.com>
 Depends: R (>= 4.0.0)
 NeedsCompilation: yes
 Description: Calculate the partial derivative of the first-passage time diffusion probability density function (PDF) and cumulative distribution function (CDF)
 		with respect to the first-passage time t (only for PDF), the upper barrier a, the drift rate v, the relative starting point w, the non-decision time t0,
     the inter-trial variability of the drift rate sv, the inter-trial variability of the rel. starting point sw, and the inter-trial variability of the
-    non-decision time st0.
-		In addition the PDF and CDF themselves are also provided. Most calculations are done on the logarithmic scale to make it more stable.
+    non-decision time st0. In addition the PDF and CDF themselves are also provided. Most calculations are done on the logarithmic scale to make it more stable. 
+    For the numerical integration we used the C library cubature by Johnson, S. G. (2005-2013) <https://github.com/stevengj/cubature>. Numerical integration is
+    required whenever sv, sw, and/or st0 is not zero. Note that numerical integration reduces speed of the computation.
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.1
