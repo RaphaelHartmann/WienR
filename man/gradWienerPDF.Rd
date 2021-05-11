@@ -56,7 +56,6 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the PDF with respect to a, v, w, t0, sv, sw, and st0,
-    \item \code{derivln}: the derivatives of the log-transformed PDF with respect to a, v, w, t0, sv, sw, and st0,
     \item \code{call}: the function call.
   }
 }

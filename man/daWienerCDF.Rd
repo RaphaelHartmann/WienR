@@ -56,7 +56,6 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the CDF with respect to a,
-    \item \code{derivln}: the derivatives of the log-transformed CDF with respect to a,
     \item \code{call}: the function call.
   }
 }
