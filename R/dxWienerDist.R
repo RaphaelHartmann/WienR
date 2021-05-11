@@ -25,7 +25,6 @@
 #' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
 #'     \item \code{deriv}: the derivatives of the CDF with respect to a, v, w, t0, sv, sw, and st0,
-#'     \item \code{derivln}: the derivatives of the log-transformed CDF with respect to a, v, w, t0, sv, sw, and st0,
 #'     \item \code{call}: the function call.
 #'   }
 #' @examples
