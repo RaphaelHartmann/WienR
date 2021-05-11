@@ -395,7 +395,7 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	// double valueln;
 
 	double *val_ptr = &value;
-	double errorW = myerr ? myerr*.1 : 1.e-12*.1;
+	double errorW = myerr ? myerr*0.1 : 1.e-12*0.1;
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr};
 
@@ -420,23 +420,25 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
-	double abstol = myerr ? myerr*.9 : 1.e-12*.9;
+	double abstol = myerr ? myerr*0.9 : 1.e-12*0.9;
 
 	double val, err;
 
+	int Meval = 6000;
+
 	//	printf("%u-dim integral, tolerance = %g\n", dim, tol);
 	switch (choice) {
-		case 0: hcubature(1, int_ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-	  case 1: hcubature(1, int_daddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 2: hcubature(1, int_dvddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 3: hcubature(1, int_dt0ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 4: hcubature(1, int_dwddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 5: hcubature(1, int_dswddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 6: hcubature(1, int_dsvddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 7: hcubature(1, int_dst0ddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 8: hcubature(1, int_dtddiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 0: hcubature(1, int_ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+	  case 1: hcubature(1, int_daddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 2: hcubature(1, int_dvddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 3: hcubature(1, int_dt0ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 4: hcubature(1, int_dwddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 5: hcubature(1, int_dswddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 6: hcubature(1, int_dsvddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 7: hcubature(1, int_dst0ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 8: hcubature(1, int_dtddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 	}
-
+	//if(err > abstol) Rprintf("absolute error not achieved: %g < %g\n", abstol, err);
 
 	free(xmin); free(xmax);
 	*derivF = val;
@@ -794,7 +796,7 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	// double valueln;
 
 	double *val_ptr = &value;
-	double errorW = myerr ? myerr*.1 : 1.e-12*.1;
+	double errorW = myerr ? myerr*0.1 : 1.e-12*0.1;
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr};
 
@@ -819,22 +821,24 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
-	double abstol = myerr ? myerr*.9 : 1.e-12*.9;
+	double abstol = myerr ? myerr*0.9 : 1.e-12*0.9;
 
 	double val, err;
 
+	int Meval = 6000;
+
 	//	printf("%u-dim integral, tolerance = %g\n", dim, tol);
 	switch (choice) {
-		case 0: hcubature(1, int_pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-	  case 1: hcubature(1, int_dapdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 2: hcubature(1, int_dvpdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 3: hcubature(1, int_dt0pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 4: hcubature(1, int_dwpdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 5: hcubature(1, int_dswpdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 6: hcubature(1, int_dsvpdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 7: hcubature(1, int_dst0pdiff, &params, dim, xmin, xmax, 0, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 0: hcubature(1, int_pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+	  case 1: hcubature(1, int_dapdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 2: hcubature(1, int_dvpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 3: hcubature(1, int_dt0pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 4: hcubature(1, int_dwpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 5: hcubature(1, int_dswpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 6: hcubature(1, int_dsvpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		case 7: hcubature(1, int_dst0pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 	}
-
+	//if(err > abstol) Rprintf("absolute error not achieved: %g < %g\n", abstol, err);
 
 	free(xmin); free(xmax);
 	*derivF = val;

@@ -4,8 +4,7 @@
 
 #include "derivs.h"
 #include <Rinternals.h>
-
-
+#include "rwiener.h"
 
 extern "C" {
 
@@ -994,6 +993,72 @@ extern "C" {
 		SET_STRING_ELT(names,4,Rf_mkChar("dsw"));
 		SET_STRING_ELT(names,5,Rf_mkChar("dsv"));
 		SET_STRING_ELT(names,6,Rf_mkChar("dst"));
+
+		Rf_setAttrib(out,R_NamesSymbol,names);
+
+
+		/* Unprotect the out and names objects */
+		UNPROTECT(prtCnt);
+
+		return(out);
+	}
+
+}
+
+
+
+/* SAMPLING */
+
+extern "C" {
+
+	SEXP randWiener(SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP bo1) {
+
+		/* define input variables */
+		double a = REAL(re2)[0];
+		double v = REAL(re3)[0];
+		double w = REAL(re4)[0];
+		double sv = REAL(re5)[0];
+		double sw = REAL(re6)[0];
+		double eps = REAL(re7)[0];
+		double bound = REAL(re8)[0];
+
+		int R = INTEGER(in1)[0];
+		int K = INTEGER(in2)[0];
+		int N = INTEGER(in3)[0];
+		int NThreads = INTEGER(in4)[0];
+		int choice = INTEGER(in5)[0];
+
+		int epsFLAG = INTEGER(bo1)[0];
+
+
+		/* declare R objects for output */
+		int outCnt = 0, prtCnt = 0;
+		SEXP q = PROTECT(Rf_allocVector(REALSXP, N));
+		outCnt++;
+		SEXP resp = PROTECT(Rf_allocVector(INTSXP, N));
+		outCnt++;
+		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
+		prtCnt = outCnt + 1;
+
+
+		/* declare C++ pointers for R objects */
+		double *Rq = REAL(q);
+		int *Rresp = INTEGER(resp);
+
+		/* sampling */
+		run_make_rwiener(choice, N, a, v, w, sv, sw, R, bound, eps, K, epsFLAG, Rq, Rresp);
+
+
+		/* set elements of list out */
+		SET_VECTOR_ELT(out,0,q);
+		SET_VECTOR_ELT(out,1,resp);
+
+
+		/* make name vector and set element names */
+		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
+		prtCnt++;
+		SET_STRING_ELT(names,0,Rf_mkChar("q"));
+		SET_STRING_ELT(names,1,Rf_mkChar("resp"));
 
 		Rf_setAttrib(out,R_NamesSymbol,names);
 

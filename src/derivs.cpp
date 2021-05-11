@@ -820,6 +820,7 @@ void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
         else Rdsv[i] = NAN;
         if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i]);
         else Rdst[i] = NAN;
+        Rprintf("");
       }
     }
 

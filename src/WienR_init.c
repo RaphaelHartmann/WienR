@@ -28,6 +28,8 @@ extern SEXP pDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SE
 extern SEXP dxdDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dxpDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
+extern SEXP randWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+
 
 static const R_CallMethodDef CallEntries[] = {
     {"dWiener", (DL_FUNC) &dWiener, 10},
@@ -48,6 +50,8 @@ static const R_CallMethodDef CallEntries[] = {
 
     {"dxdDiffusion7", (DL_FUNC) &dxdDiffusion7, 14},
     {"dxpDiffusion7", (DL_FUNC) &dxpDiffusion7, 14},
+
+    {"randWiener", (DL_FUNC) &randWiener, 13},
 
     {NULL, NULL, 0}
 };
