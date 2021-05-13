@@ -308,7 +308,7 @@ void dapwiener(int pm, double q, double a, double v, double w, double lp, double
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-  err = err;// + lp;
+  // err = err;// + lp;
 
 	double Kal, Kas;
 	if (pm == -1) dakL(q, a, v, w, err, Kal); else dakL(q, a, -v, 1.0 - w, err, Kal);
@@ -458,7 +458,7 @@ void dvpwiener(int pm, double q, double a, double v, double w, double lp, double
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-  err = err;// + lp;
+  // err = err;// + lp;
 
 	double Kvl, Kvs;
 	if (pm == -1) dvkL(q, a, v, w, err, Kvl); else dvkL(q, a, -v, 1.0 - w, err, Kvl);
@@ -617,7 +617,7 @@ void dwpwiener(int pm, double q, double a, double v, double w, double lp, double
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-  err = err;// + lp;
+  // err = err;// + lp;
 
 	double Kwl, Kws;
 	if (pm == -1) dwkL(q, a, v, w, err, Kwl); else dwkL(q, a, -v, 1.0 - w, err, Kwl);
@@ -822,7 +822,7 @@ void dxpwiener(int pm, double q, double a, double v, double w, double lp, double
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
 	else if(epsFLAG) err = log(err);
-	err = err;// + lp;
+	// err = err;// + lp;
 
 	double Kal, Kvl, Kwl;
 	double Kas, Kvs, Kws;

@@ -702,7 +702,7 @@ static int rule75genzmalik_evalError(rule *r_, unsigned fdim, integrand_v f, voi
       result = R[iR].h.vol * (r->weight1 * val0 + weight2 * sum2 + r->weight3 * sum3 + weight4 * sum4 + r->weight5 * sum5);
       res5th = R[iR].h.vol * (r->weightE1 * val0 + weightE2 * sum2 + r->weightE3 * sum3 + weightE4 * sum4);
 
-      R[iR].ee[j].val = result;
+      R[iR].ee[j].val = result;          // <--------------------------------------------- here
       R[iR].ee[j].err = fabs(res5th - result);
 
       v += r_->num_points * fdim;
@@ -906,7 +906,7 @@ static int rule15gauss_evalError(rule *r,
       }
 
       /* integration result */
-      R[iR].ee[k].val = result_kronrod * halfwidth;
+      R[iR].ee[k].val = result_kronrod * halfwidth; // <--------------------------- here
 
       /* error estimate
       (from GSL, probably dates back to QUADPACK
@@ -1013,7 +1013,7 @@ static int heap_push(heap *h, heap_item hi)
   unsigned i, fdim = h->fdim;
 
   for (i = 0; i < fdim; ++i) {
-    h->ee[i].val += hi.ee[i].val;
+    h->ee[i].val += hi.ee[i].val;   // <----------------------------------- here together
     h->ee[i].err += hi.ee[i].err;
   }
   insert = h->n;
@@ -1074,7 +1074,7 @@ static heap_item heap_pop(heap *h)
   {
     unsigned i, fdim = h->fdim;
     for (i = 0; i < fdim; ++i) {
-      h->ee[i].val -= ret.ee[i].val;
+      h->ee[i].val -= ret.ee[i].val;  // <-------------------------------- here apart
       h->ee[i].err -= ret.ee[i].err;
     }
   }
@@ -1246,9 +1246,9 @@ static int cubature(unsigned fdim, integrand_v f, void *fdata,
   : rulecubature(r, fdim, f, fdata, &h,
     maxEval, reqAbsError, reqRelError, norm,
     val, err, parallel);
-    destroy_hypercube(&h);
-    destroy_rule(r);
-    return status;
+  destroy_hypercube(&h);
+  destroy_rule(r);
+  return status;
 }
 
 int hcubature_v(unsigned fdim, integrand_v f, void *fdata,

@@ -28,8 +28,8 @@ int int_dst0pdiff(unsigned, const double *, void *, unsigned, double *);
 
 
 /* Wrapper */
-void ddiff(int, double, int, double, double, double, double, double, double, double, double, int, int, double *);
-void pdiff(int, double, int, double, double, double, double, double, double, double, double, int, int, double *);
+void ddiff(int, double, int, double, double, double, double, double, double, double, double, int, int, double *, double *);
+void pdiff(int, double, int, double, double, double, double, double, double, double, double, int, int, double *, double *);
 /*-----------------------------------------------*/
 
 

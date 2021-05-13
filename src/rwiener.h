@@ -15,7 +15,7 @@
 #include <algorithm>    // std::sort
 
 
-void run_make_rwiener(int, int, double, double, double, double, double, int, double, double, int, int, double*, int*);
+void run_make_rwiener(int, int, double, double, double, double, double, int, double, double, int, int, double*, int*, ars_archiv*, ars_archiv*, int);
 
 
 #endif

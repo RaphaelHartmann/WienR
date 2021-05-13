@@ -4,6 +4,7 @@
 
 #include "tools.h"
 #include <Rinternals.h>
+#include <cmath>
 
 double fun_upper(int, double, std::vector<piece>);
 void generate_intervals(int&, double, std::vector<point>, std::vector<piece>&, std::vector<piece>&, std::vector<double>&);

@@ -226,7 +226,6 @@ Copyright (C) 2002 Przemyslaw Sliwa and Jason H. Stover. GPL 3
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Gerard Jungman. GPL 3
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 Gerard Jungman, Brian Gough. GPL 3
 
-
 */
 
 double rat_eval(const double a[], const size_t na,

@@ -312,7 +312,7 @@ NEW:
 	int Meval = 6000;
 
 	hcubature(1, int_dtddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
-	val = val;
+	// val = val;
 
 	cnt++;
 	if(cnt == 10) {
@@ -697,6 +697,7 @@ double arst(ars_archiv& ars_store, double scale, double totallow, double start, 
 	lower = ars_store.lowerstore;
 	upper = ars_store.upperstore;
 	s = ars_store.sstore;
+
 	if (s.size() != h.size())
 		Rprintf("Problem in ars\n");
 	int k = static_cast<int>(h.size());
@@ -728,13 +729,14 @@ WEITER:
 		xstar = -INFINITY;
 		goto END;
 	}
+
 	ww = log(oneuni()); tt = fun_upper(k, xstar, upper);  ss = fun_lower(k, xstar, h, lower);
+
 	if(xstar > 12) Rprintf("ww = %g   tt = %g   ss = %g\n", ww, tt, ss);
 	if (ww <= (ss - tt))  goto STOP;
 	one.x = xstar; generic2(start, scale, norm, xstar, a, v, w, sw, sv, one);
 	if(xstar > 12) Rprintf("bin hier\n");
 	if (ww <= (one.h - tt))  goto STOP;
-
 	flag = update_intervals(k, totallow, one, h, lower, upper, s);
 if(xstar > 12) Rprintf("flag = %d\n", flag);
 	if (flag) {
@@ -761,12 +763,14 @@ double make_rwiener2(ars_archiv& ars_store, double bound, double a, double v, do
 	double temp;
 NEW:
 	double start = ars_store.startstore;
-
+// Rprintf("ars hstore length = %d", static_cast<int>(ars_store.hstore.size()));
 	double  scale = ars_store.scalestore;
+
 	double bound2 = (bound == INFINITY) ? bound : (log(bound) - start) / scale;
 
 	//	start = start * scale;
 	temp = arst(ars_store, scale, -INFINITY, start, bound2, a, v, w, sw, sv, wiener_comp);
+
 	if (temp != -INFINITY) temp = exp(start + temp * scale);
 	//	else temp = -rdiffusion_lower_trunc(bound, v, w, a, rst);
 	else
@@ -793,33 +797,37 @@ NEW:
 }
 
 // R=0 is lower bound and R=1 is upper bound
-void run_make_rwiener(int choice, int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, double *q, int *resp) {
+void run_make_rwiener(int choice, int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
 	double vs, ws;
+	// printf("h1 size = %d\n", static_cast<int>(ars_store1->hstore.size()));
+	// printf("h2 size = %d\n", static_cast<int>(ars_store2->hstore.size()));
 	switch (choice) {
 		case 1:
 			if (R != 0) { // one-sided
 
-				ars_archiv ars_store;
+				// ars_archiv ars_store;
 				if(R == 2) {
 					v = -v;
 					w = 1-w;
 				}
-				initialize_ars(a, v, w, sw, sv, bound, ars_store);
+				// initialize_ars(a, v, w, sw, sv, bound, ars_store);
+				if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store1);
 				for (int i = 0; i != N; i++) {
-					q[i] = make_rwiener2(ars_store, bound, a, v, w, sw, sv, err, K, epsFLAG);
+					// q[i] = make_rwiener2(ars_store, bound, a, v, w, sw, sv, err, K, epsFLAG);
+					q[i] = make_rwiener2(*ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG);
 					resp[i] = R;
 				}
 
 			} else { // R = 0 -- both sides
 
-				ars_archiv ars_store_up;
-				ars_archiv ars_store_lo;
-				double p_up; //, p_lo;
+				// ars_archiv ars_store1;
+				// ars_archiv ars_store2;
+				double p_up, Rerr = 99.9; //, p_lo;
 				if (std::isfinite(bound)) { // truncated
 					if (sv || sw) {
 						double temp_u, temp_l;
-	          pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &temp_u);
-						pdiff(0, bound, -1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &temp_l);
+	          pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &temp_u, &Rerr);
+						pdiff(0, bound, -1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &temp_l, &Rerr);
 						p_up = temp_u / (temp_u + temp_l);
 						// p_lo = 1-p_up;
 					} else {
@@ -830,7 +838,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 					}
 				} else { // not truncated
 					if (sv || sw) {
-	          pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &p_up);
+	          pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &p_up, &Rerr);
 						// p_lo = 1-p_up;
 					} else {
 	          // p_up = exp(pwiener(bound, a, -v, 1-w, err, K, epsFLAG));
@@ -842,14 +850,18 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 				for (int i = 0; i !=N; i++) {
 					cnt_up += oneuni()<=p_up ? 1 : 0;
 				}
-				initialize_ars(a, -v, 1-w, sw, sv, bound, ars_store_up);
+
+				// printf("ars h1 size = %d\n", static_cast<int>(ars_store1->hstore.size()));
+				if (!use_store) initialize_ars(a, -v, 1-w, sw, sv, bound, *ars_store1);
 				for (int i = 0; i != cnt_up; i++) {
-					q[i] = make_rwiener2(ars_store_up, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG);
+					q[i] = make_rwiener2(*ars_store1, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG);
 					resp[i] = 2;
 				}
-				initialize_ars(a, v, w, sw, sv, bound, ars_store_lo);
+
+				// printf("ars h2 size = %d\n", static_cast<int>(ars_store2->hstore.size()));
+				if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store2);
 				for (int i = cnt_up; i != N; i++) {
-					q[i] = make_rwiener2(ars_store_lo, bound, a, v, w, sw, sv, err, K, epsFLAG);
+					q[i] = make_rwiener2(*ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG);
 					resp[i] = 1;
 				}
 
@@ -870,7 +882,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 							if (sw) ws += sw * (oneuni()-0.5);
 							if (R == 2) {vs = -vs; ws = 1 - ws;}
 							if (std::isfinite(bound)) P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-							if (std::isinf(bound)) P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+							else P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
 							REPEAT = oneuni() > P;
 						}
 					} else {

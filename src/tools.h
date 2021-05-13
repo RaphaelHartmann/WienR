@@ -47,16 +47,16 @@ struct my_params {
 };
 
 struct point {
-	double x;
-	double h;
-	double dh;
+	double x = 0;
+	double h = 0;
+	double dh = 0;
 };
 
 struct piece {
-	double z;
-	double slope;
-	double absc;
-	double center;
+	double z = 0;
+	double slope = 0;
+	double absc = 0;
+	double center = 0;
 };
 
 struct ars_archiv {
@@ -94,6 +94,9 @@ struct ars_archiv {
   /* The following mathematical constants
   are copied from GSL version 2.6 */
 
+  /* The following mathematical constants
+  are copied from GSL version 2.6 */
+
   // Copyright (C) 1996, 1997, 1998, 1999, 2000, 2004, 2007 Gerard Jungman, Brian Gough. GPL 3
 
 #ifndef GSL_DBL_EPSILON
@@ -110,7 +113,7 @@ struct ars_archiv {
 
   // Copyright (C) 1998-2011  The R Core Team. GPL 2.1
   // Copyright (C) 2004       The R Foundation. GPL 2.1
-  
+
 #ifndef M_PI
 #define M_PI          3.141592653589793238462643383280        /* pi */
 #endif

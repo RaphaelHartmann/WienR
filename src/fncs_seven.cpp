@@ -386,7 +386,7 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 }
 
 /* calculate density for 7-param diffusion */
-void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF) {
+void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF, double *Rerr) {
 
 	//double result;
 	//double error;
@@ -442,6 +442,7 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	free(xmin); free(xmax);
 	*derivF = val;
+	if (*Rerr < err+errorW) *Rerr = err+errorW;
 
 }
 
@@ -787,7 +788,7 @@ int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 }
 
 /* calculate distribution for 7-param diffusion */
-void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF) {
+void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF, double *Rerr) {
 
 	//ouble result;
 	//double error;
@@ -842,5 +843,6 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	free(xmin); free(xmax);
 	*derivF = val;
+	if (*Rerr < err+errorW) *Rerr = err+errorW;
 
 }

@@ -177,7 +177,7 @@ double inverse_distribution(int k, double xstar, std::vector<piece> upper, std::
 	t = temp / sl;
 
 	if (t < upper[j].z) {
-		Rprintf("\nnanu j=%d; k-1=%d; t=%g; upper[j]=%g; upper[j+1]=%g; s[j-1]=%g; upper slope=%g; upper absc=%g; temp=%g; fun_upper[j]=%g; fun_upper[j+1]%g\n",
+		Rprintf("\nnanu j=%d; k-1=%d; t=%g; upper[j]=%g; upper[j+1]=%g; s[j-1]=%g; upper slope=%g; upper absc=%g; temp=%g; fun_upper[j]=%g; fun_upper[j+1]=%g\n",
 		j, k - 1, t, upper[j].z, upper[j + 1].z, s[j - 1], upper[j].slope, upper[j].absc, temp, fun_upper(k, upper[j].z, upper), fun_upper(k, upper[j + 1].z, upper));
 	// else if ((j+1<k) && (t>upper[j+1].z)) std::cout << "nanu2";
 //				;	char x; std::cin >> x;
