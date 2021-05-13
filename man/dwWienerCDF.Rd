@@ -56,11 +56,12 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the CDF with respect to w,
-    \item \code{call}: the function call.
+    \item \code{call}: the function call,
+    \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
   }
 }
 \description{
-Calculate the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the relative starting point w.
+Calculates the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the relative starting point w.
 }
 \examples{
 dwWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)

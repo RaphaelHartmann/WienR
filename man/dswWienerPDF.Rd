@@ -56,11 +56,12 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the PDF with respect to a,
-    \item \code{call}: the function call.
+    \item \code{call}: the function call,
+    \item \code{err}: the absolute error.
   }
 }
 \description{
-Calculate the partial derivative of the first-passage time probability density function of the diffusion model with respect to the inter-trial variability of the relative starting point sw.
+Calculates the partial derivative of the first-passage time probability density function of the diffusion model with respect to the inter-trial variability of the relative starting point sw.
 }
 \examples{
 dswWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sw = .2)

@@ -56,11 +56,12 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the PDF with respect to a, v, w, t0, sv, sw, and st0,
-    \item \code{call}: the function call.
+    \item \code{call}: the function call,
+    \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
   }
 }
 \description{
-Calculate the gradient of the first-passage time probability density function.
+Calculates the gradient of the first-passage time probability density function.
 }
 \examples{
 gradWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6,

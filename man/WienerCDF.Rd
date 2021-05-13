@@ -57,11 +57,12 @@ A list of the class \code{Diffusion_cdf} containing
   \itemize{
     \item \code{cdf}: the CDF,
     \item \code{logcdf}: the log-transformed CDF,
-    \item \code{call}: the function call.
+    \item \code{call}: the function call,
+    \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
   }
 }
 \description{
-Calculate the first-passage time cumulative distribution function of the diffusion model.
+Calculates the first-passage time cumulative distribution function of the diffusion model.
 }
 \examples{
 WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)

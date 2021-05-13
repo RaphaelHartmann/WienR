@@ -57,7 +57,8 @@ A list of the class \code{Diffusion_pdf} containing
   \itemize{
     \item \code{pdf}: the PDF,
     \item \code{logpdf}: the log-transformed PDF,
-    \item \code{call}: the function call.
+    \item \code{call}: the function call,
+    \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
   }
 }
 \description{

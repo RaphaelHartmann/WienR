@@ -56,11 +56,12 @@ We recommend using either default (\code{precision = K = NULL}) or only \code{pr
 A list of the class \code{Diffusion_deriv} containing
   \itemize{
     \item \code{deriv}: the derivatives of the CDF with respect to w,
-    \item \code{call}: the function call.
+    \item \code{call}: the function call,
+    \item \code{err}: the absolute error.
   }
 }
 \description{
-Calculate the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the non-decision time st0.
+Calculates the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the non-decision time st0.
 }
 \examples{
 dst0WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, t0 = .3, st0 = .1)
