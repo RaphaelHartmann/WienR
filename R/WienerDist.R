@@ -1,7 +1,7 @@
 
 #' First-passage time cumulative distribution function of the diffusion model
 #'
-#' Calculate the first-passage time cumulative distribution function of the diffusion model.
+#' Calculates the first-passage time cumulative distribution function of the diffusion model.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
@@ -26,7 +26,8 @@
 #'   \itemize{
 #'     \item \code{cdf}: the CDF,
 #'     \item \code{logcdf}: the log-transformed CDF,
-#'     \item \code{call}: the function call.
+#'     \item \code{call}: the function call,
+#'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
 #' @references
 #' Blurton, S. P., Kesselmeier, M., & Gondan, M. (2012). Fast and accurate calculations for cumulative first-passage time distributions in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 56(6)}, 470–475. doi:10.1016/j.jmp.2012.09.002
@@ -49,12 +50,12 @@ WienerCDF <- function(t,
                       precision = NULL,
                       K = NULL,
                       n.threads = FALSE) {
-  
-  
-  
-  
+
+
+
+
   # ---- VALUE CHECKS ---- #
-  
+
   # general checks
   lengths <- c(length(t), length(response), length(a), length(v), length(w), length(t0), length(sv), length(sw), length(st0))
   max_len <- max(lengths)
@@ -68,51 +69,51 @@ WienerCDF <- function(t,
   if(length(sv) != max_len) sv <- rep(sv, max_len)
   if(length(sw) != max_len) sw <- rep(sw, max_len)
   if(length(st0) != max_len) st0 <- rep(st0, max_len)
-  
+
   # t a v w t0 sw sv st0 checks
   if(!is.numeric(t) | !is.numeric(a) | !is.numeric(v) | !is.numeric(w) | !is.numeric(t0) | !is.numeric(sv) | !is.numeric(sw) | !is.numeric(st0)) stop("t, a, v, w, t0, sv, sw, and st0 must be numeric")
   if(any(t <= 0) | any(a <= 0) | any(w <= 0)) stop("t, a, and w must be strictly positive")
   if(any(t0 < 0) | any(sw < 0) | any(sv < 0) | any(st0 < 0)) stop("t0, sw, sv, and st0 must be positive or zero")
   if(any(w >= 1)) stop("w must be lower than one")
   if(any(w-0.5*sw <= 0) | any(w+0.5*sw >= 1)) stop("w-0.5*sw must be greater than zero and w+0.5*sw must be lower than one")
-  
+
   # response checks
   if(!is.character(response) & !is.numeric(response)) stop("response must be a character with the values \"upper\" and/or \"lower\" OR numerics with the values 1=\"lower\" or 2=\"upper\"")
   if(!all(response %in% c("upper", "lower")) & !all(response %in% c(1,2)) ) stop("response cannot include values other than \"upper\" and/or \"lower\" OR 1=\"lower\" or 2=\"upper\"")
   resps <- ifelse(response == "lower" | response == 1, 0, 1)
-  
+
   # K checks
   if(!is.numeric(K) & !is.null(K)) stop("K must either be NULL or some numeric value")
   if(!is.null(K)) {
     if(length(K)!=1) stop("K must be of length one")
     if(K %% 1 != 0) stop("K must be an integer") else K <- as.integer(round(K))
   }
-  
+
   # precision checks
   if(!is.numeric(precision) & !is.null(precision)) stop("precision must either be NULL or some numeric value")
   if(length(precision)!=1 & !is.null(precision)) stop("precision must be of length one")
-  
+
   PRECISION_FLAG <- TRUE
   if(is.null(precision)) PRECISION_FLAG <- FALSE
-  
+
   if(is.null(K)) K <- 0
   if(is.null(precision)) precision <- 0
-  
+
   # thread checks
   if(!is.numeric(n.threads) & !is.logical(n.threads)) stop("n.threads must either be numerical or logical")
   if(is.numeric(n.threads)) if(n.threads %% 1 != 0) stop("n.threads must be an integer") else n.threads <- as.integer(n.threads)
   if(is.logical(n.threads)) n.threads <- ifelse(n.threads == TRUE, 99999, 0)
   if(n.threads < 2) n.threads <- 0
-  
-  
-  
+
+
+
   # --- C++ FUNCTION CALL ---- #
-  
+
   indW <- which(sw==0 & sv==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
-  
+
   out <- list(cdf = rep(NA, max_len), logcdf = rep(NA, max_len))
-  
+
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
     temp <- .Call("pWiener",
@@ -129,7 +130,7 @@ WienerCDF <- function(t,
     )
     out$cdf[indW] <- temp$cdf
     out$logcdf[indW] <- temp$logcdf
-  } 
+  }
   if (length(indD) > 0){
     temp <- .Call("pDiffusion7",
                   as.numeric(t[indD]),
@@ -151,7 +152,7 @@ WienerCDF <- function(t,
     out$cdf[indD] <- temp$cdf
     out$logcdf[indD] <- temp$logcdf
   }
-  
+
 
   #print(out)
 

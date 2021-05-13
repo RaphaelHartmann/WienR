@@ -1,7 +1,7 @@
 
 #' Partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the relative starting point
 #'
-#' Calculate the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the relative starting point sw.
+#' Calculates the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the relative starting point sw.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
@@ -25,7 +25,8 @@
 #' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
 #'     \item \code{deriv}: the derivatives of the CDF with respect to w,
-#'     \item \code{call}: the function call.
+#'     \item \code{call}: the function call,
+#'     \item \code{err}: the absolute error.
 #'   }
 #' @examples
 #' dswWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sw = .1)
@@ -125,7 +126,7 @@ dswWienerCDF <- function(t,
 
   #print(out)
 
-  derivative <- list(deriv = out$deriv, call = match.call())
+  derivative <- list(deriv = out$deriv, call = match.call(), err = out$err)
 
   # output
   class(derivative) <- "Diffusion_deriv"

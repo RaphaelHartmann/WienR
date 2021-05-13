@@ -1,7 +1,7 @@
 
 #' Partial derivative of the first-passage time probability density function of the diffusion model with respect to the relative starting point
 #'
-#' Calculate the partial derivative of the first-passage time probability density function of the diffusion model with respect to the relative starting point w.
+#' Calculates the partial derivative of the first-passage time probability density function of the diffusion model with respect to the relative starting point w.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
@@ -25,7 +25,8 @@
 #' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
 #'     \item \code{deriv}: the derivatives of the PDF with respect to w,
-#'     \item \code{call}: the function call.
+#'     \item \code{call}: the function call,
+#'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
 #' @examples
 #' dwWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
@@ -106,7 +107,7 @@ dwWienerPDF <- function(t,
   indW <- which(sw==0 & sv==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
-  out <- list(deriv = rep(NA, max_len))
+  out <- list(deriv = rep(NA, max_len), err = rep(precision, max_len))
 
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
@@ -143,12 +144,14 @@ dwWienerPDF <- function(t,
                   as.logical(PRECISION_FLAG)
     )
     out$deriv[indD] <- temp$deriv
+    out$err[indD] <- temp$err
   }
 
 
   #print(out)
 
   derivative <- list(deriv = out$deriv, call = match.call())
+  if (length(indD) > 0) derivative$err = out$err
 
   # output
   class(derivative) <- "Diffusion_deriv"

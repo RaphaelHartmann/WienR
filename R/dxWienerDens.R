@@ -1,7 +1,7 @@
 
 #' Gradient of the first-passage time probability density function
 #'
-#' Calculate the gradient of the first-passage time probability density function.
+#' Calculates the gradient of the first-passage time probability density function.
 #' @param t First-passage time. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
@@ -25,7 +25,8 @@
 #' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
 #'     \item \code{deriv}: the derivatives of the PDF with respect to a, v, w, t0, sv, sw, and st0,
-#'     \item \code{call}: the function call.
+#'     \item \code{call}: the function call,
+#'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
 #' @examples
 #' gradWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6,
@@ -107,7 +108,7 @@ gradWienerPDF <- function(t,
   indW <- which(sw==0 & sv==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
-  out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len))
+  out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len), err = rep(precision, max_len))
 
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
@@ -155,11 +156,13 @@ gradWienerPDF <- function(t,
                   as.logical(PRECISION_FLAG)
     )
     out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD] <- temp$dsv; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst;
+    out$err[indD] <- temp$err
   }
 
 
   derivative <- list(deriv = data.frame(da = out$da, dv = out$dv, dw = out$dw, dt0 = out$dt0, dsv = out$dsv, dsw = out$dsw, dst0 = out$dst),
                      call = match.call())
+  if (length(indD) > 0) derivative$err = out$err
 
   # output
   class(derivative) <- "Diffusion_deriv"
