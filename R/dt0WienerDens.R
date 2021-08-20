@@ -22,6 +22,8 @@
 #'   }
 #'   We recommend using either default (\code{precision = K = NULL}) or only \code{precision}.
 #' @param n.threads Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.
+#' @param n.evals Optional. Number of maximal function evaluations in the numeric integral if sv, sw, and/or st0 are not zero. Default is \code{6000} and \code{0} implies no limit and the 
+#'   numeric integration goes on until the specified \code{precision} is guaranteed.
 #' @return A list of the class \code{Diffusion_deriv} containing
 #'   \itemize{
 #'     \item \code{deriv}: the derivatives of the PDF with respect to w,
@@ -44,7 +46,8 @@ dt0WienerPDF <- function(t,
                         st0 = 0,
                         precision = NULL,
                         K = NULL,
-                        n.threads = FALSE) {
+                        n.threads = FALSE,
+                        n.evals = 6000) {
 
 
 
@@ -101,6 +104,11 @@ dt0WienerPDF <- function(t,
   if(is.logical(n.threads)) n.threads <- ifelse(n.threads == TRUE, 99999, 0)
   if(n.threads < 2) n.threads <- 0
 
+  # num. integral evaluation checks
+  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+    if(!is.numeric(n.evals)) stop("n.evals must numeric")
+    if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
+  }
 
 
   # --- C++ FUNCTION CALL ---- #
@@ -142,6 +150,7 @@ dt0WienerPDF <- function(t,
                   as.integer(length(indD)),
                   as.integer(n.threads),
                   as.integer(3),
+                  as.integer(n.evals),
                   as.logical(PRECISION_FLAG)
     )
     out$deriv[indD] <- temp$deriv

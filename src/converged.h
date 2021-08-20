@@ -9,7 +9,7 @@
      switch (norm) {
 	 case ERROR_INDIVIDUAL:
 	      for (j = 0; j < fdim; ++j) {
-          if (cnt % 1000000 == 0) Rprintf("ERR = %g  reqAbsError = %g\n", ERR(j), reqAbsError);
+          // if (cnt % 1000000 == 0) Rprintf("ERR = %g  reqAbsError = %g\n", ERR(j), reqAbsError);
           if (ERR(j) > reqAbsError && ERR(j) > fabs(VAL(j))*reqRelError) return 0;
         }
 

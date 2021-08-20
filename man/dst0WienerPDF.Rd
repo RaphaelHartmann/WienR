@@ -16,7 +16,8 @@ dst0WienerPDF(
   st0,
   precision = NULL,
   K = NULL,
-  n.threads = FALSE
+  n.threads = FALSE,
+  n.evals = 6000
 )
 }
 \arguments{
@@ -51,6 +52,9 @@ dst0WienerPDF(
 We recommend using either default (\code{precision = K = NULL}) or only \code{precision}.}
 
 \item{n.threads}{Optional numerical or logical value. Number of threads to use. If not provided (or 1 or \code{FALSE}) parallelization is not used. If set to \code{TRUE} then all available threads are used.}
+
+\item{n.evals}{Optional. Number of maximal function evaluations in the numeric integral. Default is \code{6000} and \code{0} implies no limit and the 
+numeric integration goes on until the specified \code{precision} is guaranteed.}
 }
 \value{
 A list of the class \code{Diffusion_deriv} containing

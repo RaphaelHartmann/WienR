@@ -5,9 +5,13 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
-#include "cmath"
+#include <cmath>
 #include <vector>
 #include <R.h>
+// #include <mutex>
+//
+// extern std::mutex mtx_R_CUI; // mutex for R_CheckUserInterrupt
+
 
 /*------------------------------------------------*/
 
@@ -90,9 +94,6 @@ struct ars_archiv {
 #define SQR2PI        2.506628274631000502415765e0
 #endif
   /*-------------------------*/
-
-  /* The following mathematical constants
-  are copied from GSL version 2.6 */
 
   /* The following mathematical constants
   are copied from GSL version 2.6 */
@@ -236,6 +237,8 @@ double lower_bound_var(double, double, double);
 double coth(double);
 double lower_bound_time(double, double, double);
 double exp_mean(int, double, double, double);
+
+int is_interruption();
 
 
 

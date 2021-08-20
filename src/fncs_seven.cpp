@@ -2,12 +2,10 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
 
-#include "cstdio"
+#include "tools.h"
 #include "pdf_fncs.h"
 #include "cdf_fncs.h"
 #include "fncs_seven.h"
-#include "tools.h"
-#include <Rinternals.h>
 #include "cubature.h"
 
 
@@ -386,7 +384,7 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 }
 
 /* calculate density for 7-param diffusion */
-void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF, double *Rerr) {
+void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, int Neval, double *derivF, double *Rerr) {
 
 	//double result;
 	//double error;
@@ -424,7 +422,7 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	double val, err;
 
-	int Meval = 6000;
+	int Meval = Neval;
 
 	//	printf("%u-dim integral, tolerance = %g\n", dim, tol);
 	switch (choice) {
@@ -788,7 +786,7 @@ int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 }
 
 /* calculate distribution for 7-param diffusion */
-void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, double *derivF, double *Rerr) {
+void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, int Neval, double *derivF, double *Rerr) {
 
 	//ouble result;
 	//double error;
@@ -826,7 +824,7 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	double val, err;
 
-	int Meval = 6000;
+	int Meval = Neval;
 
 	//	printf("%u-dim integral, tolerance = %g\n", dim, tol);
 	switch (choice) {

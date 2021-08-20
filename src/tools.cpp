@@ -5,6 +5,9 @@
 #include <Rinternals.h>
 #include <cmath>
 #include "tools.h"
+#include <mutex>
+
+std::mutex mtx_samp;
 
 
 double logsum(double xa, double xb) {
@@ -168,6 +171,7 @@ double exp_mean(int pm, double a, double v, double w) {
 
 double oneuni() {
 	double u;
+	std::lock_guard<std::mutex> guard(mtx_samp);
 	do {
 		GetRNGstate();
 		u = unif_rand();
@@ -179,6 +183,7 @@ double oneuni() {
 
 double oneuniL() {
 	double u;
+	std::lock_guard<std::mutex> guard(mtx_samp);
 	do {
 		GetRNGstate();
 		u = unif_rand();
@@ -227,6 +232,7 @@ gsl_error
 Copyright (C) 2002 Przemyslaw Sliwa and Jason H. Stover. GPL 3
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Gerard Jungman. GPL 3
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 Gerard Jungman, Brian Gough. GPL 3
+
 
 */
 
@@ -655,3 +661,12 @@ double gsl_sf_erfc(double x)
 
 
 /* ----------------------------------- */
+
+
+void check_interruption(void *ptr) {
+  R_CheckUserInterrupt();
+}
+
+int is_interruption() {
+  return !(R_ToplevelExec(check_interruption, nullptr));
+}

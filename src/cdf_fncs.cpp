@@ -170,7 +170,7 @@ double davlogP(int pm, double a, double v, double w) {
 			tt = rexp(tt);
 		}
 	}
-	if (std::isfinite(tt)) return(tt);
+	if (R_FINITE(tt)) return(tt);
 	else {
 		Rprintf("dalogprob %20g%20g%20g\n", a, v, w);
 		//std::cout << "dalogprob " << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
@@ -185,7 +185,7 @@ double dalogP(int pm, double a, double v, double w, double dav) {
 	double tt;
 	tt = dav * v;
 	tt = (pm == 1) ? -tt : tt;
-	if (std::isfinite(tt)) return(tt);
+	if (R_FINITE(tt)) return(tt);
 	else {
 		Rprintf("dalogprob %20g%20g%20g\n", a, v, w);
 		//std::cout << "dalogprob " << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
@@ -336,7 +336,7 @@ void dapwiener(int pm, double q, double a, double v, double w, double lp, double
 double dvlogP(int pm, double a, double v, double w, double dav) {
 	int sign = 1; if (pm == 1) sign = -1;
 	double tt = dav * a * sign;
-	if (std::isfinite(tt)) return(tt); else
+	if (R_FINITE(tt)) return(tt); else
 	{
 		Rprintf("dvlogprob %20g%20g%20g\n", a, v, w);
 		//std::cout << "dvlogprob " << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
@@ -721,14 +721,14 @@ void logdxFs(int pm, int Ksa, int Ksv, int Ksw, double t, double a, double v, do
 		double x = rj - v * t, xsqt = x / sqt;
 		double temp = rexp(dj + logMill(xsqt)), temp2 = exp(dj);
 		if (k <= Ksv) tv1 = -temp * x;
-		if (k <= Kaw) temp3 = temp * (-vt) - sqt * temp2;
+		temp3 = temp * (-vt) - sqt * temp2;
 		if (k <= Ksa) ta1 =  temp3 * (2 * k + w);
 		if (k <= Ksw) tw1 = temp3 * a;
 
 		x = rj + v * t, xsqt = x / sqt;
 		temp = rexp(dj + logMill(xsqt));
 		if (k <= Ksv) tv2 = temp * x;
-		if (k <= Kaw) temp3 = temp * vt - sqt * temp2;
+		temp3 = temp * vt - sqt * temp2;
 		if (k <= Ksa) ta2 = temp3 * (2 * k + w);
 		if (k <= Ksw) tw2 = temp3 * a;
 
@@ -737,14 +737,14 @@ void logdxFs(int pm, int Ksa, int Ksv, int Ksw, double t, double a, double v, do
 		x = rj - v * t, xsqt = x / sqt;
 		temp = rexp(dj + logMill(xsqt)), temp2 = exp(dj);
 		if (k <= Ksv) tv3 = temp * x;
-		if (k <= Kaw) temp3 = temp * (-vt) - sqt * temp2;
+		temp3 = temp * (-vt) - sqt * temp2;
 		if (k <= Ksa) ta3 = -temp3 * (2 * k + 2.0 - w);
 		if (k <= Ksw) tw3 = -temp3 * (-a);
 
 		x = rj + v * t, xsqt = x / sqt;
 		temp = rexp(dj + logMill(xsqt));
 		if (k <= Ksv) tv4 = -temp * x;
-		if (k <= Kaw) temp3 = temp * vt - sqt * temp2;
+		temp3 = temp * vt - sqt * temp2;
 		if (k <= Ksa) ta4 = -temp3 * (2 * k + 2.0 - w);
 		if (k <= Ksw) tw4 = -temp3 * (-a);
 

@@ -1049,7 +1049,7 @@ static heap_item heap_pop(heap *h)
   if (!(h->n)) {
     //fprintf(stderr, "attempted to pop an empty heap\n");
     //exit(EXIT_FAILURE);
-    Rprintf("attempted to pop an empty heap\n");
+    error("attempted to pop an empty heap\n");
   }
 
   ret = h->items[0];
@@ -1129,7 +1129,10 @@ static int rulecubature(rule *r, unsigned fdim,
   long int cnt = 0;
   while (numEval < maxEval || !maxEval) {
     cnt += 1;
-    if (cnt % 1000000 == 0) Rprintf("%ld iterations in while loop\n", cnt);
+    if (cnt % 1048576 == 0) {
+      // Rprintf("%ld iterations in while loop\n", cnt);
+      R_CheckUserInterrupt();
+    }
     if (converged(fdim, regions.ee, reqAbsError, reqRelError, norm, cnt))
     break;
 

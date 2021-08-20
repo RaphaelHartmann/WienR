@@ -2,12 +2,9 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
 
-#include "cstdio"
-#include "pdf_fncs.h"
 #include "tools.h"
-#include <Rinternals.h>
+#include "pdf_fncs.h"
 #include <cmath>
-
 
 
 /* DENSITY */

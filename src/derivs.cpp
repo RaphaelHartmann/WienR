@@ -9,6 +9,8 @@
 #include <cmath>
 #include <thread>
 
+
+
 /* PDF and CDF of Wiener diffusion */
   /* PDF of Wiener diffusion */
 void PDF(double *t, double *a, double *v, double *w, double eps, int *resp, int K, int N, int epsFLAG, double *Rpdf, double *Rlogpdf, int NThreads) {
@@ -53,6 +55,7 @@ void PDF(double *t, double *a, double *v, double *w, double eps, int *resp, int 
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       // double mp = -1.0*pm;
       // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -105,6 +108,7 @@ void CDF(double *t, double *a, double *v, double *w, double eps, int *resp, int 
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       int pm = (resp[i]==1) ? 1 : -1;
       int mp = -1*pm;
       double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -157,6 +161,7 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       double mp = -1.0*pm;
@@ -203,6 +208,7 @@ void daPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &Rderiv[i], eps, K, epsFLAG);
@@ -248,6 +254,7 @@ void dvPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       dvdwiener(t[i]*pm, a[i], v[i], w[i], ld, &Rderiv[i]);
@@ -293,6 +300,7 @@ void dwPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       dwdwiener(t[i]*pm, a[i], v[i], w[i], ld, &Rderiv[i], eps, K, epsFLAG);
@@ -343,6 +351,7 @@ void daCDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       int pm = (resp[i]==1) ? 1 : -1;
       int mp = -1*pm;
       double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -391,6 +400,7 @@ void dvCDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       int pm = (resp[i]==1) ? 1 : -1;
       int mp = -1*pm;
       double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -439,6 +449,7 @@ void dwCDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       int pm = (resp[i]==1) ? 1 : -1;
       int mp = -1*pm;
       double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -488,6 +499,7 @@ void dxPDF_old(double *t, double *a, double *v, double *w, double eps, int *resp
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       dxdwiener(t[i]*pm, a[i], v[i], w[i], ld, eps, K, epsFLAG, &da[i], &dv[i], &dw[i]);
@@ -536,6 +548,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &da[i], eps, K, epsFLAG);
@@ -585,6 +598,7 @@ void dxCDF_old(double *t, double *a, double *v, double *w, double eps, int *resp
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       int pm = (resp[i]==1) ? 1 : -1;
       int mp = -1*pm;
       double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -636,6 +650,7 @@ void dxCDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       int pm = (resp[i]==1) ? 1 : -1;
       int mp = -1*pm;
       double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
@@ -652,7 +667,7 @@ void dxCDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
 
 /* PDF and CDF of 7-param diffusion */
   /* PDF of 7-param diffusion */
-void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, double *Rerr, int NThreads) {
+void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, double *Rerr, int NThreads, int Neval) {
 
   if (NThreads) {
     /* prepare threads */
@@ -669,7 +684,7 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
           Rerr[i] = 0;
-          ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rerr[i]);
+          ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
           if (choice == 0) {
             Rlogval[i] = log(Rval[i]);
           }
@@ -681,7 +696,7 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
     for (int i = last; i < N; i++) {
       double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
       Rerr[i] = 0;
-      ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rerr[i]);
+      ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
         Rlogval[i] = log(Rval[i]);
       }
@@ -694,9 +709,10 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
       Rerr[i] = 0;
-      ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rerr[i]);
+      ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
         Rlogval[i] = log(Rval[i]);
       }
@@ -708,7 +724,7 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
 
 
   /* CDF of 7-param diffusion */
-void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, double *Rerr, int NThreads) {
+void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, double *Rerr, int NThreads, int Neval) {
 
   if (NThreads) {
     /* prepare threads */
@@ -725,7 +741,7 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
           Rerr[i] = 0;
-          pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rerr[i]);
+          pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
           if (choice == 0) {
             Rlogval[i] = log(Rval[i]);
           }
@@ -737,7 +753,7 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
     for (int i = last; i < N; i++) {
       double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
       Rerr[i] = 0;
-      pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rerr[i]);
+      pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
         Rlogval[i] = log(Rval[i]);
       }
@@ -750,9 +766,10 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
       double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
       Rerr[i] = 0;
-      pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rval[i], &Rerr[i]);
+      pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
         Rlogval[i] = log(Rval[i]);
       }
@@ -761,7 +778,7 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
 }
 
   /* gradient of CDF */
-void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rda, double *Rdv, double *Rdt0, double *Rdw, double *Rdsw, double *Rdsv, double *Rdst, double *Rerr, int NThreads) {
+void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rda, double *Rdv, double *Rdt0, double *Rdw, double *Rdsw, double *Rdsv, double *Rdst, double *Rerr, int NThreads, int Neval) {
 
     if (NThreads) {
       /* prepare threads */
@@ -778,15 +795,15 @@ void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
           for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
             double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
             Rerr[i] = 0;
-            ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rerr[i]);
-            ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rerr[i]);
-            ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rerr[i]);
-            ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rerr[i]);
-            if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rerr[i]);
+            ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
+            ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
+            ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+            ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
+            if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
             else Rdsw[i] = NAN;
-            if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rerr[i]);
+            if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
             else Rdsv[i] = NAN;
-            if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rerr[i]);
+            if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
             else Rdst[i] = NAN;
           }
         });
@@ -796,15 +813,15 @@ void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
       for (int i = last; i < N; i++) {
         double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
         Rerr[i] = 0;
-        ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rerr[i]);
-        ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rerr[i]);
-        ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rerr[i]);
-        ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rerr[i]);
-        if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rerr[i]);
+        ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
+        ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
+        ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
+        if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
         else Rdsw[i] = NAN;
-        if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rerr[i]);
+        if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
         else Rdsv[i] = NAN;
-        if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rerr[i]);
+        if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
         else Rdst[i] = NAN;
       }
 
@@ -815,17 +832,18 @@ void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
     } else {
       /* calculate derivative without parallelization */
       for(int i = 0; i < N; i++) {
+        if (i % 1024 == 0) R_CheckUserInterrupt();
         double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
         Rerr[i] = 0;
-        ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rerr[i]);
-        ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rerr[i]);
-        ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rerr[i]);
-        ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rerr[i]);
-        if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rerr[i]);
+        ddiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
+        ddiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
+        ddiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        ddiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
+        if (sw[0]) ddiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
         else Rdsw[i] = NAN;
-        if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rerr[i]);
+        if (sv[0]) ddiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
         else Rdsv[i] = NAN;
-        if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rerr[i]);
+        if (st[0]) ddiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
         else Rdst[i] = NAN;
         Rprintf("");
       }
@@ -833,7 +851,7 @@ void dxPDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
 
   }
 
-void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rda, double *Rdv, double *Rdt0, double *Rdw, double *Rdsw, double *Rdsv, double *Rdst, double *Rerr, int NThreads) {
+void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rda, double *Rdv, double *Rdt0, double *Rdw, double *Rdsw, double *Rdsv, double *Rdst, double *Rerr, int NThreads, int Neval) {
 
     if (NThreads) {
       /* prepare threads */
@@ -850,15 +868,15 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
           for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
             double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
             Rerr[i] = 0;
-            pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rerr[i]);
-            pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rerr[i]);
-            pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rerr[i]);
-            pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rerr[i]);
-            if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rerr[i]);
+            pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
+            pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
+            pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+            pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
+            if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
             else Rdsw[i] = NAN;
-            if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rerr[i]);
+            if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
             else Rdsv[i] = NAN;
-            if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rerr[i]);
+            if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
             else Rdst[i] = NAN;
           }
         });
@@ -868,15 +886,15 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
       for (int i = last; i < N; i++) {
         double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
         Rerr[i] = 0;
-        pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rerr[i]);
-        pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rerr[i]);
-        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rerr[i]);
-        pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rerr[i]);
-        if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rerr[i]);
+        pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
+        pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
+        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
+        if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
         else Rdsw[i] = NAN;
-        if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rerr[i]);
+        if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
         else Rdsv[i] = NAN;
-        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rerr[i]);
+        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
         else Rdst[i] = NAN;
       }
 
@@ -887,17 +905,18 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
     } else {
       /* calculate derivative without parallelization */
       for(int i = 0; i < N; i++) {
+        if (i % 1024 == 0) R_CheckUserInterrupt();
         double low_or_up = (resp[i]==1) ? 1.0 : -1.0;
         Rerr[i] = 0;
-        pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rda[i], &Rerr[i]);
-        pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdv[i], &Rerr[i]);
-        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdt0[i], &Rerr[i]);
-        pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdw[i], &Rerr[i]);
-        if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsw[i], &Rerr[i]);
+        pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
+        pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
+        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
+        if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
         else Rdsw[i] = NAN;
-        if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdsv[i], &Rerr[i]);
+        if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
         else Rdsv[i] = NAN;
-        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, &Rdst[i], &Rerr[i]);
+        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
         else Rdst[i] = NAN;
       }
     }

@@ -1,9 +1,202 @@
 
 
+#include "tools.h"
+#include "cdf_fncs.h"
+#include "pdf_fncs.h"
 #include "rwiener.h"
+#include "cubature.h"
 #include <cmath>
+#include <algorithm>    // std::sort
 
 #define t_tilde 2.5
+
+double bla(double a, double b, double c) {
+	return a + b + c;
+}
+
+double fun_upper(int k, double x, std::vector<piece> upper) {
+	int i = 1;
+	//	int k = static_cast<int>(upper.size());
+	while ((i != k) && (x >= upper[i].z)) i++;
+	i = i - 1;
+	double t = upper[i].absc + upper[i].slope * (x - upper[i].center);
+	return t;
+}
+
+void generate_intervals(int& k, double totallow, std::vector<point> h, std::vector<piece>& lower, std::vector<piece>& upper, std::vector<double>& s) {
+	k = static_cast<int>(h.size());
+
+	lower.clear(); upper.clear(); piece low, up;
+	for (int j = 0; j != k; j++) {
+		double z;
+		if (j == 0) z = totallow;
+		else z = (h[j].h - h[j - 1].h - h[j].x * h[j].dh + h[j - 1].x * h[j - 1].dh) / (h[j - 1].dh - h[j].dh);
+
+		up.z = z;
+		up.slope = h[j].dh; up.absc = h[j].h; up.center = h[j].x;
+		upper.push_back(up);
+		if (j == 0) low.z = totallow;
+		else low.z = h[j - 1].x;
+		lower.push_back(low);
+	}
+	low.z = h[k - 1].x; lower.push_back(low);
+
+	double sum = -INFINITY, t; s.clear();
+	for (int i = 0; i != k; i++) {
+		if (i == 0) t = fun_upper(k, upper[i + 1].z, upper);
+		else
+			if (i < k - 1) {
+				double sl = upper[i].slope;
+				t = upper[i].absc - upper[i].center * sl + logdiff(upper[i + 1].z * sl,
+					upper[i].z * sl);
+			}
+			else {
+				t = (fun_upper(k, upper[i].z, upper));
+			}
+		t -= log(fabs(upper[i].slope));
+
+		sum = logsum(sum, t);
+		s.push_back(sum);
+	}
+}
+
+bool update_intervals(int k, double totallow, point new_point, std::vector<point>& h, std::vector<piece>& lower, std::vector<piece>& upper, std::vector<double>& s) {
+	double x = new_point.x;
+	bool flag = false;
+	int i = 0;
+	k = static_cast<int>(h.size());
+	while ((i != k) && (x > h[i].x))  i++;
+
+	h.insert(h.begin() + i, new_point);
+	piece low;
+	int j = i + 1;
+	low.z = h[i].x;
+	lower.insert(lower.begin() + j, low);
+	j = i;
+	piece up;
+	double z;
+	if (j == 0) z = totallow;
+	else z = (h[j].h - h[j - 1].h - h[j].x * h[j].dh + h[j - 1].x * h[j - 1].dh) / (h[j - 1].dh - h[j].dh);
+	up.z = z;
+
+	up.slope = h[j].dh; up.absc = h[j].h; up.center = h[j].x;
+	if (i < k) upper[i] = up; else upper.push_back(up);
+
+
+	if (i < k) {
+		j = i + 1;
+		z = (h[j].h - h[j - 1].h - h[j].x * h[j].dh + h[j - 1].x * h[j - 1].dh) / (h[j - 1].dh - h[j].dh);
+		up.z = z;
+		up.slope = h[j].dh; up.absc = h[j].h; up.center = h[j].x;
+		upper.insert(upper.begin() + j, up);
+	}
+
+	k = k + 1;
+
+	double sum = 0, t;
+	std::vector<double> sold = s;
+	//	s.clear();
+//	if (i + 1 == k) std::cout << "!!!!!!!!!!!!!!!!!";
+	{
+		if (i > 1) sum = sold[i - 2];
+		int iup = (i + 1 == k) ? i + 1 : i + 2;
+		int ilow = (i == 0) ? 0 : i - 1;
+		for (int j = ilow; j != iup; j++) {
+			if (j == 0) t = fun_upper(k, upper[j + 1].z, upper);
+			else
+				if (j < k - 1) {
+					double sl = upper[j].slope;
+					t = upper[j].absc - upper[j].center * sl + logdiff(upper[j + 1].z * sl,
+						upper[j].z * sl);
+				}
+				else {
+					t = (fun_upper(k, upper[j].z, upper));
+				}
+			t -= log(fabs(upper[j].slope));
+			if (j == 0) sum = t;
+			else sum = logsum(sum, t);
+			if (j != i) s[j] = sum; else s.insert(s.begin() + j, sum);
+		}
+	}
+	if (i + 1 < k) {
+		if (sold[i] < s[i + 1]) {
+			Rprintf("Denkfehler %20g%20g\n", sold[i], s[i + 1]);
+			flag = true;
+		}
+		double temp = logdiff(sold[i], s[i + 1]);
+		for (int j = i + 2; j < k; j++) {
+			s[j] = logdiff(sold[j - 1], temp);
+		}
+	}
+	if (flag) {
+		generate_intervals(k, totallow, h, lower, upper, s);
+		flag = false;
+	}
+	return flag;
+}
+
+double fun_lower(int k, double x, std::vector<point> h, std::vector<piece> lower) {
+	int i = 1;
+	//	int k = static_cast<int>(lower.size());
+	k = k + 1;
+	while ((i != k) && (x >= lower[i].z)) i++;
+	i = i - 1; double t;
+	if ((i == 0) || (i == k - 1)) t = -INFINITY;
+	else t = ((h[i].x - x) * h[i - 1].h + (x - h[i - 1].x) * h[i].h) / (h[i].x - h[i - 1].x);
+
+	return t;
+}
+
+double inverse_distribution(int k, double xstar, std::vector<piece> upper, std::vector<double> s, double bound, bool& flag) {
+	double sum = 0, t;
+
+	if (bound == INFINITY) sum = s[k - 1];
+	else {
+		if (bound <= upper[k - 1].z) {
+			Rprintf("Problem in inverse\n");
+			flag = true;
+		}
+		double sl = upper[k - 1].slope;
+		t = upper[k - 1].absc - upper[k - 1].center * sl + logdiff(bound * sl,
+			upper[k - 1].z * sl);
+		t -= log(fabs(sl));
+		s[k - 1] = logsum(t, s[k - 2]);
+		sum = s[k - 1];
+	}
+	int j = 0;
+	double temp = log(xstar) + sum;
+	while (temp > s[j]) j++;
+	if (j > k - 1) { Rprintf("Wie das?\n"); }
+
+
+	double sl = upper[j].slope;
+	double help = log(fabs(sl)); int sign = sl > 0 ? 1 : -1;
+	if (std::isnan(sl)) {
+		flag = true;
+		Rprintf("slope is infinity\n");
+	}
+
+	if (j > 0) temp = logdiff(temp, s[j - 1]);
+	help = help + temp - upper[j].absc + upper[j].center * sl;
+	if (sign == 1) temp = logsum(help, upper[j].z * sl);
+	else temp = logdiff(upper[j].z * sl, help);
+	t = temp / sl;
+
+	if (t < upper[j].z) {
+		Rprintf("\nnanu j=%d; k-1=%d; t=%g; upper[j]=%g; upper[j+1]=%g; s[j-1]=%g; upper slope=%g; upper absc=%g; temp=%g; fun_upper[j]=%g; fun_upper[j+1]=%g\n",
+		j, k - 1, t, upper[j].z, upper[j + 1].z, s[j - 1], upper[j].slope, upper[j].absc, temp, fun_upper(k, upper[j].z, upper), fun_upper(k, upper[j + 1].z, upper));
+	// else if ((j+1<k) && (t>upper[j+1].z)) std::cout << "nanu2";
+//				;	char x; std::cin >> x;
+		t = upper[j].z;
+  		flag = true;
+	}
+
+	//	if (j == k - 1) std::cout << setw(20) << upper[j].z << setw(20) << t << setw(20) << upper[j].center << setw(5) << k << setw(5) << upper.size() << std::endl;
+// END:;
+	return t;
+}
+
+
 
 
 double dwiener_d(double q, double a, double vn, double wn, double leps) {
@@ -467,7 +660,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 	std::vector<point> xemp; xemp.clear();
 	xemp.push_back(h[0]);
 	for (long long unsigned int i = 1; i != h.size(); i++) if (h[i].x > h[i - 1].x) xemp.push_back(h[i]);
-	h = xemp;
+	h.assign(xemp.begin(), xemp.end());
 
 
 	int k = 0;
@@ -477,10 +670,10 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 	ars_store.startstore = start;
 	ars_store.scalestore = scale;
 	ars_store.normstore = norm;
-	ars_store.hstore = h;
-	ars_store.lowerstore = lower;
-	ars_store.upperstore = upper;
-	ars_store.sstore = s;
+	ars_store.hstore.assign(h.begin(), h.end());
+	ars_store.lowerstore.assign(lower.begin(), lower.end());
+	ars_store.upperstore.assign(upper.begin(), upper.end());
+	ars_store.sstore.assign(s.begin(), s.end());
 
 	//			if (h.size() < 10) {
 	//  		std::cout << setw(20) << a << setw(20) << v << setw(20) << w << setw(20) << scale << setw(20) << h.size() << std::endl;
@@ -679,339 +872,4 @@ double rwiener_diag2(int pm, double bound, double a, double v, double w, double 
 
 	} while (fabs(q - qold) > eps);
 	return(q);
-}
-
-double arst(ars_archiv& ars_store, double scale, double totallow, double start, double bound, double a, double v, double w, double sw, double sv,
-	void generic2(double start, double scale, double norm, double alpha, double a, double v, double w, double sw, double sv, point& h)) {
-	// intialize h's
-	double norm = ars_store.normstore; bool flag;
-
-// NEW:
-	flag = false;
-	std::vector<point> h; std::vector<piece> lower, upper; std::vector<double> s;
-	double ww, tt, xstar;
-	point one;
-
-
-	h = ars_store.hstore;
-	lower = ars_store.lowerstore;
-	upper = ars_store.upperstore;
-	s = ars_store.sstore;
-
-	if (s.size() != h.size())
-		Rprintf("Problem in ars\n");
-	int k = static_cast<int>(h.size());
-	bool update = false;
-
-	if (bound < INFINITY)
-	{
-		int l = 0;
-		while ((l != k) && (h[l].x < bound)) l++;
-		k = l;
-	}
-	if (k < 2) {
-		Rprintf("k Probel %g %d\n", exp(start + bound / scale), k);
-		xstar = -INFINITY;
-		goto END;
-	}
-
-
-	double ss;
-
-WEITER:
-//	MONITOR(0, 2)++;
-	xstar = oneuni();
-
-	xstar = inverse_distribution(k, xstar, upper, s, bound, flag);
-	if (flag) {
-//		std::cout << "NEW0 in ars";
-//		std::cout << "arst "  << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
-		xstar = -INFINITY;
-		goto END;
-	}
-
-	ww = log(oneuni()); tt = fun_upper(k, xstar, upper);  ss = fun_lower(k, xstar, h, lower);
-
-	if(xstar > 12) Rprintf("ww = %g   tt = %g   ss = %g\n", ww, tt, ss);
-	if (ww <= (ss - tt))  goto STOP;
-	one.x = xstar; generic2(start, scale, norm, xstar, a, v, w, sw, sv, one);
-	if(xstar > 12) Rprintf("bin hier\n");
-	if (ww <= (one.h - tt))  goto STOP;
-	flag = update_intervals(k, totallow, one, h, lower, upper, s);
-if(xstar > 12) Rprintf("flag = %d\n", flag);
-	if (flag) {
-		xstar = -INFINITY;
-		goto END;
-	}
-	k = k + 1;
-	update = true;
-
-//	MONITOR(1, 2)++;
-	goto WEITER;
-STOP:
-	if (update) {
-		ars_store.hstore = h;
-		ars_store.lowerstore = lower;
-		ars_store.upperstore = upper;
-		ars_store.sstore = s;
-	}
-END:	return xstar;
-
-}
-
-double make_rwiener2(ars_archiv& ars_store, double bound, double a, double v, double w, double sw, double sv, double err, int K, int epsFLAG) {
-	double temp;
-NEW:
-	double start = ars_store.startstore;
-// Rprintf("ars hstore length = %d", static_cast<int>(ars_store.hstore.size()));
-	double  scale = ars_store.scalestore;
-
-	double bound2 = (bound == INFINITY) ? bound : (log(bound) - start) / scale;
-
-	//	start = start * scale;
-	temp = arst(ars_store, scale, -INFINITY, start, bound2, a, v, w, sw, sv, wiener_comp);
-
-	if (temp != -INFINITY) temp = exp(start + temp * scale);
-	//	else temp = -rdiffusion_lower_trunc(bound, v, w, a, rst);
-	else
-	{
-		Rprintf("ars hat nicht geklappt\n");
-		initialize_ars(a, v, w, sw, sv, bound, ars_store);
-		goto NEW;
-		// double vs = v, ws = w;
-		// bool REPEAT;
-		// if(sv || sw) {
-		// 	REPEAT = true;
-		// 	while (REPEAT) {
-		// 		vs = v, ws = w;
-		// 		if (sv) vs += sv * onenorm();
-		// 		if (sw) ws += sw * (oneuni()-0.5);
-		// 		double P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-		// 		REPEAT = P < oneuni();
-		// 	}
-		// }
-		// temp = rwiener_diag2(0, bound, a, vs, ws, err, K, epsFLAG);
-	}
-
-	return temp;
-}
-
-// R=0 is lower bound and R=1 is upper bound
-void run_make_rwiener(int choice, int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
-	double vs, ws;
-	// printf("h1 size = %d\n", static_cast<int>(ars_store1->hstore.size()));
-	// printf("h2 size = %d\n", static_cast<int>(ars_store2->hstore.size()));
-	switch (choice) {
-		case 1:
-			if (R != 0) { // one-sided
-
-				// ars_archiv ars_store;
-				if(R == 2) {
-					v = -v;
-					w = 1-w;
-				}
-				// initialize_ars(a, v, w, sw, sv, bound, ars_store);
-				if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store1);
-				for (int i = 0; i != N; i++) {
-					// q[i] = make_rwiener2(ars_store, bound, a, v, w, sw, sv, err, K, epsFLAG);
-					q[i] = make_rwiener2(*ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG);
-					resp[i] = R;
-				}
-
-			} else { // R = 0 -- both sides
-
-				// ars_archiv ars_store1;
-				// ars_archiv ars_store2;
-				double p_up, Rerr = 99.9; //, p_lo;
-				if (std::isfinite(bound)) { // truncated
-					if (sv || sw) {
-						double temp_u, temp_l;
-	          pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &temp_u, &Rerr);
-						pdiff(0, bound, -1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &temp_l, &Rerr);
-						p_up = temp_u / (temp_u + temp_l);
-						// p_lo = 1-p_up;
-					} else {
-	          double temp_u = exp(pwiener(bound, a, -v, 1-w, err, K, epsFLAG));
-						double temp_l = exp(pwiener(bound, a, v, w, err, K, epsFLAG));
-						p_up = temp_u / (temp_u + temp_l);
-						// p_lo = 1-p_up;
-					}
-				} else { // not truncated
-					if (sv || sw) {
-	          pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, &p_up, &Rerr);
-						// p_lo = 1-p_up;
-					} else {
-	          // p_up = exp(pwiener(bound, a, -v, 1-w, err, K, epsFLAG));
-						p_up = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
-						// p_lo = 1-p_up;
-					}
-				}
-				int cnt_up = 0;
-				for (int i = 0; i !=N; i++) {
-					cnt_up += oneuni()<=p_up ? 1 : 0;
-				}
-
-				// printf("ars h1 size = %d\n", static_cast<int>(ars_store1->hstore.size()));
-				if (!use_store) initialize_ars(a, -v, 1-w, sw, sv, bound, *ars_store1);
-				for (int i = 0; i != cnt_up; i++) {
-					q[i] = make_rwiener2(*ars_store1, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG);
-					resp[i] = 2;
-				}
-
-				// printf("ars h2 size = %d\n", static_cast<int>(ars_store2->hstore.size()));
-				if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store2);
-				for (int i = cnt_up; i != N; i++) {
-					q[i] = make_rwiener2(*ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG);
-					resp[i] = 1;
-				}
-
-			}
-			break;
-
-		case 2:
-			if(R != 0) { // one-sided
-				double P;
-				bool REPEAT;
-				for (int i = 0; i != N; i++) {
-					vs = v; ws = w;
-					if(sv || sw) {
-						REPEAT = true;
-						while (REPEAT) {
-							vs = v, ws = w;
-							if (sv) vs += sv * onenorm();
-							if (sw) ws += sw * (oneuni()-0.5);
-							if (R == 2) {vs = -vs; ws = 1 - ws;}
-							if (std::isfinite(bound)) P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-							else P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
-							REPEAT = oneuni() > P;
-						}
-					} else {
-						if (R == 2) {
-							vs = -vs;
-							ws = 1 - ws;
-						}
-					}
-					q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws);
-					resp[i] = R;
-				}
-
-			} else { // R = 0 -- both sides
-				if (std::isfinite(bound)) { // truncated
-					double p_up, p_lo;
-					bool REPEAT;
-					for (int i = 0; i != N; i++) {
-						vs = v; ws = w;
-						if(sv || sw) {
-							REPEAT = true;
-							while (REPEAT) {
-								vs = v; ws = w;
-								if (sv) vs += sv*onenorm();
-								if (sw) ws += sw*(oneuni()-0.5);
-								p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-								p_up = exp(pwiener(bound, a, -vs, 1-ws, err, K, epsFLAG));
-								REPEAT = oneuni() > (p_up + p_lo);
-							}
-						}
-						q[i] = rdiffusion_UPbound(bound, a, vs, ws);
-						resp[i] = q[i] > 0 ? 2 : 1;
-						if (resp[i] == 1) q[i] = fabs(q[i]);
-					}
-				} else { // not truncated
-					for (int i = 0; i != N; i++) {
-						vs = v; ws = w;
-						if (sv) vs += sv*onenorm();
-						if (sw) ws += sw*(oneuni()-0.5);
-						q[i] = rdiffusion_UPbound(bound, a, vs, ws);
-						resp[i] = q[i] > 0 ? 2 : 1;
-						if (resp[i] == 1) q[i] = fabs(q[i]);
-					}
-				}
-			}
-			break;
-
-		case 3:
-			double p_lo, p_up;
-			if (R != 0) { // one-sided
-				vs = v; ws = w;
-				bool REPEAT;
-				for (int i = 0; i != N; i++) {
-					if(sv || sw) {
-						REPEAT = true;
-						while (REPEAT) {
-							vs = v; ws = w;
-							if (sv) vs += sv * onenorm();
-							if (sw) ws += sw * (oneuni()-0.5);
-							if (std::isfinite(bound)) { // truncated
-								if (R == 1) {
-									p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-									REPEAT = oneuni() > p_lo;
-								}
-								if (R == 2) {
-									p_up = exp(pwiener(bound, a, -vs, 1-ws, err, K, epsFLAG));
-									REPEAT = oneuni() > p_up;
-								}
-							} else { // not truncated
-								// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-								p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
-								if (R == 1) REPEAT = oneuni() > p_lo;
-								if (R == 2) REPEAT = oneuni() > 1-p_lo;
-							}
-						}
-					}
-					q[i] = rwiener_diag2(R-1, bound, a, vs, ws, err, K, epsFLAG);
-					resp[i] = R;
-				}
-
-			} else { // R = 0 -- both sides
-
-				int up_or_down;
-				if (std::isfinite(bound)) { // truncated
-					bool REPEAT;
-					double u;
-					for (int i = 0; i != N; i++) {
-						vs = v; ws = w;
-						if(sv || sw) {
-							REPEAT = true;
-							while (REPEAT) {
-								vs = v; ws = w;
-								if (sv) vs += sv * onenorm();
-								if (sw) ws += sw * (oneuni()-0.5);
-								p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-								p_up = exp(pwiener(bound, a, -vs, 1-ws, err, K, epsFLAG));
-								u = oneuni();
-								if (u <= p_lo) {
-									REPEAT = false;
-									up_or_down = 0;
-								} else if (u >= 1-p_up) {
-									REPEAT = false;
-									up_or_down = 1;
-								} else {
-									REPEAT = true;
-								}
-							}
-						} else {
-							p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-							p_up = exp(pwiener(bound, a, -vs, 1-ws, err, K, epsFLAG));
-							up_or_down = oneuni() <= p_up / (p_up + p_lo) ? 1 : 0;
-						}
-						q[i] = rwiener_diag2(up_or_down, bound, a, vs, ws, err, K, epsFLAG);
-						resp[i] = up_or_down + 1;
-					}
-				} else { // not truncated
-					for (int i = 0; i != N; i++) {
-						vs = v; ws = w;
-						if (sv) vs += sv * onenorm();
-						if (sw) ws += sw * (oneuni()-0.5);
-						// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-						p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
-						up_or_down = oneuni() < p_lo ? 0 : 1;
-						q[i] = rwiener_diag2(up_or_down, bound, a, vs, ws, err, K, epsFLAG);
-						resp[i] = up_or_down + 1;
-					}
-				}
-
-			}
-			break;
-
-	}
 }

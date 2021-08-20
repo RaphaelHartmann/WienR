@@ -2,10 +2,10 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Raphael Hartmann and Christoph Klauer
 
-#include "derivs.h"
-#include <Rinternals.h>
-#include "rwiener.h"
 #include "tools.h"
+#include "derivs.h"
+#include "methods.h"
+#include <Rinternals.h>
 
 extern "C" {
 
@@ -679,7 +679,7 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP bo1) {
+	SEXP dDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
@@ -697,6 +697,7 @@ extern "C" {
 		int N = INTEGER(in3)[0];
 		int NThreads = INTEGER(in4)[0];
 		int choice = INTEGER(in5)[0];
+		int Neval = INTEGER(in6)[0];
 
 		int epsFLAG = INTEGER(bo1)[0];
 
@@ -720,7 +721,7 @@ extern "C" {
 
 
 		/* calculate the PDF or derivatives */
-		PDF7(choice, t, resp, a, v, to, w, sw, sv, st, eps, K, N, epsFLAG, Rvalue, Rvalue_ln, Rerr, NThreads);
+		PDF7(choice, t, resp, a, v, to, w, sw, sv, st, eps, K, N, epsFLAG, Rvalue, Rvalue_ln, Rerr, NThreads, Neval);
 
 
 		/* set elements of list out */
@@ -758,7 +759,7 @@ extern "C" {
 
 extern "C" {
 
-	SEXP pDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP bo1) {
+	SEXP pDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
@@ -776,6 +777,7 @@ extern "C" {
 		int N = INTEGER(in3)[0];
 		int NThreads = INTEGER(in4)[0];
 		int choice = INTEGER(in5)[0];
+		int Neval = INTEGER(in6)[0];
 
 		int epsFLAG = INTEGER(bo1)[0];
 
@@ -799,7 +801,7 @@ extern "C" {
 
 
 		/* calculate the PDF or derivatives */
-		CDF7(choice, t, resp, a, v, to, w, sw, sv, st, eps, K, N, epsFLAG, Rvalue, Rvalue_ln, Rerr, NThreads);
+		CDF7(choice, t, resp, a, v, to, w, sw, sv, st, eps, K, N, epsFLAG, Rvalue, Rvalue_ln, Rerr, NThreads, Neval);
 
 
 		/* set elements of list out */
@@ -839,7 +841,7 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dxdDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dxdDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
@@ -856,6 +858,7 @@ extern "C" {
 		int K = INTEGER(in2)[0];
 		int N = INTEGER(in3)[0];
 		int NThreads = INTEGER(in4)[0];
+		int Neval = INTEGER(in5)[0];
 
 		int epsFLAG = INTEGER(bo1)[0];
 
@@ -894,7 +897,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dxPDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rdv, Rdt0, Rdw, Rdsw, Rdsv, Rdst, Rerr, NThreads);
+		dxPDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rdv, Rdt0, Rdw, Rdsw, Rdsv, Rdst, Rerr, NThreads, Neval);
 
 
 		/* set elements of list out */
@@ -936,7 +939,7 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dxpDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dxpDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
@@ -953,6 +956,7 @@ extern "C" {
 		int K = INTEGER(in2)[0];
 		int N = INTEGER(in3)[0];
 		int NThreads = INTEGER(in4)[0];
+		int Neval = INTEGER(in5)[0];
 
 		int epsFLAG = INTEGER(bo1)[0];
 
@@ -991,7 +995,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dxCDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rdv, Rdt0, Rdw, Rdsw, Rdsv, Rdst, Rerr, NThreads);
+		dxCDF7(t, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rda, Rdv, Rdt0, Rdw, Rdsw, Rdsv, Rdst, Rerr, NThreads, Neval);
 
 
 		/* set elements of list out */
@@ -1049,7 +1053,7 @@ extern "C" {
 		int R = INTEGER(in1)[0];
 		int K = INTEGER(in2)[0];
 		int N = INTEGER(in3)[0];
-		// int NThreads = INTEGER(in4)[0];
+		int NThreads = INTEGER(in4)[0];
 		int choice = INTEGER(in5)[0];
 		int *list_nrs = INTEGER(in6);
 
@@ -1095,7 +1099,7 @@ extern "C" {
 				hstr[i].h = list[i + list_nrs[1]];
 				hstr[i].dh = list[i + list_nrs[1] + list_nrs[1]];
 			}
-			temp_arch1.hstore = hstr;
+			temp_arch1.hstore.assign(hstr.begin(), hstr.end());
 			int offset = 3 * list_nrs[1];
 			for (i = 0; i < list_nrs[2]; ++i) {
 				lowstr[i].z = list[i + offset];
@@ -1103,7 +1107,7 @@ extern "C" {
 				lowstr[i].absc = list[i + offset + 2*list_nrs[2]];
 				lowstr[i].center = list[i + offset + 3*list_nrs[2]];
 			}
-			temp_arch1.lowerstore = lowstr;
+			temp_arch1.lowerstore.assign(lowstr.begin(), lowstr.end());
 			offset += 4*list_nrs[2];
 			for (i = 0; i < list_nrs[3]; ++i) {
 				uppstr[i].z = list[i + offset];
@@ -1111,7 +1115,7 @@ extern "C" {
 				uppstr[i].absc = list[i + offset + 2*list_nrs[3]];
 				uppstr[i].center = list[i + offset + 3*list_nrs[3]];
 			}
-			temp_arch1.upperstore = uppstr;
+			temp_arch1.upperstore.assign(uppstr.begin(), uppstr.end());
 			offset += 4*list_nrs[3];
 			temp_arch1.startstore = list[offset++];
 			temp_arch1.scalestore = list[offset++];
@@ -1119,7 +1123,7 @@ extern "C" {
 			for (i = 0; i < list_nrs[4]; ++i) {
 				sstr[i] = list[i + offset];
 			}
-			temp_arch1.sstore = sstr;
+			temp_arch1.sstore.assign(sstr.begin(), sstr.end());
 			offset += list_nrs[4];
 
 			if (list_nrs[0] == 2) {
@@ -1135,7 +1139,7 @@ extern "C" {
 					hstr2[i].h = list[i + offset + list_nrs[5]];
 					hstr2[i].dh = list[i + offset + list_nrs[5] + list_nrs[5]];
 				}
-				temp_arch2.hstore = hstr2;
+				temp_arch2.hstore.assign(hstr2.begin(), hstr2.end());
 				offset += 3 * list_nrs[5];
 				for (i = 0; i < list_nrs[6]; ++i) {
 					lowstr2[i].z = list[i + offset];
@@ -1143,7 +1147,7 @@ extern "C" {
 					lowstr2[i].absc = list[i + offset + 2*list_nrs[6]];
 					lowstr2[i].center = list[i + offset + 3*list_nrs[6]];
 				}
-				temp_arch2.lowerstore = lowstr2;
+				temp_arch2.lowerstore.assign(lowstr2.begin(), lowstr2.end());
 				offset += 4*list_nrs[6];
 				for (i = 0; i < list_nrs[7]; ++i) {
 					uppstr2[i].z = list[i + offset];
@@ -1151,7 +1155,7 @@ extern "C" {
 					uppstr2[i].absc = list[i + offset + 2*list_nrs[7]];
 					uppstr2[i].center = list[i + offset + 3*list_nrs[7]];
 				}
-				temp_arch2.upperstore = uppstr2;
+				temp_arch2.upperstore.assign(uppstr2.begin(), uppstr2.end());
 				offset += 4*list_nrs[7];
 				temp_arch2.startstore = list[offset++];
 				temp_arch2.scalestore = list[offset++];
@@ -1159,7 +1163,7 @@ extern "C" {
 				for (i = 0; i < list_nrs[8]; ++i) {
 					sstr2[i] = list[i + offset];
 				}
-				temp_arch2.sstore = sstr2;
+				temp_arch2.sstore.assign(sstr2.begin(), sstr2.end());
 
 				if (R == 0) {
 					ars_arch1 = temp_arch1;
@@ -1184,7 +1188,7 @@ extern "C" {
 
 
 		/* sampling */
-		run_make_rwiener(choice, N, a, v, w, sv, sw, R, bound, eps, K, epsFLAG, Rq, Rresp, &ars_arch1, &ars_arch2, use_store);
+		run_make_rwiener(choice, N, a, v, w, sv, sw, R, bound, eps, K, epsFLAG, NThreads, Rq, Rresp, &ars_arch1, &ars_arch2, use_store);
 
 
 		/* fill list store */
