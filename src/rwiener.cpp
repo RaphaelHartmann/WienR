@@ -1,7 +1,7 @@
 
 
 #include "rwiener.h"
-
+#include <cmath>
 
 #define t_tilde 2.5
 

@@ -6,6 +6,7 @@
 #include "pdf_fncs.h"
 #include "tools.h"
 #include <Rinternals.h>
+#include <cmath>
 
 
 

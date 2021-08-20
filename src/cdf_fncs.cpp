@@ -6,6 +6,7 @@
 #include "cdf_fncs.h"
 #include "tools.h"
 #include <Rinternals.h>
+#include <cmath>
 #include <limits>
 
 

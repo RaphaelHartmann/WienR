@@ -1,5 +1,5 @@
 Package: WienR
-Version: 0.2-0
+Version: 0.2-1
 Title: Derivatives of the Diffusion Density and Cumulative Distribution
         Function
 Authors@R: c(person("Raphael", "Hartmann", email = "raphael.hartmann@protonmail.com", role = c("aut", "cre")),

@@ -2,6 +2,8 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
 
+#include <Rinternals.h>
+#include <cmath>
 #include "tools.h"
 
 

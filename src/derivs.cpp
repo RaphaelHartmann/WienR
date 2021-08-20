@@ -6,6 +6,7 @@
 #include "pdf_fncs.h"
 #include "cdf_fncs.h"
 #include "fncs_seven.h"
+#include <cmath>
 #include <thread>
 
 /* PDF and CDF of Wiener diffusion */
