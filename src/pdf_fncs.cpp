@@ -12,7 +12,7 @@
 /* calculate number of terms needed for short t */
 double ks(double t, double w, double eps) {
 	double K1 = (sqrt(2.0 * t) + w) / 2.0;
-	double u_eps = fmin(-1.0, M_LN2 + M_LNPI + 2.0 * log(t) + 2.0 * (eps));
+	double u_eps = fmin(-1.0, M_LN2 + M_LNPI + 2.0 * std::log(t) + 2.0 * (eps));
 	double	arg = -t * (u_eps - sqrt(-2.0 * u_eps - 2.0));
 	double 	K2 = (arg > 0) ? 0.5 * (sqrt(arg) - w) : K1;
 	return ceil(fmax(K1, K2));
@@ -21,7 +21,7 @@ double ks(double t, double w, double eps) {
 /* calculate number of terms needed for large t */
 double kl(double q, double v, double w, double err) {
 	double K1 = 1.0 / (M_PI * sqrt(q)), K2=0.0;
-	double temp = -2.0 * (log(M_PI * q) + err);
+	double temp = -2.0 * (std::log(M_PI * q) + err);
 	if (temp>=0) K2 = sqrt(temp/(pow(M_PI, 2) * q));
 	return ceil(fmax(K1,K2));
 }
@@ -34,11 +34,11 @@ double logfs(double t, double w, int K) {
 		for (int k = K; k >= 1; k--) {
 			double temp1 = w + 2.0 * k, temp2 = w - 2.0 * k;
 
-			fplus = logsum(log(temp1) - pow(temp1, 2) / twot, fplus);
-			fminus = logsum(log(-temp2) - pow(temp2, 2) / twot, fminus);
+			fplus = logsum(std::log(temp1) - pow(temp1, 2) / twot, fplus);
+			fminus = logsum(std::log(-temp2) - pow(temp2, 2) / twot, fminus);
 		}
-	fplus = logsum(log(w) - pow(w, 2) / twot, fplus);
-	return  -0.5 * M_LN2 - M_LN_SQRT_PI - 1.5 * log(t) + logdiff(fplus, fminus);
+	fplus = logsum(std::log(w) - pow(w, 2) / twot, fplus);
+	return  -0.5 * M_LN2 - M_LN_SQRT_PI - 1.5 * std::log(t) + logdiff(fplus, fminus);
 }
 
 /* calculate terms of the sum for large t */
@@ -49,8 +49,8 @@ double logfl(double q, double v, double w, int K) {
 	for (int k = K; k >= 1; k--) {
 		double temp = k * M_PI;
 		double check = sin(temp * w);
-		if (check > 0) fplus = logsum(log(k) - pow(temp, 2) * halfq + log(check), fplus);
-		else fminus = logsum(log(k) - pow(temp, 2) * halfq + log(-check), fminus);
+		if (check > 0) fplus = logsum(std::log(static_cast<double>(k)) - pow(temp, 2) * halfq + std::log(check), fplus);
+		else fminus = logsum(std::log(static_cast<double>(k)) - pow(temp, 2) * halfq + std::log(-check), fminus);
 	}
 	return	logdiff(fplus, fminus) + M_LNPI;
 }
@@ -66,7 +66,7 @@ double dwiener(double q, double a, double vn, double wn, double err, int K, int 
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102;  // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	else if(epsFLAG) err = std::log(err);
 
 	if (q >= 0) {
 		w = 1.0 - wn;
@@ -82,7 +82,7 @@ double dwiener(double q, double a, double vn, double wn, double err, int K, int 
 	ans = 0.0;
 
 	/* calculate the number of terms needed for short t*/
-	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2.0) - 2.0*log(a);
+	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2.0) - 2.0*std::log(a);
 	double es = (err - lg1);
 	kss = ks(q_asq, w, es);
 	/* calculate the number of terms needed for large t*/
@@ -112,7 +112,7 @@ double dwiener(double q, double a, double vn, double wn, double err, int K, int 
 /* calculate number of terms needed for short t */
 double dtaks(double t, double w, double eps) {
 	double K1 = (sqrt(3.0*t) + w) / 2.0;
-	double u_eps = fmin(-1.0, (log(8.0 / 27.0) + M_LNPI + 4.0*log(t) + 2.0*eps)/3.0);
+	double u_eps = fmin(-1.0, (std::log(8.0 / 27.0) + M_LNPI + 4.0*std::log(t) + 2.0*eps)/3.0);
 	double	arg = -3.0 * t * (u_eps - sqrt(-2.0 * u_eps - 2.0));
 	double 	K2 = (arg > 0) ? 0.5 * (sqrt(arg) - w) : K1;
 
@@ -122,7 +122,7 @@ double dtaks(double t, double w, double eps) {
 /* calculate number of terms needed for large t */
 double dtakl(double q, double v, double a, double err) {
 	double K1 = sqrt(3.0 / q) / M_PI;
-	double u_eps = fmin(-1.0, err + log(0.6) + M_LNPI + 2.0 * log(q) );
+	double u_eps = fmin(-1.0, err + std::log(0.6) + M_LNPI + 2.0 * std::log(q) );
 	double	arg = -2.0/M_PISQ/q*(u_eps - sqrt(-2.0 * u_eps - 2.0));
 	double 	kl = (arg > 0) ? sqrt(arg) : K1;
 
@@ -136,12 +136,12 @@ void logdtfs(double t, double w, int K, double &erg, int &newsign) {
     if (K > 0)
     for (int k = K; k >= 1; k--) {
       double temp1 = w + 2.0 * k, temp2 = w - 2.0 * k;
-      fplus = logsum(3.0*log(temp1) - temp1 * temp1 / twot, fplus);
-      fminus = logsum(3.0*log(-temp2) - temp2 * temp2 / twot, fminus);
+      fplus = logsum(3.0*std::log(temp1) - temp1 * temp1 / twot, fplus);
+      fminus = logsum(3.0*std::log(-temp2) - temp2 * temp2 / twot, fminus);
     }
   }
   newsign = 1;
-  fplus = logsum(3.0*log(w) - w * w / twot, fplus);
+  fplus = logsum(3.0*std::log(w) - w * w / twot, fplus);
   erg = logdiff(fplus, fminus);
   if (fplus < fminus) newsign = -1;
 }
@@ -153,11 +153,11 @@ void logdtfl(double q, double w, int K, double &erg, int &newsign) {
   for (int k = K; k >= 1; k--) {
     double temp = M_PI * k, zwi = sin(temp * w);
     if (zwi > 0) {
-      fplus = logsum(3.0*log(k) - temp * temp * halfq + log(zwi), fplus);
+      fplus = logsum(3.0*std::log(static_cast<double>(k)) - temp * temp * halfq + std::log(zwi), fplus);
 
     }
     if (zwi < 0) {
-      fminus = logsum(3.0*log(k) - temp * temp * halfq + log(-zwi), fminus);
+      fminus = logsum(3.0*std::log(static_cast<double>(k)) - temp * temp * halfq + std::log(-zwi), fminus);
 
     }
   }
@@ -175,12 +175,12 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 			epsFLAG = 1;
 		}
 		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-		else if(epsFLAG) err = log(err);
+		else if(epsFLAG) err = std::log(err);
 
 		/* prepare some variables */
 	  double q_asq = q / pow(a, 2);
 	  double ans0 = -pow(v, 2) / 2.0;
-	  double la = 2.0*log(a);
+	  double la = 2.0*std::log(a);
 	  double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
 	  double factor = lg1 - la;
 
@@ -199,7 +199,7 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 			if((epsFLAG && kss<K) || !epsFLAG) kss = K;
 	    double erg; int newsign;
 	    logdtfs(q_asq, w, static_cast<int>(kss), erg, newsign);
-	    ans = ans0 - 1.5 / q + newsign * exp(factor - 1.5 * M_LN2 - M_LN_SQRT_PI - 3.5 * log(q_asq) + erg - ld);
+	    ans = ans0 - 1.5 / q + newsign * exp(factor - 1.5 * M_LN2 - M_LN_SQRT_PI - 3.5 * std::log(q_asq) + erg - ld);
 	  }
 	  // if large t is better...
 	  else {
@@ -230,7 +230,7 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 			epsFLAG = 1;
 		}
 		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-		else if(epsFLAG) err = log(err);
+		else if(epsFLAG) err = std::log(err);
 
 		if (q >= 0) {
 			w = 1.0 - wn;
@@ -242,7 +242,7 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 			v = vn;
 		}
 
-		double la = log(a), lq = log(q);
+		double la = std::log(a), lq = std::log(q);
 
 		/* prepare some variables */
 		double q_asq = q / pow(a, 2);
@@ -318,7 +318,7 @@ void dvdwiener(double q, double a, double vn, double wn, double ld, double *deri
 /* calculate number of terms needed for short t */
 double dwks(double t, double w, double eps) {
 	double K1 = (sqrt(3.0*t) + w) / 2.0;
-	double u_eps = fmin(-1.0, 2.0*(eps) + M_LN2 + M_LNPI + 2.0*log(t));
+	double u_eps = fmin(-1.0, 2.0*(eps) + M_LN2 + M_LNPI + 2.0*std::log(t));
 	double	arg = -t * (u_eps - sqrt(-2.0 * u_eps - 2.0));
 	double 	K2 = (arg > 0) ? (sqrt(arg) + w) / 2.0 : K1;
 	return ceil(fmax(K1, K2));
@@ -327,7 +327,7 @@ double dwks(double t, double w, double eps) {
 /* calculate number of terms needed for large t */
 double dwkl(double q, double v, double err) {
 	double K1 = sqrt(2.0 / q) / M_PI;
-	double u_eps = fmin(-1.0, log(4.0 / 9.0) + 2.0*M_LNPI + 3.0*log(q) + 2.0*(err));
+	double u_eps = fmin(-1.0, std::log(4.0 / 9.0) + 2.0*M_LNPI + 3.0*std::log(q) + 2.0*(err));
 	double	arg = -(u_eps - sqrt(-2.0 * u_eps - 2.0));
 	double 	K2 = (arg > 0) ? 1.0 / M_PI * sqrt(arg / q) : K1;
 	return ceil(fmax(K1, K2));
@@ -338,14 +338,14 @@ void logdwfs(double t, double w, int K, double &erg, int &sign) {
 	double	fplus = -INFINITY, fminus = -INFINITY, twot = 2 * t;
 	for (int k = K; k >= 1; k--) {
 		double temp1 = pow((w + 2 * k), 2), temp2 = pow((w - 2 * k), 2), temp3 = temp1 - t, temp4 = temp2 - t;
-		if (temp3 > 0) fplus = logsum(log(temp3) - temp1 / twot, fplus);
-		else if (temp3 < 0) fminus = logsum(log(-(temp3)) - temp1 / twot, fminus);
-		if (temp4 > 0) fplus = logsum(log(temp4) - temp2 / twot, fplus);
-		else if (temp4 < 0) fminus = logsum(log(-(temp4)) - temp2 / twot, fminus);
+		if (temp3 > 0) fplus = logsum(std::log(temp3) - temp1 / twot, fplus);
+		else if (temp3 < 0) fminus = logsum(std::log(-(temp3)) - temp1 / twot, fminus);
+		if (temp4 > 0) fplus = logsum(std::log(temp4) - temp2 / twot, fplus);
+		else if (temp4 < 0) fminus = logsum(std::log(-(temp4)) - temp2 / twot, fminus);
 	}
 	double temp = pow(w, 2), temp1 = temp - t;
-	if (temp1 > 0) fplus = logsum(log(temp1) - temp / twot, fplus);
-	else if (temp1 < 0) fminus = logsum(log(-(temp1)) - temp / twot, fminus);
+	if (temp1 > 0) fplus = logsum(std::log(temp1) - temp / twot, fplus);
+	else if (temp1 < 0) fminus = logsum(std::log(-(temp1)) - temp / twot, fminus);
 	erg = logdiff(fplus, fminus);
 	sign = (fplus < fminus)? -1: 1;
 	// 1/sqrt(2*pi*t^5) added outside
@@ -360,9 +360,9 @@ void logdwfl(double q, double v,  double w, int K, double &erg, int &sign) {
 		double temp = M_PI * k;
 		double x = cos(temp * w);
 		if (x > 0)
-			fplus = logsum(2.0*log(k) - pow(temp, 2) * halfq + log(x), fplus);
+			fplus = logsum(2.0*std::log(static_cast<double>(k)) - pow(temp, 2) * halfq + std::log(x), fplus);
 		else if (x < 0)
-			fminus = logsum(2.0*log(k) - pow(temp, 2) * halfq + log(-x), fminus);
+			fminus = logsum(2.0*std::log(static_cast<double>(k)) - pow(temp, 2) * halfq + std::log(-x), fminus);
 	}
 	erg = logdiff(fplus, fminus);
 	sign = (fplus < fminus)? -1: 1;
@@ -380,7 +380,7 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 			epsFLAG = 1;
 		}
 		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-		else if(epsFLAG) err = log(err);
+		else if(epsFLAG) err = std::log(err);
 
 		int sign = 1;
 
@@ -398,7 +398,7 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 		/* prepare some variables */
 		double q_asq = q / pow(a, 2);
 		double ans0 = -v * a;
-		double lg1 = (-v * a*w - pow(v, 2)*(q) / 2.0) - 2.0*log(a);
+		double lg1 = (-v * a*w - pow(v, 2)*(q) / 2.0) - 2.0*std::log(a);
 		double ls = -lg1 + ld;
 		double ll = -lg1 + ld;
 
@@ -411,7 +411,7 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 			if((epsFLAG && kss<K) || !epsFLAG) kss = K;
 			double erg; int newsign;
 			logdwfs(q_asq, w, static_cast<int>(kss), erg, newsign);
-			ans = sign*(ans0 - newsign * exp(erg - ls - 2.5 * log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI));
+			ans = sign*(ans0 - newsign * exp(erg - ls - 2.5 * std::log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI));
 		}
 		// if large t is better...
 		else {
@@ -432,17 +432,17 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 /* calculate number of terms needed for short t */
 void dxks(double q, double t, double w, double a, double eps, double &Kas, double &Kws) {
-	double la = log(a);
-	double lq = log(t);
+	double la = std::log(a);
+	double lq = std::log(t);
 	double es_a = eps + la;
 	es_a = es_a - M_LN2 +  2*la - lq;
 
 	double K1_a = (sqrt(3.0*q) + w) / 2.0;
 	double K1_w = K1_a;
 
-	double u_eps_a = fmin(-1.0, (log(8.0 / 27.0) + M_LNPI + 4.0*log(q) + 2.0*es_a)/3.0);
+	double u_eps_a = fmin(-1.0, (std::log(8.0 / 27.0) + M_LNPI + 4.0*std::log(q) + 2.0*es_a)/3.0);
 	double arg_a = -3.0 * q * (u_eps_a - sqrt(-2.0 * u_eps_a - 2.0));
-	double u_eps_w = fmin(-1, 2*(eps) +M_LN2+ M_LNPI + 2.0*log(q));
+	double u_eps_w = fmin(-1, 2*(eps) +M_LN2+ M_LNPI + 2.0*std::log(q));
 	double arg_w = -q * (u_eps_w - sqrt(-2 * u_eps_w - 2));
 
 	double K2_a = (arg_a > 0) ? 0.5 * (sqrt(arg_a) - w) : K1_a;
@@ -454,17 +454,17 @@ void dxks(double q, double t, double w, double a, double eps, double &Kas, doubl
 
 /* calculate number of terms needed for large t */
 void dxkl(double q, double t, double v, double a, double err, double &Kal, double &Kwl) {
-	double la = log(a);
-	double lq = log(t);
+	double la = std::log(a);
+	double lq = std::log(t);
 	double el_a = err + la;
 	el_a = el_a - M_LN2 + 2*la - lq;
 
 	double K1_a = sqrt(3 / q)/M_PI;
 	double K1_w = sqrt(2 / q) / M_PI;
 
-	double u_eps_a = fmin(-1.0, el_a + log(0.6) + M_LNPI + 2.0 * log(q) );
+	double u_eps_a = fmin(-1.0, el_a + std::log(0.6) + M_LNPI + 2.0 * std::log(q) );
 	double arg_a = -2.0/M_PISQ/q*(u_eps_a - sqrt(-2.0 * u_eps_a - 2.0));
-	double u_eps_w = fmin(-1, log(4.0 / 9.0) + 2 * M_LNPI + 3.0*log(q) + 2.0*(err));
+	double u_eps_w = fmin(-1, std::log(4.0 / 9.0) + 2 * M_LNPI + 3.0*std::log(q) + 2.0*(err));
 	double arg_w = -(u_eps_w - sqrt(-2 * u_eps_w - 2));
 
 	double K2_a = (arg_a > 0) ? sqrt(arg_a) : K1_a;
@@ -486,24 +486,24 @@ void logdxfs(double q, double w, int Kas, int Kws, double &erg_a, double &erg_w,
 			for (int k = K; k >= 1; k--) {
 	      double temp1 = w + 2.0 * k, temp2 = w - 2.0 * k;
 				if (k <= Kas) {
-					fplus_a = logsum(3.0*log(temp1) - temp1 * temp1 / twot, fplus_a);
-		      fminus_a = logsum(3.0*log(-temp2) - temp2 * temp2 / twot, fminus_a);
+					fplus_a = logsum(3.0*std::log(temp1) - temp1 * temp1 / twot, fplus_a);
+		      fminus_a = logsum(3.0*std::log(-temp2) - temp2 * temp2 / twot, fminus_a);
 				}
 				if (k <= Kws) {
 					double temp1sq = pow(temp1, 2), temp2sq = pow(temp2, 2);
 					double temp3 = temp1sq - q, temp4 = temp2sq - q;
-					if (temp3 > 0) fplus_w = logsum(log(temp3) - temp1sq / twot, fplus_w);
-					else if (temp3 < 0) fminus_w = logsum(log(-(temp3)) - temp1sq / twot, fminus_w);
-					if (temp4 > 0) fplus_w = logsum(log(temp4) - temp2sq / twot, fplus_w);
-					else if (temp4 < 0) fminus_w = logsum(log(-(temp4)) - temp2sq / twot, fminus_w);
+					if (temp3 > 0) fplus_w = logsum(std::log(temp3) - temp1sq / twot, fplus_w);
+					else if (temp3 < 0) fminus_w = logsum(std::log(-(temp3)) - temp1sq / twot, fminus_w);
+					if (temp4 > 0) fplus_w = logsum(std::log(temp4) - temp2sq / twot, fplus_w);
+					else if (temp4 < 0) fminus_w = logsum(std::log(-(temp4)) - temp2sq / twot, fminus_w);
 				}
 	    }
 		}
 		double temp = pow(w, 2), temp1 = temp - q;
-		if (temp1 > 0) fplus_w = logsum(log(temp1) - temp / twot, fplus_w);
-		else if (temp1 < 0) fminus_w = logsum(log(-(temp1)) - temp / twot, fminus_w);
+		if (temp1 > 0) fplus_w = logsum(std::log(temp1) - temp / twot, fplus_w);
+		else if (temp1 < 0) fminus_w = logsum(std::log(-(temp1)) - temp / twot, fminus_w);
   }
-	fplus_a = logsum(3.0*log(w) - w * w / twot, fplus_a);
+	fplus_a = logsum(3.0*std::log(w) - w * w / twot, fplus_a);
 
 	erg_a = logdiff(fplus_a, fminus_a); sign_a = (fplus_a > fminus_a) ? 1 : -1;
 	erg_w = logdiff(fplus_w, fminus_w); sign_w = (fplus_w > fminus_w) ? 1 : -1;
@@ -519,16 +519,16 @@ void logdxfl(double q, double w, int Kal, int Kwl, double &erg_a, double &erg_w,
 	for (int k = K; k >= 1; k--) {
 		double temp = M_PI * k, zwi = sin(temp * w), x = cos(temp * w);
 		if (zwi > 0 && k <= Kal) {
-			if (k <= Kal) fplus_a = logsum(3.0*log(k) - temp * temp * halfq + log(zwi), fplus_a);
+			if (k <= Kal) fplus_a = logsum(3.0*std::log(static_cast<double>(k)) - temp * temp * halfq + std::log(zwi), fplus_a);
 		}
 		if (zwi < 0 && k <= Kal) {
-			if (k <= Kal) fminus_a = logsum(3.0*log(k) - temp * temp * halfq + log(-zwi), fminus_a);
+			if (k <= Kal) fminus_a = logsum(3.0*std::log(static_cast<double>(k)) - temp * temp * halfq + std::log(-zwi), fminus_a);
 		}
 		if (x > 0 && k <= Kwl) {
-			if (k <= Kwl) fplus_w = logsum(2.0 * log(k) - pow(temp, 2) * halfq + log(x), fplus_w);
+			if (k <= Kwl) fplus_w = logsum(2.0 * std::log(static_cast<double>(k)) - pow(temp, 2) * halfq + std::log(x), fplus_w);
 		}
 		if (x < 0 && k <= Kwl) {
-			if (k <= Kwl) fminus_w = logsum(2.0 * log(k) - pow(temp, 2) * halfq + log(-x), fminus_w);
+			if (k <= Kwl) fminus_w = logsum(2.0 * std::log(static_cast<double>(k)) - pow(temp, 2) * halfq + std::log(-x), fminus_w);
 		}
 	}
 	erg_a = logdiff(fplus_a, fminus_a); sign_a = (fplus_a > fminus_a) ? 1 : -1;
@@ -555,7 +555,7 @@ void dxdwiener(double q, double a, double vn, double wn, double ld, double err, 
 			epsFLAG = 1;
 		}
 		else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-		else if(epsFLAG) err = log(err);
+		else if(epsFLAG) err = std::log(err);
 
 		if (q >= 0) {
 			w = 1.0 - wn;
@@ -574,8 +574,8 @@ void dxdwiener(double q, double a, double vn, double wn, double ld, double err, 
 		double ans_w, ans0_w = -v * a;
 		double ans_v = sign*(- a * w - v * q);
 
-		double la = log(a);
-		double lq = log(q);
+		double la = std::log(a);
+		double lq = std::log(q);
 		double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - 2.0*la;
 		double es = err - lg1;// + ld;
 		double el = es;
@@ -594,7 +594,7 @@ void dxdwiener(double q, double a, double vn, double wn, double ld, double err, 
 			double erg_a, erg_w; int newsign_a, newsign_w;
 			logdxfs(q_asq, w, static_cast<int>(kas), static_cast<int>(kws), erg_a, erg_w, newsign_a, newsign_w);
 			ans_a = ans0_a + 1.0 / a - newsign_a * exp(-0.5*M_LN2 - M_LN_SQRT_PI - 2.5*lq + 4 * la + lg1 + erg_a - ld);
-			ans_w = ans0_w - newsign_w * exp(erg_w - factor_w - 2.5 * log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI);
+			ans_w = ans0_w - newsign_w * exp(erg_w - factor_w - 2.5 * std::log(q_asq) - 0.5 * M_LN2 - 0.5 * M_LNPI);
 		}
 		// if large t is better...
 		else {

@@ -29,7 +29,7 @@ void PDF(double *t, double *a, double *v, double *w, double eps, int *resp, int 
       threads[j] = std::thread([=]() {
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double pm = (resp[i]==1) ? 1.0 : -1.0;
-          // double mp = -1.0*pm;
+          // double mp = -static_cast<double>(pm);
           // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
           double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
           Rlogpdf[i] = ld;
@@ -41,7 +41,7 @@ void PDF(double *t, double *a, double *v, double *w, double eps, int *resp, int 
     int last = NperThread * (AmntOfThreads-1);
     for (int i = last; i < N; i++) {
       double pm = (resp[i]==1) ? 1.0 : -1.0;
-      // double mp = -1.0*pm;
+      // double mp = -static_cast<double>(pm);
       // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       Rlogpdf[i] = ld;
@@ -57,7 +57,7 @@ void PDF(double *t, double *a, double *v, double *w, double eps, int *resp, int 
     for(int i = 0; i < N; i++) {
       if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
-      // double mp = -1.0*pm;
+      // double mp = -static_cast<double>(pm);
       // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
       Rlogpdf[i] = ld;
@@ -140,7 +140,7 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double pm = (resp[i]==1) ? 1.0 : -1.0;
           double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
-          double mp = -1.0*pm;
+          double mp = -static_cast<double>(pm);
           dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, ld, &Rderiv[i], eps, K, epsFLAG);
         }
       });
@@ -150,7 +150,7 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
     for (int i = last; i < N; i++) {
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
-      double mp = -1.0*pm;
+      double mp = -static_cast<double>(pm);
       dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, ld, &Rderiv[i], eps, K, epsFLAG);
     }
 
@@ -164,7 +164,7 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
       if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], eps, K, epsFLAG);
-      double mp = -1.0*pm;
+      double mp = -static_cast<double>(pm);
       dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, ld, &Rderiv[i], eps, K, epsFLAG);
     }
   }
@@ -686,7 +686,7 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
           Rerr[i] = 0;
           ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
           if (choice == 0) {
-            Rlogval[i] = log(Rval[i]);
+            Rlogval[i] = std::log(Rval[i]);
           }
         }
       });
@@ -698,7 +698,7 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
       Rerr[i] = 0;
       ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
-        Rlogval[i] = log(Rval[i]);
+        Rlogval[i] = std::log(Rval[i]);
       }
     }
 
@@ -714,7 +714,7 @@ void PDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
       Rerr[i] = 0;
       ddiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
-        Rlogval[i] = log(Rval[i]);
+        Rlogval[i] = std::log(Rval[i]);
       }
     }
   }
@@ -743,7 +743,7 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
           Rerr[i] = 0;
           pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
           if (choice == 0) {
-            Rlogval[i] = log(Rval[i]);
+            Rlogval[i] = std::log(Rval[i]);
           }
         }
       });
@@ -755,7 +755,7 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
       Rerr[i] = 0;
       pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
-        Rlogval[i] = log(Rval[i]);
+        Rlogval[i] = std::log(Rval[i]);
       }
     }
 
@@ -771,7 +771,7 @@ void CDF7(int choice, double *t, int *resp, double *a, double *v, double *t0, do
       Rerr[i] = 0;
       pdiff(choice, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
       if (choice == 0) {
-        Rlogval[i] = log(Rval[i]);
+        Rlogval[i] = std::log(Rval[i]);
       }
     }
   }

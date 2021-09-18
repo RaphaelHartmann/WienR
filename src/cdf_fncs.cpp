@@ -44,7 +44,7 @@ double Ks(double t, double v, double a, double w, double eps)
 double Kl(double t, double v, double a, double w, double err) {
 	double api = a / M_PI, vsq = pow(v, 2);
 	double sqrtL1 = sqrt(1 / t) * api;
-	double sqrtL2 = sqrt(fmax(1.0, -2 / t * pow(api, 2) * (err+log(M_PI*t / 2 * (vsq + pow((M_PI / a), 2))) + v * a * w + vsq * t / 2)));
+	double sqrtL2 = sqrt(fmax(1.0, -2 / t * pow(api, 2) * (err+std::log(M_PI*t / 2 * (vsq + pow((M_PI / a), 2))) + v * a * w + vsq * t / 2)));
 	return ceil(fmax(sqrtL1, sqrtL2));
 }
 
@@ -76,18 +76,18 @@ double logFs(double t, double v, double a, double w, int K)
 double logFl(double q, double v, double a, double w, int K)
 {
 	double fplus = -INFINITY, fminus = -INFINITY;
-	double la = log(a), lv = log(fabs(v));
+	double la = std::log(a), lv = std::log(fabs(v));
 	double F = -INFINITY;
 	for (int k = K; k >= 1; k--) {
-		double temp0 = log(k * 1.0), temp1 = k * M_PI, temp2 = temp1 * w;
+		double temp0 = std::log(k * 1.0), temp1 = k * M_PI, temp2 = temp1 * w;
 		double check = sin(temp2);
 		if (check > 0) {
-			double temp = temp0 - logsum(2 * lv, 2 * (temp0 + M_LNPI - la)) - 0.5 * pow((temp1 / a), 2) * q + log(check);
+			double temp = temp0 - logsum(2 * lv, 2 * (temp0 + M_LNPI - la)) - 0.5 * pow((temp1 / a), 2) * q + std::log(check);
 			fplus = logsum(temp, fplus);
 		}
 		else if (check < 0)
 		{
-			double temp = temp0 - logsum(2 * lv, 2 * (temp0 + M_LNPI - la)) - 0.5 * pow((temp1 / a), 2) * q + log(-check);
+			double temp = temp0 - logsum(2 * lv, 2 * (temp0 + M_LNPI - la)) - 0.5 * pow((temp1 / a), 2) * q + std::log(-check);
 			fminus = logsum(temp, fminus);
 		}
 	}
@@ -104,13 +104,13 @@ double pwiener(double q, double a, double v, double w, double err, int K, int ep
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	else if(epsFLAG) err = std::log(err);
 
 	if (std::isinf(q)) return logP(0, a, v, w);
 
 	Kss = Ks(q, v, a, w, err);
 	Kll = Kl(q, v, a, w, err);
-	double lg = M_LN2 + M_LNPI - 2.0 * log(a);
+	double lg = M_LN2 + M_LNPI - 2.0 * std::log(a);
 
   if (3 * Kss < Kll) {
 		if((epsFLAG && Kss<K) || !epsFLAG) Kss = K;
@@ -146,12 +146,12 @@ double davlogP(int pm, double a, double v, double w) {
 		double emw = (2.0 * v * a * (1.0 - w)), ew = 2 * a * v * w, e = 2 * a * v;
 		tt = M_LN2 + emw - log1p(-exp(emw));
 		double temp = log1p(-exp(ew)) - log1p(-exp(e));
-		if (log(w) > temp) {
-			tt += logdiff(log(w), temp);
+		if (std::log(w) > temp) {
+			tt += logdiff(std::log(w), temp);
 			tt = rexp(tt);
 		}
 		else {
-			tt += logdiff(temp, log(w));
+			tt += logdiff(temp, std::log(w));
 			tt = -rexp(tt);
 		}
 
@@ -161,12 +161,12 @@ double davlogP(int pm, double a, double v, double w) {
 		double emw = (-2.0 * v * a * (1.0 - w)), e = (-2 * a * v);
 		tt = M_LN2 - log1p(-exp(emw));
 		double temp = logdiff(emw, e) - log1p(-exp(e));
-		if (log(w) > temp) {
-			tt += logdiff(log(w), temp);
+		if (std::log(w) > temp) {
+			tt += logdiff(std::log(w), temp);
 			tt = -rexp(tt);
 		}
 		else {
-			tt += logdiff(temp, log(w));
+			tt += logdiff(temp, std::log(w));
 			tt = rexp(tt);
 		}
 	}
@@ -196,7 +196,7 @@ double dalogP(int pm, double a, double v, double w, double dav) {
 
 /* calculate number of terms needed for short t */
 void dakS(double q, double a, double v, double w, double err, double &Kas) {
-	double la = log(a), sqt = sqrt(q), lv = log1p(pow(v, 2) * q);
+	double la = std::log(a), sqt = sqrt(q), lv = log1p(pow(v, 2) * q);
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
 	double wdash = fmin(w, 1.0 - w);
 
@@ -209,10 +209,10 @@ void dakS(double q, double a, double v, double w, double err, double &Kas) {
 
 /* calculate number of terms needed for large t */
 void dakL(double q, double a, double v, double w, double err, double &Kal) {
-	double lt = log(q), la = log(a);
+	double lt = std::log(q), la = std::log(a);
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
   double K1 = a / M_PI / sqrt(q);
-  double C1 = M_LN2 - logsum(2 * log(fabs(v)), 2 * (M_LNPI - la)); C1 = logsum(C1, lt);
+  double C1 = M_LN2 - logsum(2 * std::log(fabs(v)), 2 * (M_LNPI - la)); C1 = logsum(C1, lt);
 	double alphka = fmin(factor + M_LNPI + lt + la - M_LN2 - C1, 0.0);
 	Kal = ceil(fmax(fmax(sqrt(-2 * alphka / q) * a / M_PI, K1),1.0));
 }
@@ -269,7 +269,7 @@ void logdaFs(int pm, int Ksa, double t, double a, double v, double w, double &de
 	derF = -v * w * exp(lp) + derF / t/ Fj;
 /*	if(Fj == 0) {Rprintf("One derivative d/da had to be calculated numerically\n");
 		double epsilon = .00000000001;
-		double tempL = logdiff(logsum(lp, log(epsilon)), logdiff(lp, log(epsilon)))-log(2*epsilon);
+		double tempL = logdiff(logsum(lp, std::log(epsilon)), logdiff(lp, std::log(epsilon)))-std::log(2*epsilon);
 		derF = exp(tempL-lp);
 	}*/
 }
@@ -308,7 +308,7 @@ void dapwiener(int pm, double q, double a, double v, double w, double lp, double
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	else if(epsFLAG) err = std::log(err);
   // err = err;// + lp;
 
 	double Kal, Kas;
@@ -347,7 +347,7 @@ double dvlogP(int pm, double a, double v, double w, double dav) {
 
 /* calculate number of terms needed for short t */
 void dvkS(double q, double a, double v, double w, double err, double &Kvs) {
-	double lt = log(q), sqt = sqrt(q);
+	double lt = std::log(q), sqt = sqrt(q);
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
 	double wdash = fmin(w, 1.0 - w);
 
@@ -360,14 +360,14 @@ void dvkS(double q, double a, double v, double w, double err, double &Kvs) {
 
 /* calculate number of terms needed for large t */
 void dvkL(double q, double a, double v, double w, double err, double &Kvl) {
-	double lt = log(q), la = log(a);
+	double lt = std::log(q), la = std::log(a);
 	double temp = -rexp(la - M_LNPI - 0.5*lt);
 
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
 
 	if (v == 0) Kvl = 1.0;
 	else {
-		double lv = log(fabs(v));
+		double lv = std::log(fabs(v));
 		double alphKv = rexp(factor + 0.5 * (7*M_LNPI + lt) - 2.5 * M_LN2 - 3 * la - lv);
 		alphKv = fmax(0.0, fmin(1.0, alphKv));
 		Kvl = fmax(ceil((alphKv == 0) ? INFINITY : (alphKv == 1) ? -INFINITY : temp * gsl_cdf_ugaussian_Pinv(alphKv)), 1.0);
@@ -458,7 +458,7 @@ void dvpwiener(int pm, double q, double a, double v, double w, double lp, double
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	else if(epsFLAG) err = std::log(err);
   // err = err;// + lp;
 
 	double Kvl, Kvs;
@@ -494,13 +494,13 @@ double dwlogP(int pm, double a, double v, double w) {
 	if (fabs(v) == 0.0) return -tt / (1.0 - w);
 	if (v < 0) {
 		double e = (2.0 * v * a * (1.0 - w));
-		double temp = M_LN2 + e + log(fabs(v)) + log(a) - log1p(-exp(e));
+		double temp = M_LN2 + e + std::log(fabs(v)) + std::log(a) - log1p(-exp(e));
 		tt *= -exp(temp);
 	}
 	else
 	{
 		double e = -(2.0 * v * a * (1.0 - w));
-		double temp = M_LN2 + log(fabs(v)) + log(a) - log1p(-exp(e));
+		double temp = M_LN2 + std::log(fabs(v)) + std::log(a) - log1p(-exp(e));
 		tt *= -exp(temp);
 	}
 	return tt;
@@ -523,7 +523,7 @@ void dwkS(double q, double a, double v, double w, double err, double &Kws) {
 
 /* calculate number of terms needed for large t */
 void dwkL(double q, double a, double v, double w, double err, double &Kwl) {
-	double lt = log(q), la = log(a);
+	double lt = std::log(q), la = std::log(a);
 	double temp = -rexp(la - M_LNPI - 0.5*lt);
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
 	double  alphKw = rexp(factor + 0.5 * (M_LNPI + lt) - 1.5 * M_LN2 - la);
@@ -617,7 +617,7 @@ void dwpwiener(int pm, double q, double a, double v, double w, double lp, double
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	else if(epsFLAG) err = std::log(err);
   // err = err;// + lp;
 
 	double Kwl, Kws;
@@ -643,7 +643,7 @@ void dwpwiener(int pm, double q, double a, double v, double w, double lp, double
 
 /* calculate number of terms needed for short t */
 void dxkS(double q, double a, double v, double w, double err, double &Kas, double &Kvs, double &Kws) {
-	double lt = log(q), la = log(a), sqt = sqrt(q), lv = log1p(pow(v, 2) * q);
+	double lt = std::log(q), la = std::log(a), sqt = sqrt(q), lv = log1p(pow(v, 2) * q);
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
 	double wdash = fmin(w, 1.0 - w);
 
@@ -668,7 +668,7 @@ void dxkS(double q, double a, double v, double w, double err, double &Kas, doubl
 
 /* calculate number of terms needed for large t */
 void dxkL(double q, double a, double v, double w, double err, double &Kal, double &Kvl, double &Kwl) {
-	double lt = log(q), la = log(a);
+	double lt = std::log(q), la = std::log(a);
 	double temp = -rexp(la - M_LNPI - 0.5*lt);
 
 	double factor = v * a * w + pow(v, 2) * q / 2 + err;
@@ -678,14 +678,14 @@ void dxkL(double q, double a, double v, double w, double err, double &Kal, doubl
 
 	alphKw = fmax(0.0, fmin(1.0, alphKw));
 	if (v == 0) Kvl = 1.0; else {
-		double lv = log(fabs(v));
+		double lv = std::log(fabs(v));
 		double alphKv = rexp(factor + 0.5 * (7*M_LNPI + lt) - 2.5 * M_LN2 - 3 * la - lv);
 		alphKv = fmax(0.0, fmin(1.0, alphKv));
 		Kvl = fmax(ceil((alphKv == 0) ? INFINITY : (alphKv == 1) ? -INFINITY : temp * gsl_cdf_ugaussian_Pinv(alphKv)), 1.0);
 	}
 
 	double K1 = a / M_PI / sqrt(q);
-	double C1 = M_LN2 - logsum(2 * log(fabs(v)), 2 * (M_LNPI - la)); C1 = logsum(C1, lt);
+	double C1 = M_LN2 - logsum(2 * std::log(fabs(v)), 2 * (M_LNPI - la)); C1 = logsum(C1, lt);
 	double alphka = fmin(factor + M_LNPI + lt + la - M_LN2 - C1, 0.0);
 	Kal = ceil(fmax(fmax(sqrt(-2 * alphka / q) * a / M_PI, K1),1.0));
 }
@@ -822,7 +822,7 @@ void dxpwiener(int pm, double q, double a, double v, double w, double lp, double
 		epsFLAG = 1;
 	}
 	else if(!epsFLAG && K>0) err = -27.63102; // exp(err) = 1.e-12
-	else if(epsFLAG) err = log(err);
+	else if(epsFLAG) err = std::log(err);
 	// err = err;// + lp;
 
 	double Kal, Kvl, Kwl;

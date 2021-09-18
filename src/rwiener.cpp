@@ -11,6 +11,191 @@
 #define t_tilde 2.5
 
 
+double fun_upper(int k, double x, std::vector<piece> upper) {
+	int i = 1;
+	//	int k = static_cast<int>(upper.size());
+	while ((i != k) && (x >= upper[i].z)) i++;
+	i = i - 1;
+	double t = upper[i].absc + upper[i].slope * (x - upper[i].center);
+	return t;
+}
+
+void generate_intervals(int& k, double totallow, std::vector<point> h, std::vector<piece>& lower, std::vector<piece>& upper, std::vector<double>& s) {
+	k = static_cast<int>(h.size());
+
+	lower.clear(); upper.clear(); piece low, up;
+	for (int j = 0; j != k; j++) {
+		double z;
+		if (j == 0) z = totallow;
+		else z = (h[j].h - h[j - 1].h - h[j].x * h[j].dh + h[j - 1].x * h[j - 1].dh) / (h[j - 1].dh - h[j].dh);
+
+		up.z = z;
+		up.slope = h[j].dh; up.absc = h[j].h; up.center = h[j].x;
+		upper.push_back(up);
+		if (j == 0) low.z = totallow;
+		else low.z = h[j - 1].x;
+		lower.push_back(low);
+	}
+	low.z = h[k - 1].x; lower.push_back(low);
+
+	double sum = -INFINITY, t; s.clear();
+	for (int i = 0; i != k; i++) {
+		if (i == 0) t = fun_upper(k, upper[i + 1].z, upper);
+		else
+			if (i < k - 1) {
+				double sl = upper[i].slope;
+				t = upper[i].absc - upper[i].center * sl + logdiff(upper[i + 1].z * sl,
+					upper[i].z * sl);
+			}
+			else {
+				t = (fun_upper(k, upper[i].z, upper));
+			}
+		t -= std::log(fabs(upper[i].slope));
+
+		sum = logsum(sum, t);
+		s.push_back(sum);
+	}
+}
+
+bool update_intervals(int k, double totallow, point new_point, std::vector<point>& h, std::vector<piece>& lower, std::vector<piece>& upper, std::vector<double>& s) {
+	double x = new_point.x;
+	bool flag = false;
+	int i = 0;
+	k = static_cast<int>(h.size());
+	while ((i != k) && (x > h[i].x))  i++;
+
+	h.insert(h.begin() + i, new_point);
+	piece low;
+	int j = i + 1;
+	low.z = h[i].x;
+	lower.insert(lower.begin() + j, low);
+	j = i;
+	piece up;
+	double z;
+	if (j == 0) z = totallow;
+	else z = (h[j].h - h[j - 1].h - h[j].x * h[j].dh + h[j - 1].x * h[j - 1].dh) / (h[j - 1].dh - h[j].dh);
+	up.z = z;
+
+	up.slope = h[j].dh; up.absc = h[j].h; up.center = h[j].x;
+	if (i < k) upper[i] = up; else upper.push_back(up);
+
+
+	if (i < k) {
+		j = i + 1;
+		z = (h[j].h - h[j - 1].h - h[j].x * h[j].dh + h[j - 1].x * h[j - 1].dh) / (h[j - 1].dh - h[j].dh);
+		up.z = z;
+		up.slope = h[j].dh; up.absc = h[j].h; up.center = h[j].x;
+		upper.insert(upper.begin() + j, up);
+	}
+
+	k = k + 1;
+
+	double sum = 0, t;
+	std::vector<double> sold = s;
+	//	s.clear();
+//	if (i + 1 == k) std::cout << "!!!!!!!!!!!!!!!!!";
+	{
+		if (i > 1) sum = sold[i - 2];
+		int iup = (i + 1 == k) ? i + 1 : i + 2;
+		int ilow = (i == 0) ? 0 : i - 1;
+		for (int j = ilow; j != iup; j++) {
+			if (j == 0) t = fun_upper(k, upper[j + 1].z, upper);
+			else
+				if (j < k - 1) {
+					double sl = upper[j].slope;
+					t = upper[j].absc - upper[j].center * sl + logdiff(upper[j + 1].z * sl,
+						upper[j].z * sl);
+				}
+				else {
+					t = (fun_upper(k, upper[j].z, upper));
+				}
+			t -= std::log(fabs(upper[j].slope));
+			if (j == 0) sum = t;
+			else sum = logsum(sum, t);
+			if (j != i) s[j] = sum; else s.insert(s.begin() + j, sum);
+		}
+	}
+	if (i + 1 < k) {
+		if (sold[i] < s[i + 1]) {
+			Rprintf("Denkfehler %20g%20g\n", sold[i], s[i + 1]);
+			flag = true;
+		}
+		double temp = logdiff(sold[i], s[i + 1]);
+		for (int j = i + 2; j < k; j++) {
+			s[j] = logdiff(sold[j - 1], temp);
+		}
+	}
+	if (flag) {
+		generate_intervals(k, totallow, h, lower, upper, s);
+		flag = false;
+	}
+	return flag;
+}
+
+double fun_lower(int k, double x, std::vector<point> h, std::vector<piece> lower) {
+	int i = 1;
+	//	int k = static_cast<int>(lower.size());
+	k = k + 1;
+	while ((i != k) && (x >= lower[i].z)) i++;
+	i = i - 1; double t;
+	if ((i == 0) || (i == k - 1)) t = -INFINITY;
+	else t = ((h[i].x - x) * h[i - 1].h + (x - h[i - 1].x) * h[i].h) / (h[i].x - h[i - 1].x);
+
+	return t;
+}
+
+double inverse_distribution(int k, double xstar, std::vector<piece> upper, std::vector<double> s, double bound, bool& flag) {
+	double sum = 0, t;
+
+	if (bound == INFINITY) sum = s[k - 1];
+	else {
+		if (bound <= upper[k - 1].z) {
+			Rprintf("Problem in inverse\n");
+			flag = true;
+		}
+		double sl = upper[k - 1].slope;
+		t = upper[k - 1].absc - upper[k - 1].center * sl + logdiff(bound * sl,
+			upper[k - 1].z * sl);
+		t -= std::log(fabs(sl));
+		s[k - 1] = logsum(t, s[k - 2]);
+		sum = s[k - 1];
+	}
+	int j = 0;
+	double temp = std::log(xstar) + sum;
+	while (temp > s[j]) j++;
+	if (j > k - 1) { Rprintf("Wie das?\n"); }
+
+
+	double sl = upper[j].slope;
+	double help = std::log(fabs(sl)); int sign = sl > 0 ? 1 : -1;
+	if (std::isnan(sl)) {
+		flag = true;
+		Rprintf("slope is infinity\n");
+	}
+
+	if (j > 0) temp = logdiff(temp, s[j - 1]);
+	help = help + temp - upper[j].absc + upper[j].center * sl;
+	if (sign == 1) temp = logsum(help, upper[j].z * sl);
+	else temp = logdiff(upper[j].z * sl, help);
+	t = temp / sl;
+
+	if (t < upper[j].z) {
+		Rprintf("\nnanu j=%d; k-1=%d; t=%g; upper[j]=%g; upper[j+1]=%g; s[j-1]=%g; upper slope=%g; upper absc=%g; temp=%g; fun_upper[j]=%g; fun_upper[j+1]=%g\n",
+		j, k - 1, t, upper[j].z, upper[j + 1].z, s[j - 1], upper[j].slope, upper[j].absc, temp, fun_upper(k, upper[j].z, upper), fun_upper(k, upper[j + 1].z, upper));
+	// else if ((j+1<k) && (t>upper[j+1].z)) std::cout << "nanu2";
+//				;	char x; std::cin >> x;
+		t = upper[j].z;
+  		flag = true;
+	}
+
+	//	if (j == k - 1) std::cout << setw(20) << upper[j].z << setw(20) << t << setw(20) << upper[j].center << setw(5) << k << setw(5) << upper.size() << std::endl;
+// END:;
+	return t;
+}
+
+
+
+
 double dwiener_d(double q, double a, double vn, double wn, double leps) {
 	double kll, kss, ans, v, w;
 	double errziel = leps;
@@ -28,7 +213,7 @@ double dwiener_d(double q, double a, double vn, double wn, double leps) {
 	}
 
 	double q_asq = q / pow(a, 2);
-	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2) - 2 * log(a);
+	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2) - 2 * std::log(a);
 
 NEW:
 	ans = 0;
@@ -70,7 +255,7 @@ double dtdwiener_d(double q, double a, double v, double w, double &ld, double le
 	double q_asq = q / pow(a, 2);
 
 	double ans0 = -pow(v, 2) / 2.0;
-	double la = 2.0 * log(a);
+	double la = 2.0 * std::log(a);
 	double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
 	double factor = lg1 - la;
 
@@ -88,7 +273,7 @@ NEW:
 	{
 		double erg; int newsign;
 		logdtfs(q_asq, w, static_cast<int>(kss), erg, newsign);
-		ans = ans0 - 1.5 / q + newsign * exp(factor - 1.5 * M_LN2 - M_LN_SQRT_PI - 3.5 * log(q_asq) + erg - ld);
+		ans = ans0 - 1.5 / q + newsign * exp(factor - 1.5 * M_LN2 - M_LN_SQRT_PI - 3.5 * std::log(q_asq) + erg - ld);
 	}
 	// if large t is better...
 	else
@@ -105,7 +290,7 @@ NEW:
 		return ans;
 	}
 
-	double temp = log(fabs(ans)) + ld;
+	double temp = std::log(fabs(ans)) + ld;
 	if (temp < ld) {
 		double check = temp - ld;
 		if (err - check > errziel) {
@@ -155,7 +340,7 @@ int int_ddiff_d(unsigned dim, const double *x, void *p, unsigned fdim, double *r
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
 		double ldW = dwiener(low_or_up * (t - tau), a, nu, omega, errorW, 0, 1);
-		// double ldW = dwiener_d(low_or_up * (t - tau), a, nu, omega, log(errorW));
+		// double ldW = dwiener_d(low_or_up * (t - tau), a, nu, omega, std::log(errorW));
 
 		double temp2 = 0;
 		if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
@@ -213,7 +398,7 @@ NEW:
 
 	hcubature(1, int_ddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
 // Rprintf("val = %g", val);
-	double logval = log(val);
+	double logval = std::log(val);
 	cnt++;
 	if (cnt == 10) {
 		Rprintf("cnt = 10 %20g%20g%20g%20g%20g\n", t, a, v, w, newerror*.1);
@@ -221,8 +406,8 @@ NEW:
 		return logval;
 	}
 
-	if (log(newerror) - logval > log(myerr)) {
-		newerror = exp(log(myerr)*(1+cnt*0.1) + logval);
+	if (std::log(newerror) - logval > std::log(myerr)) {
+		newerror = exp(std::log(myerr)*(1+cnt*0.1) + logval);
 		goto NEW;
 	}
 
@@ -326,16 +511,16 @@ NEW:
 		return val * exp(-d);
 	}
 
-	double temp = log(fabs(val));
-	if (temp + log(myerr) < log(newerror) && newerror != 1.e-15) {
-			newerror = exp(log(myerr)*(1+cnt*0.1) + temp);
+	double temp = std::log(fabs(val));
+	if (temp + std::log(myerr) < std::log(newerror) && newerror != 1.e-15) {
+			newerror = exp(std::log(myerr)*(1+cnt*0.1) + temp);
 			newerror = newerror < 1.e-15 ? 1.e-15 : newerror;
 			goto NEW;
 	}
 	double check = temp + M_LN2 - d;
 
-	if (log(newerror) + check > log(myerr) && newerror != 1.e-15) {
-		double lnewerror = log(myerr)*(1+cnt*0.1) - check;
+	if (std::log(newerror) + check > std::log(myerr) && newerror != 1.e-15) {
+		double lnewerror = std::log(myerr)*(1+cnt*0.1) - check;
 		newerror = exp(lnewerror);
 		newerror = newerror < 1.e-15 ? 1.e-15 : newerror;
 		d = ddiff_d(t, low_or_up, a, v, 0, w, sw, sv, 0, newerror);
@@ -360,7 +545,7 @@ void wiener_comp(double start, double scale, double norm, double alpha, double a
 		h.dh = dtdiff_d(t, -1, a, v, 0.0, w, sw, sv, 0.0, 1.e-7, h.h);
 	}
 if(h.h == -INFINITY) Rprintf("t = %g\n", t);
-	h.h += start + h.x * scale + log(scale) - norm;
+	h.h += start + h.x * scale + std::log(scale) - norm;
 	h.dh = (1.0 + t * h.dh) * scale;
 }
 
@@ -373,10 +558,10 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 	double norm = 0.0, step = 1.0;
 	//			double temp = fmax(0.2, fabs(v)) / a * w;
 	//			double start = sqrt(temp * temp + 2.25) - 1.5;
-	//			start = log(exp_mean(0, a, v, w) * start / temp);
+	//			start = std::log(exp_mean(0, a, v, w) * start / temp);
 				// based on mode of inverse-Gaussian
 	double t0 = exp_mean(0, a, v, w);
-	double start = log(t0);
+	double start = std::log(t0);
 
 	double scale;
 	if (fabs(v) > 0.1)
@@ -387,7 +572,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 	}
 
 	scale = fmax(scale, 0.05);
-	scale = log(t0 + scale) - start;
+	scale = std::log(t0 + scale) - start;
 
 	point begun, one;
 	double ub, lb;
@@ -454,7 +639,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 
 	h.push_back(one); h.push_back(low); h.push_back(high);
 
-	bound = (log(bound) - start) / scale;
+	bound = (std::log(bound) - start) / scale;
 	if (high.x > bound) {
 		one.x = bound - step;
 		wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
@@ -497,17 +682,17 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 
 
 bool accept(double logf_t_prop,double c2) {
-	if (c2 <= 0.06385320297074884) Rprintf("hm\n"); // log(5/3) / 16, req. for convergence
-	double z=log(oneuni())+logf_t_prop;
+	if (c2 <= 0.06385320297074884) Rprintf("hm\n"); // std::log(5/3) / 16, req. for convergence
+	double z=std::log(oneuni())+logf_t_prop;
 	double b=-c2;
-	int k=3; double lk=log(1.0*k);
+	int k=3; double lk=std::log(static_cast<double>(k));
 	while (true)  {
 		if (z>b) return false;
 		b=logdiff(b,(lk-c2*k*k));
 		if (z<b) return true;
-		k=k+2; lk=log(1.0*k);
+		k=k+2; lk=std::log(static_cast<double>(k));
 		b=logsum(b,(lk-c2*k*k));
-		k=k+2; lk=log(1.0*k);
+		k=k+2; lk=std::log(static_cast<double>(k));
 	}
 }
 
@@ -532,7 +717,7 @@ double norm_exp_proposal(double drift) {
 		}
 		else {
 			double z = oneuni(); //zc=log1p(-z);
-			double t_prop = t_tilde - log(z) / rate;
+			double t_prop = t_tilde - std::log(z) / rate;
 			double c2 = M_PISQ * t_prop / 8.0;  double f_t_prop = (-c2);
 			if (accept(f_t_prop, c2)) return t_prop;
 		}
@@ -556,14 +741,14 @@ double invnorm(double drift) {
 double invgauss_proposal(double drift) {
     double t_prop, cs, cl;
     if (t_tilde >= 0.63662) { cs = 0.0; cl = -M_LNPI + 2 * M_LN2 - 0.5*(M_LNPI + M_LN2); }
-    else { cl = -M_PISQ / 8.0*t_tilde + 1.5*log(t_tilde) + 1.0 / (2 * t_tilde); cs = cl + 0.5*(M_LNPI + M_LN2) + M_LNPI - 2 * M_LN2; }
+    else { cl = -M_PISQ / 8.0*t_tilde + 1.5*std::log(t_tilde) + 1.0 / (2 * t_tilde); cs = cl + 0.5*(M_LNPI + M_LN2) + M_LNPI - 2 * M_LN2; }
 
     while (true) {
         t_prop = invnorm(drift);
 
 
         if (t_prop <= t_tilde) { if (accept(cs - 1.0 / (2 * t_prop), 1.0 / (2 * t_prop))) return t_prop; }
-        else if (accept(cl - 1 / (2 * t_prop) - 1.5 * log(t_prop), M_PISQ * t_prop / 8)) return t_prop;
+        else if (accept(cl - 1 / (2 * t_prop) - 1.5 * std::log(t_prop), M_PISQ * t_prop / 8)) return t_prop;
     }
 
 }
@@ -658,7 +843,7 @@ double rwiener_diag2(int pm, double bound, double a, double v, double w, double 
 
 	double qmax = bound;
 	double q = std::isinf(bound) ? 1.0 : bound / 2;
-	double p = log(oneuni());
+	double p = std::log(oneuni());
 
 	double qold;
 

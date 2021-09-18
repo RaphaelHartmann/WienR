@@ -80,7 +80,7 @@ WEITER:
 		goto END;
 	}
 
-	ww = log(oneuni()); tt = fun_upper(k, xstar, upper);  ss = fun_lower(k, xstar, h, lower);
+	ww = std::log(oneuni()); tt = fun_upper(k, xstar, upper);  ss = fun_lower(k, xstar, h, lower);
 
 	if (ww <= (ss - tt))  goto STOP;
 	one.x = xstar; generic2(start, scale, norm, xstar, a, v, w, sw, sv, one);
@@ -190,7 +190,7 @@ NEW:
 // Rprintf("ars hstore length = %d", static_cast<int>(ars_store.hstore.size()));
 	double  scale = ars_store.scalestore;
 
-	double bound2 = (bound == INFINITY) ? bound : (log(bound) - start) / scale;
+	double bound2 = (bound == INFINITY) ? bound : (std::log(bound) - start) / scale;
 
 	//	start = start * scale;
 	temp = arst(ars_store, ars_str_glob, scale, -INFINITY, start, bound2, a, v, w, sw, sv, Nars_parallel, wiener_comp);

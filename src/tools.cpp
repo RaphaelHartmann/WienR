@@ -58,7 +58,7 @@ double lnnorm(double z)
         double z2, y, s, p1, q1, p2, q2, t, a1, a2 ;
         double n, m ;
 
-	if (z==0.0e0) return(log(0.50e0)) ;
+	if (z==0.0e0) return(std::log(0.50e0)) ;
 
 	if (z > LNNORM_MAX_X) return(0.0e0);
         if (z <= LNNORM_MIN_X) return(-0.5e0*z*z);
@@ -85,8 +85,8 @@ double lnnorm(double z)
                         z *= ((z2)/ (n)) ;
                         s+=z ;
                 }
-                if (lower) return(log(0.50e0-s)) ;
-                return(log(0.50e0+s)) ;
+                if (lower) return(std::log(0.50e0-s)) ;
+                return(std::log(0.50e0+s)) ;
         }
 
         a1=2.0e0 ;
@@ -119,13 +119,13 @@ double lnnorm(double z)
                 }
  		            t = p2/q2;
         }
-        t = lower ? log(t) - 0.5*z2 - log(SQR2PI) : log1p(-y*t);
+        t = lower ? std::log(t) - 0.5*z2 - std::log(SQR2PI) : log1p(-y*t);
         return(t) ;
 }
 
 double logMill(double x) {
 	double m;
-	if (x > 1.0e5) return -log(x);
+	if (x > 1.0e5) return -std::log(x);
 	m = lnnorm(-x) - lognormal(x);
 	return m;
 }
