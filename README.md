@@ -93,4 +93,6 @@ dst0WienerCDF(t, response, a, v, w, t0, sv, sw, st0)
 
 gradWienerPDF(t, response, a, v, w, t0, sv, sw, st0)
 gradWienerCDF(t, response, a, v, w, t0, sv, sw, st0)
+
+sampWiener(N = 10, a = 1, v = .3, w = .5)
 ```
