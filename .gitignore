@@ -8,5 +8,5 @@ src/*.dll
 src-x64/*
 src-i386/*
 .Rproj.user
-WienR_0.3-0.tar.gz
+*.tar.gz
 WienR.Rproj
