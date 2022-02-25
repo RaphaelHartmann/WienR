@@ -56,7 +56,7 @@ double logfl(double q, double v, double w, int K) {
 }
 
 /* calculate density */
-double dwiener(double q, double a, double vn, double wn, double err, int K, int epsFLAG) {
+double dwiener(double q, double a, double vn, double wn, double sv, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		return -INFINITY;
 	}
@@ -82,7 +82,10 @@ double dwiener(double q, double a, double vn, double wn, double err, int K, int 
 	ans = 0.0;
 
 	/* calculate the number of terms needed for short t*/
-	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2.0) - 2.0*std::log(a);
+	double eta_sqr = pow(sv, 2);
+	double temp = 1 + eta_sqr * q;
+	double lg1 = (eta_sqr * pow(a * w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 * log(a) - 0.5 * log(temp);
+	//double lg1 = (-v * a * w - (pow(v, 2)) * q / 2.0) - 2.0*std::log(a);
 	double es = (err - lg1);
 	kss = ks(q_asq, w, es);
 	/* calculate the number of terms needed for large t*/

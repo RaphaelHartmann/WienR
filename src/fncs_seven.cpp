@@ -34,13 +34,13 @@ int int_ddiff(unsigned dim, const double *x, void *p, unsigned fdim, double *ret
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
 	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
+	//double nu = sv ? v + sv * y : v;
 	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
 	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t - tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t - tau), a, v, omega, sv, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
@@ -78,7 +78,7 @@ int int_daddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -119,7 +119,7 @@ int int_dvddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -159,7 +159,7 @@ int int_dt0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -202,7 +202,7 @@ int int_dwddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -243,7 +243,7 @@ int int_dswddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -283,7 +283,7 @@ int int_dsvddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
@@ -323,7 +323,7 @@ int int_dst0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -366,7 +366,7 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -603,7 +603,7 @@ int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -773,7 +773,7 @@ int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);

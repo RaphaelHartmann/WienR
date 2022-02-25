@@ -339,7 +339,7 @@ int int_ddiff_d(unsigned dim, const double *x, void *p, unsigned fdim, double *r
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t - tau), a, nu, omega, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t - tau), a, nu, omega, 0, errorW, 0, 1);
 		// double ldW = dwiener_d(low_or_up * (t - tau), a, nu, omega, std::log(errorW));
 
 		double temp2 = 0;
@@ -441,7 +441,7 @@ int int_dtddiff_d(unsigned dim, const double* x, void* p, unsigned fdim, double*
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, 0, 1);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);

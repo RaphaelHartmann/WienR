@@ -36,7 +36,7 @@ void logdxfl(double, double, int, int, double &, double &, int &, int &);
 /*-----------------------------------------------*/
 
 /* DENSITY */
-double dwiener(double, double, double, double, double, int, int);
+double dwiener(double, double, double, double, double, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dt DENSITY */

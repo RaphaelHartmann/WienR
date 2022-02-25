@@ -9,7 +9,7 @@
 */
 
 /* .Call calls */
-extern SEXP dWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP dWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dtdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dadWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dvdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -32,7 +32,7 @@ extern SEXP randWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEX
 
 
 static const R_CallMethodDef CallEntries[] = {
-    {"dWiener", (DL_FUNC) &dWiener, 10},
+    {"dWiener", (DL_FUNC) &dWiener, 11},
     {"dtdWiener", (DL_FUNC) &dtdWiener, 10},
     {"dadWiener", (DL_FUNC) &dadWiener, 10},
     {"dvdWiener", (DL_FUNC) &dvdWiener, 10},

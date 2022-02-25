@@ -7,7 +7,7 @@
 
 /* PDF and CDF of Wiener diffusion */
   /* PDF */
-  void PDF(double *, double *, double *, double *, double, int *, int, int, int, double *, double *, int);
+  void PDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, double *, int);
   /* CDF */
   void CDF(double *, double *, double *, double *, double, int *, int, int, int, double *, double *, int);
 /* ------------------------------------------------ */
