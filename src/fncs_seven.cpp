@@ -43,7 +43,7 @@ int int_ddiff(unsigned dim, const double *x, void *p, unsigned fdim, double *ret
 		double ldW = dwiener(low_or_up * (t - tau), a, v, omega, sv, errorW, K, epsFLAG);
 
 		double temp2 = 0;
-		if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
+		//if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
 
 		double integrand = exp(ldW + temp2);
 
@@ -205,7 +205,7 @@ int int_dwddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
 
 		double temp2 = 0;
-		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
 		dwdwiener(low_or_up * (t-tau), a, v, omega, sv, ldW, val_ptr, errorW, K, epsFLAG);
 
@@ -236,19 +236,19 @@ int int_dswddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
 	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
+	//double nu = sv ? v + sv * y : v;
 	double omega = sv ? w + sw * (x[1] - 0.5) : w + sw * (x[0] - 0.5);
 	double tau = sv ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0);
 	double temp_sw = sv ? (x[1]-0.5) : (x[0]-0.5);
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
 
 		double temp2 = 0;
 		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
-		dwdwiener(low_or_up * (t-tau), a, nu, omega, 0, ldW, val_ptr, errorW, K, epsFLAG);
+		dwdwiener(low_or_up * (t-tau), a, v, omega, sv, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = temp_sw * val_ptr[0] * exp(temp2);
 
@@ -397,24 +397,24 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr};
 
-	int dim = (sw!=0)+(sv!=0)+(st!=0);
+	int dim = (sw!=0)+(st!=0);
 
 	double *xmin = (double*)malloc(dim * sizeof(double));
 	double *xmax = (double*)malloc(dim * sizeof(double));
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
-	if(sv) {
-		xmin[0] = -1; xmax[0] = 1;
-		for (int i = 1; i < dim; i++) {
-			xmin[i] = 0;
-			xmax[i] = 1;
-		}
-	} else {
-		for (int i = 0; i < dim; i++) {
-			xmin[i] = 0;
-			xmax[i] = 1;
-		}
+//	if(sv) {
+//		xmin[0] = -1; xmax[0] = 1;
+//		for (int i = 1; i < dim; i++) {
+//			xmin[i] = 0;
+//			xmax[i] = 1;
+//		}
+//	} else {
+	for (int i = 0; i < dim; i++) {
+		xmin[i] = 0;
+		xmax[i] = 1;
 	}
+//	}
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
