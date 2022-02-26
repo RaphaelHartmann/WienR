@@ -52,7 +52,7 @@ void dvdwiener(double, double, double, double, double, double *);
 /*-----------------------------------------------*/
 
 /* d/dw DENSITY */
-void dwdwiener(double, double, double, double, double, double *, double, int, int);
+void dwdwiener(double, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dt d/da d/dv d/dw DENSITY */

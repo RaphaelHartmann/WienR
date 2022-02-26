@@ -373,7 +373,7 @@ void logdwfl(double q, double v,  double w, int K, double &erg, int &sign) {
 }
 
 /* calculate derivative of density with respect to w */
-void dwdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double err, int K, int epsFLAG) {
+void dwdwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
 	} else {
@@ -400,8 +400,12 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 		/* prepare some variables */
 		double q_asq = q / pow(a, 2);
-		double ans0 = -v * a;
-		double lg1 = (-v * a*w - pow(v, 2)*(q) / 2.0) - 2.0*std::log(a);
+		//double ans0 = -v * a;
+		double eta_sqr = pow(sv, 2);
+		double temp = (1 + eta_sqr * q);
+		double ans0 = (-v * a + eta_sqr * pow(a, 2) * w) / temp;
+		//double lg1 = (-v*a*w - pow(v, 2)*(q) / 2.0) - 2.0*std::log(a);
+		double lg1 = (eta_sqr * pow(a*w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 * log(a) - 0.5 * log(temp);
 		double ls = -lg1 + ld;
 		double ll = -lg1 + ld;
 
