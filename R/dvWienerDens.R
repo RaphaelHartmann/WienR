@@ -104,7 +104,7 @@ dvWienerPDF <- function(t,
   if(n.threads < 2) n.threads <- 0
 
   # num. integral evaluation checks
-  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+  if(any(sw!=0) | any(st0!=0)) {
     if(!is.numeric(n.evals)) stop("n.evals must numeric")
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
@@ -112,7 +112,7 @@ dvWienerPDF <- function(t,
 
   # --- C++ FUNCTION CALL ---- #
 
-  indW <- which(sw==0 & sv==0 & st0==0)
+  indW <- which(sw==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
   out <- list(deriv = rep(NA, max_len), err = rep(precision, max_len))
@@ -124,6 +124,7 @@ dvWienerPDF <- function(t,
                   as.numeric(a[indW]),
                   as.numeric(v[indW]),
                   as.numeric(w[indW]),
+                  as.numeric(sv[indW]),
                   as.numeric(precision),
                   as.integer(resps[indW]),
                   as.integer(K),
