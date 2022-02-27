@@ -19,7 +19,7 @@ extern SEXP dapWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP
 extern SEXP dvpWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dwpWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
-extern SEXP dxdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP dxdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dxpWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 extern SEXP dDiffusion7(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -42,7 +42,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"dvpWiener", (DL_FUNC) &dvpWiener, 10},
     {"dwpWiener", (DL_FUNC) &dwpWiener, 10},
 
-    {"dxdWiener", (DL_FUNC) &dxdWiener, 10},
+    {"dxdWiener", (DL_FUNC) &dxdWiener, 11},
     {"dxpWiener", (DL_FUNC) &dxpWiener, 10},
 
     {"dDiffusion7", (DL_FUNC) &dDiffusion7, 16},

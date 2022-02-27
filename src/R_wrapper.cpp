@@ -544,14 +544,15 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dxdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dxdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -580,7 +581,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dxPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
+		dxPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
 
 
 		/* set elements of list out */
