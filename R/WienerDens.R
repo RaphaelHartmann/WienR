@@ -124,7 +124,7 @@ WienerPDF <- function(t,
 
   out <- list(pdf = rep(NA, max_len), logpdf = rep(NA, max_len))
 
-  if (length(indW) > 0) {print("hier")
+  if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
     temp <- .Call("dWiener",
                   as.numeric(ifelse(tt<0, 0, tt)),

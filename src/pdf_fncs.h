@@ -40,11 +40,11 @@ double dwiener(double, double, double, double, double, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dt DENSITY */
-void dtdwiener(double, double, double, double, double, double *, double, int, int);
+void dtdwiener(double, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/da DENSITY */
-void dadwiener(double, double, double, double, double, double *, double, int, int);
+void dadwiener(double, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dv DENSITY */

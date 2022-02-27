@@ -13,8 +13,8 @@ bool update_intervals(int k, double totallow, point new_point, std::vector<point
 double fun_lower(int k, double x, std::vector<point> h, std::vector<piece> lower);
 double inverse_distribution(int k, double xstar, std::vector<piece> upper, std::vector<double> s, double bound, bool& flag);
 
-double dwiener_d(double q, double a, double vn, double wn, double leps);
-double dtdwiener_d(double q, double a, double v, double w, double &ld, double leps);
+double dwiener_d(double q, double a, double vn, double wn, double sv, double leps);
+double dtdwiener_d(double q, double a, double v, double w, double sv, double &ld, double leps);
 int int_ddiff_d(unsigned dim, const double *x, void *p, unsigned fdim, double *retval);
 double ddiff_d(double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr);
 int int_dtddiff_d(unsigned dim, const double* x, void* p, unsigned fdim, double* retval);

@@ -123,7 +123,7 @@ void CDF(double *t, double *a, double *v, double *w, double eps, int *resp, int 
 
 /* partial derivs with respect to each param of PDF */
   /* derivative of PDF with respect to t */
-void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, int K, int N, int epsFLAG, double *Rderiv, int NThreads) {
+void dtPDF(double *t, double *a, double *v, double *w, double *sv, double eps, int *resp, int K, int N, int epsFLAG, double *Rderiv, int NThreads) {
 
   if (NThreads) {
     /* prepare threads */
@@ -139,9 +139,9 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
       threads[j] = std::thread([=]() {
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double pm = (resp[i]==1) ? 1.0 : -1.0;
-          double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
+          double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
           double mp = -static_cast<double>(pm);
-          dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, ld, &Rderiv[i], eps, K, epsFLAG);
+          dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
         }
       });
     }
@@ -149,9 +149,9 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
     int last = NperThread * (AmntOfThreads-1);
     for (int i = last; i < N; i++) {
       double pm = (resp[i]==1) ? 1.0 : -1.0;
-      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
+      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
       double mp = -static_cast<double>(pm);
-      dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, ld, &Rderiv[i], eps, K, epsFLAG);
+      dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
     }
 
     for (int j = 0; j < AmntOfThreads-1; j++) {
@@ -163,16 +163,16 @@ void dtPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
     for(int i = 0; i < N; i++) {
       if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
-      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
+      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
       double mp = -static_cast<double>(pm);
-      dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, ld, &Rderiv[i], eps, K, epsFLAG);
+      dtdwiener(t[i], a[i], v[i]*mp, (resp[i]-w[i])*pm, sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
     }
   }
 
 }
 
   /* derivative of PDF with respect to a */
-void daPDF(double *t, double *a, double *v, double *w, double eps, int *resp, int K, int N, int epsFLAG, double *Rderiv, int NThreads) {
+void daPDF(double *t, double *a, double *v, double *w, double *sv, double eps, int *resp, int K, int N, int epsFLAG, double *Rderiv, int NThreads) {
 
   if (NThreads) {
     /* prepare threads */
@@ -188,8 +188,8 @@ void daPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
       threads[j] = std::thread([=]() {
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double pm = (resp[i]==1) ? 1.0 : -1.0;
-          double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
-          dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &Rderiv[i], eps, K, epsFLAG);
+          double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
+          dadwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
         }
       });
     }
@@ -197,8 +197,8 @@ void daPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
     int last = NperThread * (AmntOfThreads-1);
     for (int i = last; i < N; i++) {
       double pm = (resp[i]==1) ? 1.0 : -1.0;
-      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
-      dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &Rderiv[i], eps, K, epsFLAG);
+      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
+      dadwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
     }
 
     for (int j = 0; j < AmntOfThreads-1; j++) {
@@ -210,8 +210,8 @@ void daPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
     for(int i = 0; i < N; i++) {
       if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
-      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
-      dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &Rderiv[i], eps, K, epsFLAG);
+      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
+      dadwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
     }
   }
 
@@ -525,7 +525,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           double pm = (resp[i]==1) ? 1.0 : -1.0;
           double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
-          dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &da[i], eps, K, epsFLAG);
+          dadwiener(t[i]*pm, a[i], v[i], w[i], 0, ld, &da[i], eps, K, epsFLAG);
           dvdwiener(t[i]*pm, a[i], v[i], w[i], ld, &dv[i]);
           dwdwiener(t[i]*pm, a[i], v[i], w[i], 0, ld, &dw[i], eps, K, epsFLAG);
         }
@@ -536,7 +536,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
     for (int i = last; i < N; i++) {
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
-      dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &da[i], eps, K, epsFLAG);
+      dadwiener(t[i]*pm, a[i], v[i], w[i], 0, ld, &da[i], eps, K, epsFLAG);
       dvdwiener(t[i]*pm, a[i], v[i], w[i], ld, &dv[i]);
       dwdwiener(t[i]*pm, a[i], v[i], w[i], 0, ld, &dw[i], eps, K, epsFLAG);
     }
@@ -551,7 +551,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double eps, int *resp, in
       if (i % 1024 == 0) R_CheckUserInterrupt();
       double pm = (resp[i]==1) ? 1.0 : -1.0;
       double ld = dwiener(t[i]*pm, a[i], v[i], w[i], 0, eps, K, epsFLAG);
-      dadwiener(t[i]*pm, a[i], v[i], w[i], ld, &da[i], eps, K, epsFLAG);
+      dadwiener(t[i]*pm, a[i], v[i], w[i], 0, ld, &da[i], eps, K, epsFLAG);
       dvdwiener(t[i]*pm, a[i], v[i], w[i], ld, &dv[i]);
       dwdwiener(t[i]*pm, a[i], v[i], w[i], 0, ld, &dw[i], eps, K, epsFLAG);
     }

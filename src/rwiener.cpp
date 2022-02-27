@@ -196,7 +196,7 @@ double inverse_distribution(int k, double xstar, std::vector<piece> upper, std::
 
 
 
-double dwiener_d(double q, double a, double vn, double wn, double leps) {
+double dwiener_d(double q, double a, double vn, double wn, double sv, double leps) {
 	double kll, kss, ans, v, w;
 	double errziel = leps;
 	double err = leps * 1.2;
@@ -213,7 +213,10 @@ double dwiener_d(double q, double a, double vn, double wn, double leps) {
 	}
 
 	double q_asq = q / pow(a, 2);
-	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2) - 2 * std::log(a);
+	double eta_sqr = pow(sv, 2);
+	double temp = 1 + eta_sqr * q;
+	double lg1 = (eta_sqr * pow(a * w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 *std::log(a) - 0.5 *std::log(temp);
+	//double lg1 = (-v * a * w - (pow(v, 2)) * q / 2) - 2 * std::log(a);
 
 NEW:
 	ans = 0;
@@ -243,7 +246,7 @@ NEW:
 	return ans;
 }
 
-double dtdwiener_d(double q, double a, double v, double w, double &ld, double leps)
+double dtdwiener_d(double q, double a, double v, double w, double sv, double &ld, double leps)
 {
 	double kll, kss, ans;
 	//	double err = 1e-12;
@@ -253,10 +256,13 @@ double dtdwiener_d(double q, double a, double v, double w, double &ld, double le
 	//1.e-12
 
 	double q_asq = q / pow(a, 2);
-
-	double ans0 = -pow(v, 2) / 2.0;
 	double la = 2.0 * std::log(a);
-	double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	//double ans0 = -pow(v, 2) / 2.0;
+	//double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	double eta_sqr = pow(sv, 2);
+	double tempx = (1 + eta_sqr * q);
+	double ans0 = -0.5 * (pow(eta_sqr, 2) * (q + pow(a * w, 2)) + eta_sqr * (1 - 2 * a * v * w) + pow(v, 2)) / pow(tempx, 2);
+	double lg1 = (eta_sqr * pow(a * w,  2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / tempx - la - 0.5 * std::log(tempx);
 	double factor = lg1 - la;
 
 
@@ -306,7 +312,7 @@ NEW:
 //		std::cout << setw(20) << err << setw(20) << check << std::endl;
 //		MONITOR(1, 6)++;
 		err = errziel*(1 + zahl*0.1) - check;
-		ld = dwiener_d(-q, a, v, w, err);
+		ld = dwiener_d(-q, a, v, w, sv, err);
 		goto NEW;
 	}
 //	else std::cout << "okay" << std::endl;
@@ -435,22 +441,22 @@ int int_dtddiff_d(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
 	double temp = sv ? pow(x[0], 2) : 0;
 	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
+	//double nu = sv ? v + sv * y : v;
 	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
 	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, 0, errorW, 0, 1);
 
 		double temp2 = 0;
-		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
 		double dt;
-		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, &dt, errorW, 0, 1);
+		dtdwiener(t-tau, a, -low_or_up*v, wn, sv, ldW, &dt, errorW, 0, 1);
 
 		double integrand = dt * exp(temp2);
 
@@ -537,9 +543,9 @@ void wiener_comp(double start, double scale, double norm, double alpha, double a
 	h.x = alpha;
 	double t = exp(alpha * scale + start);
 
-	if (sv == 0.0 && sw == 0.0) {
-		h.h = dwiener_d(-t, a, v, w, -27.63102);
-		h.dh = dtdwiener_d(t, a, v, w, h.h, -23.02585);
+	if (sw == 0.0) {
+		h.h = dwiener_d(-t, a, v, w, sv, -27.63102);
+		h.dh = dtdwiener_d(t, a, v, w, sv, h.h, -23.02585);
 	} else {
 		h.h = ddiff_d(t, -1, a, v, 0.0, w, sw, sv, 0.0, 1.e-9);
 		h.dh = dtdiff_d(t, -1, a, v, 0.0, w, sw, sv, 0.0, 1.e-7, h.h);

@@ -14,9 +14,9 @@
 
 /* partial derivs with respect to each param of PDF */
   /* derivative of PDF with respect to t */
-  void dtPDF(double *, double *, double *, double *, double, int *, int, int, int, double *, int);
+  void dtPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, int);
   /* derivative of PDF with respect to a */
-  void daPDF(double *, double *, double *, double *, double, int *, int, int, int, double *, int);
+  void daPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, int);
   /* derivative of PDF with respect to v */
   void dvPDF(double *, double *, double *, double *, double, int *, int, int, int, double *, int);
   /* derivative of PDF with respect to w */
