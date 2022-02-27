@@ -12,7 +12,7 @@
 extern SEXP dWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dtdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dadWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP dvdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP dvdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dwdWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP pWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP dapWiener(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -35,7 +35,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"dWiener", (DL_FUNC) &dWiener, 11},
     {"dtdWiener", (DL_FUNC) &dtdWiener, 11},
     {"dadWiener", (DL_FUNC) &dadWiener, 11},
-    {"dvdWiener", (DL_FUNC) &dvdWiener, 10},
+    {"dvdWiener", (DL_FUNC) &dvdWiener, 11},
     {"dwdWiener", (DL_FUNC) &dwdWiener, 11},
     {"pWiener", (DL_FUNC) &pWiener, 10},
     {"dapWiener", (DL_FUNC) &dapWiener, 10},

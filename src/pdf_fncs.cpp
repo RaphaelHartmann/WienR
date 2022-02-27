@@ -299,7 +299,7 @@ void dadwiener(double q, double a, double vn, double wn, double sv, double ld, d
 /* d/dv DENSITY */
 
 /* calculate derivative of density with respect to v */
-void dvdwiener(double q, double a, double vn, double wn, double ld, double *derivF) {
+void dvdwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF) {
 	if (q == 0.0) {
 		*derivF = 0.0;
 	} else {
@@ -316,8 +316,11 @@ void dvdwiener(double q, double a, double vn, double wn, double ld, double *deri
 			w = wn;
 			v = vn;
 		}
+		
+		double temp = 1 + pow(sv, 2) * q;
 
-		ans =  sign*(- a * w - v * q);
+		ans = sign*(-a * w - v * q) / temp;
+		//¨ans =  sign*(- a * w - v * q);
 
 		*derivF = ans*exp(ld);
 	}

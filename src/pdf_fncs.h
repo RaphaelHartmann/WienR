@@ -48,7 +48,7 @@ void dadwiener(double, double, double, double, double, double, double *, double,
 /*-----------------------------------------------*/
 
 /* d/dv DENSITY */
-void dvdwiener(double, double, double, double, double, double *);
+void dvdwiener(double, double, double, double, double, double, double *);
 /*-----------------------------------------------*/
 
 /* d/dw DENSITY */
