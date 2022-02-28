@@ -21,6 +21,8 @@
   void dvPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, int);
   /* derivative of PDF with respect to w */
   void dwPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, int);
+  /* derivative of PDF with respect to sv */
+  void dsvPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, int);
 /* ------------------------------------------------ */
 
 /* partial derivs with respect to each param of CDF */

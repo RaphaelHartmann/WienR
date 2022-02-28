@@ -448,7 +448,36 @@ void dwdwiener(double q, double a, double vn, double wn, double sv, double ld, d
 
 
 
-/* d/dw DENSITY */
+/* d/dsv DENSITY */
+
+void dsvdwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF, double err, int K, int epsFLAG) {
+  if (q == 0.0) {
+    *derivF = 0.0;
+  } else {
+    double v, w;
+    
+    if (q < 0) {
+      v = vn;
+      w = wn;
+      q = fabs(q);
+    }
+    else {
+      v = -vn;
+      w = 1 - wn;
+    }
+    double temp = 1 + pow(sv, 2) * q;
+    double t1 = -q / temp;
+    double t2 = (pow(a * w, 2) + 2 * a * v * w * q + pow(v * q, 2)) / pow(temp, 2);
+    
+    //return ans*sign;
+    *derivF = sv * (t1 + t2) * exp(ld);
+  }
+}
+/*-----------------------------------------------*/
+
+
+
+/* grad DENSITY */
 
 /* calculate number of terms needed for short t */
 void dxks(double q, double t, double w, double a, double eps, double &Kas, double &Kws) {

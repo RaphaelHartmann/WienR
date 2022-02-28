@@ -307,6 +307,64 @@ extern "C" {
 
 
 extern "C" {
+  
+  SEXP dsvdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+    
+    /* define input variables */
+    double *t = REAL(re1);
+    double *a = REAL(re2);
+    double *v = REAL(re3);
+    double *w = REAL(re4);
+    double *sv = REAL(re5);
+    double eps = REAL(re6)[0];
+    
+    int *resp = INTEGER(in1);
+    int K = INTEGER(in2)[0];
+    int N = INTEGER(in3)[0];
+    int NThreads = INTEGER(in4)[0];
+    
+    int epsFLAG = INTEGER(bo1)[0];
+    
+    
+    /* declare R objects for output */
+    int outCnt = 0, prtCnt = 0;
+    SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
+    prtCnt = outCnt + 1;
+    
+    
+    /* declare C++ pointers for R objects */
+    double *Rderiv = REAL(deriv);
+    
+    
+    /* calculate the derivatives */
+    dsvPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
+    
+    
+    /* set elements of list out */
+    SET_VECTOR_ELT(out,0,deriv);
+    
+    
+    /* make name vector and set element names */
+    SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
+    prtCnt++;
+    SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
+    
+    Rf_setAttrib(out,R_NamesSymbol,names);
+    
+    
+    /* Unprotect the out and names objects */
+    UNPROTECT(prtCnt);
+    
+    return(out);
+  }
+  
+}
+
+
+
+extern "C" {
 
 	SEXP pWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 

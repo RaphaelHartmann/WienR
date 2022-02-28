@@ -308,6 +308,53 @@ void dwPDF(double *t, double *a, double *v, double *w, double *sv, double eps, i
   }
 
 }
+
+
+  /* derivative of PDF with respect to sv */
+void dsvPDF(double *t, double *a, double *v, double *w, double *sv, double eps, int *resp, int K, int N, int epsFLAG, double *Rderiv, int NThreads) {
+  
+  if (NThreads) {
+    /* prepare threads */
+    int maxThreads = std::thread::hardware_concurrency();
+    if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+    int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+    int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+    int NperThread = N / AmntOfThreads;
+    std::vector<std::thread> threads(AmntOfThreads-1);
+    
+    /* calculate derivative with parallelization */
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j] = std::thread([=]() {
+        for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          double pm = (resp[i]==1) ? 1.0 : -1.0;
+          double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
+          dsvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
+        }
+      });
+    }
+    
+    int last = NperThread * (AmntOfThreads-1);
+    for (int i = last; i < N; i++) {
+      double pm = (resp[i]==1) ? 1.0 : -1.0;
+      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
+      dsvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
+    }
+    
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j].join();
+    }
+    
+  } else {
+    /* calculate derivative without parallelization */
+    for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
+      double pm = (resp[i]==1) ? 1.0 : -1.0;
+      double ld = dwiener(t[i]*pm, a[i], v[i], w[i], sv[i], eps, K, epsFLAG);
+      dsvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &Rderiv[i], eps, K, epsFLAG);
+    }
+  }
+  
+}
 /* ------------------------------------------------ */
 
 
