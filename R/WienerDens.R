@@ -122,7 +122,7 @@ WienerPDF <- function(t,
   indW <- which(sw==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
-  out <- list(pdf = rep(NA, max_len), logpdf = rep(NA, max_len))
+  out <- list(pdf = rep(NA, max_len), logpdf = rep(NA, max_len), err = rep(precision, max_len))
 
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
@@ -163,13 +163,15 @@ WienerPDF <- function(t,
     )
     out$pdf[indD] <- temp$pdf
     out$logpdf[indD] <- temp$logpdf
+    out$err[indD] <- temp$err
   }
 
 
   #print(out)
 
   outcome <- list(value = out$pdf, logvalue = out$logpdf, call = match.call())
-
+  if (length(indD) > 0) outcome$err = out$err
+  
   # output
   class(outcome) <- "Diffusion_pdf"
   return(outcome)

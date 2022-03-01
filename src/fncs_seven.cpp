@@ -332,24 +332,24 @@ int int_dst0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	//double temp = sv ? pow(x[0], 2) : 0;
-	//double y = sv ? x[0] / (1 - temp) : 0;
-	//double nu = sv ? v + sv * y : v;
-	double omega = sw ? w + sw * (x[0] - 0.5) : w;
-	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
-	double temp_st0 = sw ? -x[1] : -x[0];
+	double temp = sv ? pow(x[0], 2) : 0;
+	double y = sv ? x[0] / (1 - temp) : 0;
+	double nu = sv ? v + sv * y : v;
+	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
+	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
+	double temp_st0 = sw ? (sv ? -x[2] : -x[1]) : (sv ? -x[1] : -x[0]);
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
 
 		double temp2 = 0;
-		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
-		dtdwiener(t-tau, a, -low_or_up*v, wn, sv, ldW, val_ptr, errorW, K, epsFLAG);
+		dtdwiener(t-tau, a, -low_or_up*nu, wn, 0, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = temp_st0 * val_ptr[0] * exp(temp2);
 
@@ -600,40 +600,43 @@ int int_dvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 
 /* integrand d/dt0 */
 int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
-	my_params *params = static_cast<my_params*>(p);
-	double t = (params->t);
-	int low_or_up = (params->low_or_up);
-	double a = (params->a);
-	double v = (params->v);
-	double t0 = (params->t0);
-	double w = (params->w);
-	double sw = (params->sw);
-	double sv = (params->sv);
-	double st = (params->st);
-	double errorW = (params->errorW);
-	int K = (params->K);
-	int epsFLAG = (params->epsFLAG);
-	// double *val_ptr = (params->val_ptr);
-
-	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
-
-	if (t - tau <= 0) retval[0] = 0.0;
-	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
-
-		double temp2 = 0;
-		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
-
-		double integrand = -exp(ldW + temp2);
-
-		retval[0] = integrand;
-	}
-	return 0;
+  my_params *params = static_cast<my_params*>(p);
+  double t = (params->t);
+  int low_or_up = (params->low_or_up);
+  double a = (params->a);
+  double v = (params->v);
+  double t0 = (params->t0);
+  double w = (params->w);
+  double sw = (params->sw);
+  double sv = (params->sv);
+  double st = (params->st);
+  double errorW = (params->errorW);
+  int K = (params->K);
+  int epsFLAG = (params->epsFLAG);
+  // double *val_ptr = (params->val_ptr);
+  
+  // usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
+  //double temp = sv ? pow(x[0], 2) : 0;
+  //double y = sv ? x[0] / (1 - temp) : 0;
+  //double nu = sv ? v + sv * y : v;
+  //double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
+  //double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
+  // usually: 0  = omega (w), 1 = tau (t0), depending on whether sv, sw, or st = 0
+  double omega = sw ? w + sw * (x[0] - 0.5) : w;
+  double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
+  
+  if (t - tau <= 0) retval[0] = 0.0;
+  else {
+    double ldW = dwiener(low_or_up * (t - tau), a, v, omega, sv, errorW, K, epsFLAG);
+    
+    double temp2 = 0;
+    //if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
+    
+    double integrand = -exp(ldW + temp2);
+    
+    retval[0] = integrand;
+  }
+  return 0;
 }
 
 /* integrand d/dz */

@@ -120,7 +120,7 @@ WienerCDF <- function(t,
   indW <- which(sw==0 & sv==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
-  out <- list(cdf = rep(NA, max_len), logcdf = rep(NA, max_len))
+  out <- list(cdf = rep(NA, max_len), logcdf = rep(NA, max_len), err = rep(precision, max_len))
 
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
@@ -160,13 +160,15 @@ WienerCDF <- function(t,
     )
     out$cdf[indD] <- temp$cdf
     out$logcdf[indD] <- temp$logcdf
+    out$err[indD] <- temp$err
   }
 
 
   #print(out)
 
   outcome <- list(value = out$cdf, logvalue = out$logcdf, call = match.call())
-
+  if (length(indD) > 0) outcome$err = out$err
+  
   # output
   class(outcome) <- "Diffusion_cdf"
   return(outcome)
