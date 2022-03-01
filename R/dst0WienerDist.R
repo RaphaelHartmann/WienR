@@ -105,7 +105,7 @@ dst0WienerCDF <- function(t,
   if(n.threads < 2) n.threads <- 0
 
   # num. integral evaluation checks
-  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+  if(any(sw!=0) | any(st0!=0)) {
     if(!is.numeric(n.evals)) stop("n.evals must numeric")
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
@@ -113,7 +113,7 @@ dst0WienerCDF <- function(t,
 
   # --- C++ FUNCTION CALL ---- #
 
-  out <- .Call("pDiffusion7",
+  out <- .Call("dDiffusion7",
                as.numeric(t),
                as.numeric(a),
                as.numeric(v),
@@ -127,7 +127,7 @@ dst0WienerCDF <- function(t,
                as.integer(K),
                as.integer(max_len),
                as.integer(n.threads),
-               as.integer(7),
+               as.integer(9),
                as.integer(n.evals),
                as.logical(PRECISION_FLAG)
   )

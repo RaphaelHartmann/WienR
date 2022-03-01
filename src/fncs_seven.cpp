@@ -332,24 +332,24 @@ int int_dst0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
-	double temp_st0 = sw ? (sv ? -x[2] : -x[1]) : (sv ? -x[1] : -x[0]);
+	//double temp = sv ? pow(x[0], 2) : 0;
+	//double y = sv ? x[0] / (1 - temp) : 0;
+	//double nu = sv ? v + sv * y : v;
+	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
+	double temp_st0 = sw ? -x[1] : -x[0];
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
 
 		double temp2 = 0;
-		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
-		dtdwiener(t-tau, a, -low_or_up*nu, wn, 0, ldW, val_ptr, errorW, K, epsFLAG);
+		dtdwiener(t-tau, a, -low_or_up*v, wn, sv, ldW, val_ptr, errorW, K, epsFLAG);
 
 		double integrand = temp_st0 * val_ptr[0] * exp(temp2);
 
@@ -456,6 +456,7 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 		case 6: hcubature(1, int_dsvddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 7: hcubature(1, int_dst0ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 8: hcubature(1, int_dtddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+	  case 9: hcubature(1, int_dst0pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 	}
 	//if(err > abstol) Rprintf("absolute error not achieved: %g < %g\n", abstol, err);
 
@@ -598,7 +599,7 @@ int int_dvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	return 0;
 }
 
-/* integrand d/dt0 */
+/* integrand d/dt0 */ // not needed anymore. Can be done by just taking -PDF 
 int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
   my_params *params = static_cast<my_params*>(p);
   double t = (params->t);
@@ -637,7 +638,7 @@ int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
     retval[0] = integrand;
   }
   return 0;
-}
+} 
 
 /* integrand d/dz */
 int int_dwpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
@@ -788,19 +789,19 @@ int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
-	double temp_st0 = sw ? (sv ? -x[2] : -x[1]) : (sv ? -x[1] : -x[0]);
+	//double temp = sv ? pow(x[0], 2) : 0;
+	//double y = sv ? x[0] / (1 - temp) : 0;
+	//double nu = sv ? v + sv * y : v;
+	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
+	double temp_st0 = sw ? -x[1] : -x[0];
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, 0, errorW, K, epsFLAG);
+		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
 
 		double temp2 = 0;
-		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
 		double integrand = temp_st0 * exp(ldW + temp2);
 
@@ -859,7 +860,7 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 		case 4: hcubature(1, int_dwpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 5: hcubature(1, int_dswpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 		case 6: hcubature(1, int_dsvpdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
-		case 7: hcubature(1, int_dst0pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
+		//case 7: hcubature(1, int_dst0pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err); break;
 	}
 	//if(err > abstol) Rprintf("absolute error not achieved: %g < %g\n", abstol, err);
 
