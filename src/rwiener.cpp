@@ -226,11 +226,14 @@ NEW:
 	kll = kl(q_asq, v, w, el);
 
 
-	if (2 * kss < kll)  // if small t is better
+	if (2 * kss < kll) {  // if small t is better
 		ans = lg1 + logfs(q_asq, w, static_cast<int>(kss));
-	else
-	// if large t is better...
-	ans = lg1 + logfl(q_asq, v, w, static_cast<int>(kll));
+	}
+	else {// if large t is better...
+	  ans = lg1 + logfl(q_asq, v, w, static_cast<int>(kll));
+  }
+	
+	
 
 	zahl++; // MONITOR(0, 5)++;
 	if (zahl == 10) {
@@ -337,19 +340,19 @@ int int_ddiff_d(unsigned dim, const double *x, void *p, unsigned fdim, double *r
 	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
+	//double temp = sv ? pow(x[0], 2) : 0;
+	//double y = sv ? x[0] / (1 - temp) : 0;
+	//double nu = sv ? v + sv * y : v;
+	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t - tau), a, nu, omega, 0, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t - tau), a, v, omega, sv, errorW, 0, 1);
 		// double ldW = dwiener_d(low_or_up * (t - tau), a, nu, omega, std::log(errorW));
 
 		double temp2 = 0;
-		if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
+		//if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
 
 		double integrand = exp(ldW + temp2);
 // if (integrand == 0) integrand = exp(-700);
@@ -375,24 +378,24 @@ NEW:
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, 0, 1, val_ptr};
 
-	int dim = (sw!=0)+(sv!=0)+(st!=0);
+	int dim = (sw!=0)+(st!=0);
 
 	double *xmin = (double*)malloc(dim * sizeof(double));
 	double *xmax = (double*)malloc(dim * sizeof(double));
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
-	if(sv) {
-		xmin[0] = -1; xmax[0] = 1;
-		for (int i = 1; i < dim; i++) {
-			xmin[i] = 0;
-			xmax[i] = 1;
-		}
-	} else {
+	// if(sv) {
+	// 	xmin[0] = -1; xmax[0] = 1;
+	// 	for (int i = 1; i < dim; i++) {
+	// 		xmin[i] = 0;
+	// 		xmax[i] = 1;
+	// 	}
+	// } else {
 		for (int i = 0; i < dim; i++) {
 			xmin[i] = 0;
 			xmax[i] = 1;
 		}
-	}
+	// }
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
@@ -439,15 +442,15 @@ int int_dtddiff_d(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
+	//double temp = sv ? pow(x[0], 2) : 0;
+	//double y = sv ? x[0] / (1 - temp) : 0;
 	//double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
+	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, 0, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, 0, 1);
 
 		double temp2 = 0;
 		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
@@ -480,24 +483,24 @@ NEW:
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, 0, 1, val_ptr};
 
-	int dim = (sw!=0)+(sv!=0)+(st!=0);
+	int dim = (sw!=0)+(st!=0);
 
 	double *xmin = (double*)malloc(dim * sizeof(double));
 	double *xmax = (double*)malloc(dim * sizeof(double));
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
-	if(sv) {
-		xmin[0] = -1; xmax[0] = 1;
-		for (int i = 1; i < dim; i++) {
-			xmin[i] = 0;
-			xmax[i] = 1;
-		}
-	} else {
+	// if(sv) {
+	// 	xmin[0] = -1; xmax[0] = 1;
+	// 	for (int i = 1; i < dim; i++) {
+	// 		xmin[i] = 0;
+	// 		xmax[i] = 1;
+	// 	}
+	// } else {
 		for (int i = 0; i < dim; i++) {
 			xmin[i] = 0;
 			xmax[i] = 1;
 		}
-	}
+	// }
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
