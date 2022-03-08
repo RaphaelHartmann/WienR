@@ -168,7 +168,7 @@ int int_dt0ddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	// usually: 0  = omega (w), 1 = tau (t0), depending on whether sv, sw, or st = 0
 	double omega = sw ? w + sw * (x[0] - 0.5) : w;
 	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
-	
+
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
 		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
@@ -420,8 +420,8 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	int dim = (sw!=0)+(st!=0);
 
-	double *xmin = (double*)malloc(dim * sizeof(double));
-	double *xmax = (double*)malloc(dim * sizeof(double));
+	double *xmin = (double*)R_Calloc(dim, double);
+	double *xmax = (double*)R_Calloc(dim, double);
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
 //	if(sv) {
@@ -460,7 +460,7 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	}
 	//if(err > abstol) Rprintf("absolute error not achieved: %g < %g\n", abstol, err);
 
-	free(xmin); free(xmax);
+	R_Free(xmin); R_Free(xmax);
 	*derivF = val;
 	if (*Rerr < err+errorW) *Rerr = err+errorW;
 
@@ -599,7 +599,7 @@ int int_dvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	return 0;
 }
 
-/* integrand d/dt0 */ // not needed anymore. Can be done by just taking -PDF 
+/* integrand d/dt0 */ // not needed anymore. Can be done by just taking -PDF
 int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
   my_params *params = static_cast<my_params*>(p);
   double t = (params->t);
@@ -615,7 +615,7 @@ int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
   int K = (params->K);
   int epsFLAG = (params->epsFLAG);
   // double *val_ptr = (params->val_ptr);
-  
+
   // usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
   //double temp = sv ? pow(x[0], 2) : 0;
   //double y = sv ? x[0] / (1 - temp) : 0;
@@ -625,20 +625,20 @@ int int_dt0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
   // usually: 0  = omega (w), 1 = tau (t0), depending on whether sv, sw, or st = 0
   double omega = sw ? w + sw * (x[0] - 0.5) : w;
   double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
-  
+
   if (t - tau <= 0) retval[0] = 0.0;
   else {
     double ldW = dwiener(low_or_up * (t - tau), a, v, omega, sv, errorW, K, epsFLAG);
-    
+
     double temp2 = 0;
     //if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
-    
+
     double integrand = -exp(ldW + temp2);
-    
+
     retval[0] = integrand;
   }
   return 0;
-} 
+}
 
 /* integrand d/dz */
 int int_dwpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
@@ -826,8 +826,8 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 
 	int dim = (sw!=0)+(sv!=0)+(st!=0);
 
-	double *xmin = (double*)malloc(dim * sizeof(double));
-	double *xmax = (double*)malloc(dim * sizeof(double));
+	double *xmin = (double*)R_Calloc(dim, double);
+	double *xmax = (double*)R_Calloc(dim, double);
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
 	if(sv) {
@@ -864,7 +864,7 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	}
 	//if(err > abstol) Rprintf("absolute error not achieved: %g < %g\n", abstol, err);
 
-	free(xmin); free(xmax);
+	R_Free(xmin); R_Free(xmax);
 	*derivF = val;
 	if (*Rerr < err+errorW) *Rerr = err+errorW;
 

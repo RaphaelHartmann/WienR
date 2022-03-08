@@ -232,8 +232,8 @@ NEW:
 	else {// if large t is better...
 	  ans = lg1 + logfl(q_asq, v, w, static_cast<int>(kll));
   }
-	
-	
+
+
 
 	zahl++; // MONITOR(0, 5)++;
 	if (zahl == 10) {
@@ -380,8 +380,8 @@ NEW:
 
 	int dim = (sw!=0)+(st!=0);
 
-	double *xmin = (double*)malloc(dim * sizeof(double));
-	double *xmax = (double*)malloc(dim * sizeof(double));
+	double *xmin = (double*)R_Calloc(dim, double);
+	double *xmax = (double*)R_Calloc(dim, double);
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
 	// if(sv) {
@@ -411,7 +411,7 @@ NEW:
 	cnt++;
 	if (cnt == 10) {
 		Rprintf("cnt = 10 %20g%20g%20g%20g%20g\n", t, a, v, w, newerror*.1);
-		free(xmin); free(xmax);
+		R_Free(xmin); R_Free(xmax);
 		return logval;
 	}
 
@@ -420,7 +420,7 @@ NEW:
 		goto NEW;
 	}
 
-	free(xmin); free(xmax);
+	R_Free(xmin); R_Free(xmax);
 	return logval;
 
 }
@@ -485,8 +485,8 @@ NEW:
 
 	int dim = (sw!=0)+(st!=0);
 
-	double *xmin = (double*)malloc(dim * sizeof(double));
-	double *xmax = (double*)malloc(dim * sizeof(double));
+	double *xmin = (double*)R_Calloc(dim, double);
+	double *xmax = (double*)R_Calloc(dim, double);
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
 	// if(sv) {
@@ -516,7 +516,7 @@ NEW:
 	cnt++;
 	if(cnt == 10) {
 		Rprintf("cnt dt = 10\n");
-		free(xmin); free(xmax);
+		R_Free(xmin); R_Free(xmax);
 		return val * exp(-d);
 	}
 
@@ -537,7 +537,7 @@ NEW:
 	}
 
 
-	free(xmin); free(xmax);
+	R_Free(xmin); R_Free(xmax);
 	return val * exp(-d);
 
 }

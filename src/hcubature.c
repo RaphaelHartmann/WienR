@@ -33,6 +33,7 @@
 #include <limits.h>
 #include <float.h>
 #include <Rinternals.h>
+#include <R.h>
 
 /* Adaptive multidimensional integration on hypercubes (or, really,
    hyper-rectangles) using cubature rules.
@@ -146,7 +147,7 @@ static hypercube make_hypercube(unsigned dim, const double *center, const double
   unsigned i;
   hypercube h;
   h.dim = dim;
-  h.data = (double *) malloc(sizeof(double) * dim * 2);
+  h.data = (double *) R_Calloc(dim * 2, double);
   h.vol = 0;
   if (h.data) {
     for (i = 0; i < dim; ++i) {
@@ -174,7 +175,7 @@ static hypercube make_hypercube_range(unsigned dim, const double *xmin, const do
 
 static void destroy_hypercube(hypercube *h)
 {
-  free(h->data);
+  R_Free(h->data);
   h->dim = 0;
 }
 
@@ -192,7 +193,7 @@ static region make_region(const hypercube *h, unsigned fdim)
   R.h = make_hypercube(h->dim, h->data, h->data + h->dim);
   R.splitDim = 0;
   R.fdim = fdim;
-  R.ee = R.h.data ? (esterr *) malloc(sizeof(esterr) * fdim) : NULL;
+  R.ee = R.h.data ? (esterr *) R_Calloc(fdim, esterr) : NULL;
   R.errmax = HUGE_VAL;
   return R;
 }
@@ -200,7 +201,7 @@ static region make_region(const hypercube *h, unsigned fdim)
 static void destroy_region(region *R)
 {
   destroy_hypercube(&R->h);
-  free(R->ee);
+  R_Free(R->ee);
   R->ee = 0;
 }
 
@@ -214,7 +215,7 @@ static int cut_region(region *R, region *R2)
   if (!R2->h.data) return FAILURE;
   R->h.data[d] -= R->h.data[d + dim];
   R2->h.data[d] += R->h.data[d + dim];
-  R2->ee = (esterr *) malloc(sizeof(esterr) * R2->fdim);
+  R2->ee = (esterr *) R_Calloc(R2->fdim, esterr);
   return R2->ee == NULL;
 }
 
@@ -240,24 +241,24 @@ static void destroy_rule(rule *r)
 {
   if (r) {
     if (r->destroy) r->destroy(r);
-    free(r->pts);
-    free(r);
+    R_Free(r->pts);
+    R_Free(r);
   }
 }
 
 static int alloc_rule_pts(rule *r, unsigned num_regions)
 {
   if (num_regions > r->num_regions) {
-    free(r->pts);
+    R_Free(r->pts);
     r->pts = r->vals = NULL;
     r->num_regions = 0;
     num_regions *= 2; /* allocate extra so that
     repeatedly calling alloc_rule_pts with
     growing num_regions only needs
     a logarithmic number of allocations */
-    r->pts = (double *) malloc(sizeof(double) *
+    r->pts = (double *) R_Calloc(
     (num_regions
-      * r->num_points * (r->dim + r->fdim)));
+      * r->num_points * (r->dim + r->fdim)), double);
     if (r->fdim + r->dim > 0 && !r->pts) return FAILURE;
     r->vals = r->pts + num_regions * r->num_points * r->dim;
     r->num_regions = num_regions;
@@ -272,7 +273,7 @@ static rule *make_rule(size_t sz, /* >= sizeof(rule) */
   rule *r;
 
   if (sz < sizeof(rule)) return NULL;
-  r = (rule *) malloc(sz);
+  r = (rule *) R_Calloc(sz, rule);
   if (!r) return NULL;
   r->pts = r->vals = NULL;
   r->num_regions = 0;
@@ -467,7 +468,7 @@ static int isqr(int x)
 static void destroy_rule75genzmalik(rule *r_)
 {
   rule75genzmalik *r = (rule75genzmalik *) r_;
-  free(r->p);
+  R_Free(r->p);
 }
 
 // // version 1.4
@@ -796,7 +797,7 @@ static rule *make_rule75genzmalik(unsigned dim, unsigned fdim)
   / real(729));
   r->weightE3 = real(265 - 100 * to_int(dim)) / real(1458);
 
-  r->p = (double *) malloc(sizeof(double) * dim * 3);
+  r->p = (double *) R_Calloc(dim * 3, double);
   if (!r->p) { destroy_rule((rule *) r); return NULL; }
   r->widthLambda = r->p + dim;
   r->widthLambda2 = r->p + 2 * dim;
@@ -977,7 +978,7 @@ static void heap_resize(heap *h, size_t nalloc)
     h->items = (heap_item *) realloc(h->items, sizeof(heap_item)*nalloc);
   else {
     /* BSD realloc does not free for a zero-sized reallocation */
-    free(h->items);
+    R_Free(h->items);
     h->items = NULL;
   }
 }
@@ -990,7 +991,7 @@ static heap heap_alloc(size_t nalloc, unsigned fdim)
   h.nalloc = 0;
   h.items = 0;
   h.fdim = fdim;
-  h.ee = (esterr *) malloc(sizeof(esterr) * fdim);
+  h.ee = (esterr *) R_Calloc(fdim, esterr);
   if (h.ee) {
     for (i = 0; i < fdim; ++i) h.ee[i].val = h.ee[i].err = 0;
     heap_resize(&h, nalloc);
@@ -1004,7 +1005,7 @@ static void heap_free(heap *h)
   h->n = 0;
   heap_resize(h, 0);
   h->fdim = 0;
-  free(h->ee);
+  R_Free(h->ee);
 }
 
 static int heap_push(heap *h, heap_item hi)
@@ -1114,11 +1115,11 @@ static int rulecubature(rule *r, unsigned fdim,
   regions = heap_alloc(1, fdim);
   if (!regions.ee || !regions.items) goto bad;
 
-  ee = (esterr *) malloc(sizeof(esterr) * fdim);
+  ee = (esterr *) R_Calloc(fdim, esterr);
   if (!ee) goto bad;
 
   nR_alloc = 2;
-  R = (region *) malloc(sizeof(region) * nR_alloc);
+  R = (region *) R_Calloc(nR_alloc, region);
   if (!R) goto bad;
   R[0] = make_region(h, fdim);
   if (!R[0].ee
@@ -1206,15 +1207,15 @@ static int rulecubature(rule *r, unsigned fdim,
   }
 
   /* printf("regions.nalloc = %d\n", regions.nalloc); */
-  free(ee);
+  R_Free(ee);
   heap_free(&regions);
-  free(R);
+  R_Free(R);
   return SUCCESS;
 
 bad:
-  free(ee);
+  R_Free(ee);
   heap_free(&regions);
-  free(R);
+  R_Free(R);
   return FAILURE;
 }
 
