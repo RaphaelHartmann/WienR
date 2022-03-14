@@ -36,4 +36,4 @@ Description: First, we provide functions to calculate the partial derivative of 
     "pseudo" adaptive rejection sampler that builds on the first method. For more details see the corresponding help files.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

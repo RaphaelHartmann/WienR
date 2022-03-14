@@ -72,8 +72,7 @@
 #' 
 #' Gilks, W. R., & Wild, P. (1992). Adaptive Rejection Sampling for Gibbs Sampling. \emph{Applied Statistics, 41}(2), 337. \doi{10.2307/2347565}
 #' 
-#' Hartmann, R., & Klauer, K. C. (in press). Partial Derivatives for the First-Passage Time Distribution in Wiener Diffusion Models. \emph{Journal of Mathematical Psychology}.
-#' 
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550} 
 #' @examples
 #' sample_list1 <- sampWiener(N = 100000, a = 1, v = .3, w = .5)
 #' hist(sample_list1$q, 200)

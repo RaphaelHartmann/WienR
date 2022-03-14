@@ -30,6 +30,8 @@
 #'     \item \code{call}: the function call,
 #'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
+#' @references
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
 #' @examples
 #' dt0WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6)
 #' @author Raphael Hartmann
@@ -125,6 +127,7 @@ dt0WienerPDF <- function(t,
                   as.numeric(a[indW]),
                   as.numeric(v[indW]),
                   as.numeric(w[indW]),
+                  as.numeric(sv[indW]),
                   as.numeric(precision),
                   as.integer(resps[indW]),
                   as.integer(K),
@@ -145,7 +148,7 @@ dt0WienerPDF <- function(t,
                   as.numeric(sv[indD]),
                   as.numeric(st0[indD]),
                   as.numeric(precision),
-                  as.integer(resps),
+                  as.integer(resps[indD]),
                   as.integer(K),
                   as.integer(length(indD)),
                   as.integer(n.threads),

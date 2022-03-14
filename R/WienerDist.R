@@ -32,9 +32,11 @@
 #'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
 #' @references
-#' Blurton, S. P., Kesselmeier, M., & Gondan, M. (2012). Fast and accurate calculations for cumulative first-passage time distributions in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 56(6)}, 470–475. doi:10.1016/j.jmp.2012.09.002
+#' Blurton, S. P., Kesselmeier, M., & Gondan, M. (2012). Fast and accurate calculations for cumulative first-passage time distributions in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 56(6)}, 470–475. \doi{10.1016/j.jmp.2012.09.002}
 #'
-#' Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. \emph{Journal of Mathematical Psychology, 60}, 20–22. doi:10.1016/j.jmp.2014.05.002
+#' Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. \emph{Journal of Mathematical Psychology, 60}, 20–22. \doi{10.1016/j.jmp.2014.05.002}
+#' 
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
 #' @examples
 #' WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 #' @author Raphael Hartmann
@@ -150,7 +152,7 @@ WienerCDF <- function(t,
                   as.numeric(sv[indD]),
                   as.numeric(st0[indD]),
                   as.numeric(precision),
-                  as.integer(resps),
+                  as.integer(resps[indD]),
                   as.integer(K),
                   as.integer(length(indD)),
                   as.integer(n.threads),

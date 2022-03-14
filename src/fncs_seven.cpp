@@ -404,6 +404,47 @@ int int_dtddiff(unsigned dim, const double* x, void* p, unsigned fdim, double* r
 	return 0;
 }
 
+
+/* integrand d/dst0 ___CDF___ */
+int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
+  my_params *params = static_cast<my_params*>(p);
+  double t = (params->t);
+  int low_or_up = (params->low_or_up);
+  double a = (params->a);
+  double v = (params->v);
+  double t0 = (params->t0);
+  double w = (params->w);
+  double sw = (params->sw);
+  double sv = (params->sv);
+  double st = (params->st);
+  double errorW = (params->errorW);
+  int K = (params->K);
+  int epsFLAG = (params->epsFLAG);
+  // double *val_ptr = (params->val_ptr);
+  
+  // usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
+  //double temp = sv ? pow(x[0], 2) : 0;
+  //double y = sv ? x[0] / (1 - temp) : 0;
+  //double nu = sv ? v + sv * y : v;
+  double omega = sw ? w + sw * (x[0] - 0.5) : w;
+  double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
+  double temp_st0 = sw ? -x[1] : -x[0];
+  
+  if (t - tau <= 0) retval[0] = 0.0;
+  else {
+    double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
+    
+    double temp2 = 0;
+    //if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+    
+    double integrand = temp_st0 * exp(ldW + temp2);
+    
+    retval[0] = integrand;
+  }
+  return 0;
+}
+
+
 /* calculate density for 7-param diffusion */
 void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, int Neval, double *derivF, double *Rerr) {
 
@@ -771,44 +812,44 @@ int int_dsvpdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* 
 	return 0;
 }
 
-/* integrand d/dst0 */
-int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
-	my_params *params = static_cast<my_params*>(p);
-	double t = (params->t);
-	int low_or_up = (params->low_or_up);
-	double a = (params->a);
-	double v = (params->v);
-	double t0 = (params->t0);
-	double w = (params->w);
-	double sw = (params->sw);
-	double sv = (params->sv);
-	double st = (params->st);
-	double errorW = (params->errorW);
-	int K = (params->K);
-	int epsFLAG = (params->epsFLAG);
-	// double *val_ptr = (params->val_ptr);
-
-	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	//double temp = sv ? pow(x[0], 2) : 0;
-	//double y = sv ? x[0] / (1 - temp) : 0;
-	//double nu = sv ? v + sv * y : v;
-	double omega = sw ? w + sw * (x[0] - 0.5) : w;
-	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
-	double temp_st0 = sw ? -x[1] : -x[0];
-
-	if (t - tau <= 0) retval[0] = 0.0;
-	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
-
-		double temp2 = 0;
-		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
-
-		double integrand = temp_st0 * exp(ldW + temp2);
-
-		retval[0] = integrand;
-	}
-	return 0;
-}
+// /* integrand d/dst0 (see above) */
+// int int_dst0pdiff(unsigned dim, const double* x, void* p, unsigned fdim, double* retval) {
+// 	my_params *params = static_cast<my_params*>(p);
+// 	double t = (params->t);
+// 	int low_or_up = (params->low_or_up);
+// 	double a = (params->a);
+// 	double v = (params->v);
+// 	double t0 = (params->t0);
+// 	double w = (params->w);
+// 	double sw = (params->sw);
+// 	double sv = (params->sv);
+// 	double st = (params->st);
+// 	double errorW = (params->errorW);
+// 	int K = (params->K);
+// 	int epsFLAG = (params->epsFLAG);
+// 	// double *val_ptr = (params->val_ptr);
+// 
+// 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
+// 	//double temp = sv ? pow(x[0], 2) : 0;
+// 	//double y = sv ? x[0] / (1 - temp) : 0;
+// 	//double nu = sv ? v + sv * y : v;
+// 	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+// 	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
+// 	double temp_st0 = sw ? -x[1] : -x[0];
+// 
+// 	if (t - tau <= 0) retval[0] = 0.0;
+// 	else {
+// 		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, K, epsFLAG);
+// 
+// 		double temp2 = 0;
+// 		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+// 
+// 		double integrand = temp_st0 * exp(ldW + temp2);
+// 
+// 		retval[0] = integrand;
+// 	}
+// 	return 0;
+// }
 
 /* calculate distribution for 7-param diffusion */
 void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, double w, double sw, double sv, double st, double myerr, int K, int epsFLAG, int Neval, double *derivF, double *Rerr) {
