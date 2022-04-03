@@ -7,7 +7,7 @@
 #include "tools.h"
 #include <mutex>
 
-std::mutex mtx_samp;
+std::mutex mtx_samp, mtx_RCUI;
 
 
 double logsum(double xa, double xb) {
@@ -193,6 +193,12 @@ double oneuniL() {
 
 }
 
+void R_CheckUserInterruptGuarded() {
+  std::lock_guard<std::mutex> guard(mtx_RCUI);
+  R_CheckUserInterrupt();
+}
+  
+
 /* ----------------------------------- */
 
 
@@ -340,6 +346,7 @@ double gsl_cdf_ugaussian_Pinv(const double P) {
     }
 }
 
+static inline int cheb_eval_e(const cheb_series * cs, const double x, gsl_sf_result * result);
 
 static inline int cheb_eval_e(const cheb_series * cs,
             const double x,

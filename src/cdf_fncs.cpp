@@ -706,7 +706,7 @@ void logdxFs(int pm, int Ksa, int Ksv, int Ksw, double t, double a, double v, do
 
 	int K = int(fmax(Ksa, Ksv)); K = int(fmax(K, Ksw));
 
-	int Kaw = int(fmax(Ksa, Ksw));
+	// int Kaw = int(fmax(Ksa, Ksw));
 
 	for (int k = K; k >= 0; k--)
 	{

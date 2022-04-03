@@ -4,7 +4,7 @@
 #include "cdf_fncs.h"
 #include "pdf_fncs.h"
 #include "rwiener.h"
-#include "cubature.h"
+#include "gauss.h"
 #include <cmath>
 #include <algorithm>    // std::sort
 
@@ -405,7 +405,7 @@ NEW:
 
 	int Meval = 6000;
 
-	hcubature(1, int_ddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
+	hcubature(int_ddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err);
 // Rprintf("val = %g", val);
 	double logval = std::log(val);
 	cnt++;
@@ -510,7 +510,7 @@ NEW:
 
 	int Meval = 6000;
 
-	hcubature(1, int_dtddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
+	hcubature(int_dtddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err);
 	// val = val;
 
 	cnt++;

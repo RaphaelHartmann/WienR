@@ -238,6 +238,7 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
       threads[j] = std::thread([=]() {
 				ars_archiv ars_str_local = ars_str_tmp;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
 					q[i] = make_rwiener2(ars_str_local, ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG, 1);
 					resp[i] = R;
         }
@@ -248,6 +249,7 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
     int last = NperThread * (AmntOfThreads-1);
 		ars_archiv ars_str_local = ars_str_tmp;
     for (int i = last; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
 			q[i] = make_rwiener2(ars_str_local, ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG, 1);
 			resp[i] = R;
     }
@@ -328,11 +330,13 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
       threads[j] = std::thread([=]() {
 				ars_archiv ars_str_local1 = ars_str_tmp1;
         for (int i = j*NperThread1; i < (j+1)*NperThread1; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
 					q[i] = make_rwiener2(ars_str_local1, ars_store1, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG, 1);
 					resp[i] = 2;
         }
 				ars_archiv ars_str_local2 = ars_str_tmp2;
 				for (int i = j*NperThread2+cnt_up; i < (j+1)*NperThread2+cnt_up; i++) {
+				  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
 					q[i] = make_rwiener2(ars_str_local2, ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG, 2);
 					resp[i] = 1;
         }
@@ -344,11 +348,13 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
 		int last2 = NperThread2 * (AmntOfThreads-1)+cnt_up;
 		ars_archiv ars_str_local1 = ars_str_tmp1;
 		for (int i = last1; i < cnt_up; i++) {
+		  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
 			q[i] = make_rwiener2(ars_str_local1, ars_store1, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG, 1);
 			resp[i] = 2;
     }
 		ars_archiv ars_str_local2 = ars_str_tmp2;
 		for (int i = last2; i < N; i++) {
+		  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
 			q[i] = make_rwiener2(ars_str_local2, ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG, 2);
 			resp[i] = 1;
     }
@@ -432,6 +438,7 @@ void method2_one(int N, double a, double v, double w, double sv, double sw, int 
         double P, vs = v, ws = w;
         bool REPEAT;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
           vs = v; ws = w;
           if(sv_or_sw) {
             REPEAT = true;
@@ -464,6 +471,7 @@ void method2_one(int N, double a, double v, double w, double sv, double sw, int 
     double P, vs = v, ws = w;
     bool REPEAT;
     for (int i = last; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
       vs = v; ws = w;
       if(sv_or_sw) {
         REPEAT = true;
@@ -553,6 +561,7 @@ void method2_both(int N, double a, double v, double w, double sv, double sw, int
         double p_up, p_lo, vs = v, ws = w;
         bool REPEAT;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
           vs = v; ws = w;
           if (truncated) {
             if(sv_or_sw) {
@@ -582,6 +591,7 @@ void method2_both(int N, double a, double v, double w, double sv, double sw, int
     double p_up, p_lo, vs = v, ws = w;
     bool REPEAT;
     for (int i = last; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
       vs = v; ws = w;
       if (truncated) {
         if(sv_or_sw) {
@@ -666,6 +676,7 @@ void method3_one(int N, double a, double v, double w, double sv, double sw, int 
         double p_up, p_lo, vs = v, ws = w;
         bool REPEAT;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
           if(sv_or_sw) {
 
             REPEAT = true;
@@ -701,6 +712,7 @@ void method3_one(int N, double a, double v, double w, double sv, double sw, int 
     double p_up, p_lo, vs = v, ws = w;
     bool REPEAT;
     for (int i = last; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
       if(sv_or_sw) {
         REPEAT = true;
         while (REPEAT) {
@@ -795,6 +807,7 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
         int up_or_down;
       	bool REPEAT;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
           vs = v; ws = w;
           if (truncated) { // truncated
             if(sv_or_sw) {
@@ -840,6 +853,7 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
     int up_or_down;
   	bool REPEAT;
     for (int i = last; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
       vs = v; ws = w;
       if (truncated) { // truncated
         if(sv_or_sw) {
@@ -867,8 +881,8 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
     			up_or_down = oneuni() <= p_up / (p_up + p_lo) ? 1 : 0;
     		}
       } else { // not truncated
-        if (sv) vs += sv * onenorm();
-    		if (sw) ws += sw * (oneuni()-0.5);
+        if (sv) {vs += sv * onenorm();}
+    		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
     		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
@@ -919,8 +933,8 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
     			up_or_down = oneuni() <= p_up / (p_up + p_lo) ? 1 : 0;
     		}
       } else { // not truncated
-        if (sv) vs += sv * onenorm();
-    		if (sw) ws += sw * (oneuni()-0.5);
+        if (sv) {vs += sv * onenorm();}
+    		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
     		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
@@ -955,6 +969,7 @@ void method4_one(int N, double a, double v, double w, double sv, double sw, int 
         double P, vs = v, ws = w;
         bool REPEAT;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
           vs = v; ws = w;
           if(sv_or_sw) {
             REPEAT = true;
@@ -989,6 +1004,7 @@ void method4_one(int N, double a, double v, double w, double sv, double sw, int 
     double P, vs = v, ws = w;
     bool REPEAT;
 		for (int i = last; i < N; i++) {
+		  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
       vs = v; ws = w;
       if(sv_or_sw) {
         REPEAT = true;
@@ -1083,6 +1099,7 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
         int up_or_down;
       	bool REPEAT;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
           vs = v; ws = w;
           if (truncated) { // truncated
             if(sv_or_sw) {
@@ -1136,6 +1153,7 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
     int up_or_down;
   	bool REPEAT;
     for (int i = last; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
       vs = v; ws = w;
       if (truncated) { // truncated
         if(sv_or_sw) {
@@ -1163,8 +1181,8 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
     			up_or_down = oneuni() <= p_up / (p_up + p_lo) ? 1 : 0;
     		}
       } else { // not truncated
-        if (sv) vs += sv * onenorm();
-    		if (sw) ws += sw * (oneuni()-0.5);
+        if (sv) {vs += sv * onenorm();}
+    		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
     		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
@@ -1223,8 +1241,8 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
     			up_or_down = oneuni() <= p_up / (p_up + p_lo) ? 1 : 0;
     		}
       } else { // not truncated
-        if (sv) vs += sv * onenorm();
-    		if (sw) ws += sw * (oneuni()-0.5);
+        if (sv) {vs += sv * onenorm();}
+    		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
     		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
