@@ -1,3 +1,28 @@
+/*
+ * For the code in hcubature.cpp., the package JuliaMath/HCubature.jl written 
+ * in Julia by Steven G. Johnson served as a template. It comes with the 
+ * following MIT "Expat" license:
+ * 
+ * Copyright (c) 2017: Steven G. Johnson.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy 
+ * of this software and associated documentation files (the "Software"), to deal 
+ * in the Software without restriction, including without limitation the rights 
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+ * copies of the Software, and to permit persons to whom the Software is 
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ * 
+ */
+
+/*
+ * The JuliaMath/HCubature.jl was translated to C/C++ by 
+ * Prof. Dr. Karl Christoph Klauer
+ */
+
+
 #include "gauss.h"
 #include "tools.h"
 #include <set>
@@ -39,10 +64,11 @@ void combination(int* c, int n, int p, int x) {
 void combos(int k, double lambda, int n, std::vector<double*>& p) {
     int* c = (int*)malloc(k * sizeof(int));
     for (int i = 1; i != choose(n, k) + 1; i++) {
-        double* temp = (double*)calloc(n, sizeof(double));
-        combination(c, n, k, i);
-        for (int j = 0; j != k; j++) temp[c[j] - 1] = lambda;
-        p.push_back(temp);
+      // double* temp = (double*)calloc(n, sizeof(double));
+      double* temp = new double[n]();
+      combination(c, n, k, i);
+      for (int j = 0; j != k; j++) temp[c[j] - 1] = lambda;
+      p.push_back(temp);
     }
     free(c);
 }
@@ -77,10 +103,11 @@ void signcombos(int k, double lambda, int n, std::vector<double*>& p) {
         combination(c, n, k, i);
         std::vector<bool> index; index.clear();
         for (int j = 0; j != pow(2, k); j++) {
-            increment(index, k, lambda, n, c, temp);
-            double* next = (double*)malloc(n * sizeof(double));
-            memcpy(next, temp, n * sizeof(double));
-            p.push_back(next);
+          increment(index, k, lambda, n, c, temp);
+          // double* next = (double*)malloc(n * sizeof(double));
+          double* next = new double[n];
+          memcpy(next, temp, n * sizeof(double));
+          p.push_back(next);
         }
         free(temp);
     }

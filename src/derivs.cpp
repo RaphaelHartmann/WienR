@@ -917,13 +917,14 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
             Rerr[i] = 0;
             pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
             pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
-            pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+            ddiff(0, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+            Rdt0[i] = -Rdt0[i];
             pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
             if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
             else Rdsw[i] = NAN;
             if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
             else Rdsv[i] = NAN;
-            if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
+            if (st[0]) ddiff(9, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
             else Rdst[i] = NAN;
           }
         });
@@ -935,13 +936,14 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
         Rerr[i] = 0;
         pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
         pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
-        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        ddiff(0, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        Rdt0[i] = -Rdt0[i];
         pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
         if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
         else Rdsw[i] = NAN;
         if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
         else Rdsv[i] = NAN;
-        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
+        if (st[0]) ddiff(9, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
         else Rdst[i] = NAN;
       }
 
@@ -957,13 +959,14 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
         Rerr[i] = 0;
         pdiff(1, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rda[i], &Rerr[i]);
         pdiff(2, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdv[i], &Rerr[i]);
-        pdiff(3, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        ddiff(0, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdt0[i], &Rerr[i]);
+        Rdt0[i] = -Rdt0[i];
         pdiff(4, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdw[i], &Rerr[i]);
         if (sw[0]) pdiff(5, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsw[i], &Rerr[i]);
         else Rdsw[i] = NAN;
         if (sv[0]) pdiff(6, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdsv[i], &Rerr[i]);
         else Rdsv[i] = NAN;
-        if (st[0]) pdiff(7, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
+        if (st[0]) ddiff(9, t[i], low_or_up, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err, K, epsFLAG, Neval, &Rdst[i], &Rerr[i]);
         else Rdst[i] = NAN;
       }
     }

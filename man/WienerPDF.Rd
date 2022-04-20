@@ -72,11 +72,15 @@ Calculate the first-passage time probability density function of the diffusion m
 WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 }
 \references{
+Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time distribution for the diffusion model with variable drift. \emph{Journal of Mathematical Psychology, 76}, 7–12. \doi{10.1016/j.jmp.2016.11.003}
+
+Foster, K., & Singmann, H. (2021). Another Approximation of the First-Passage Time Densities for the Ratcliff Diffusion Decision Model. \emph{arXiv preprint arXiv:2104.01902}.
+
 Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. \emph{Journal of Mathematical Psychology, 60}, 20–22. \doi{10.1016/j.jmp.2014.05.002}
 
 Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
 
-Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate calculations for first-passage times in Wiener diffusion models. Journal of Mathematical Psychology, 53(4), 222–230. \doi{10.1016/j.jmp.2009.02.003}
+Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate calculations for first-passage times in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 53}(4), 222–230. \doi{10.1016/j.jmp.2009.02.003}
 
 Wabersich, D., & Vandekerckhove, J. (2014). The RWiener Package: an R Package Providing Distribution Functions for the Wiener Diffusion Model. \emph{The R Journal, 6(1)}, 49. \doi{10.32614/rj-2014-005}
 }
