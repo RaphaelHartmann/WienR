@@ -605,7 +605,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 					one.x -= sign * step;
 
 					wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
-					if ((abs(one.dh) > 2.0) && (abs(one.dh) < 5)) h.push_back(one);
+					if ((fabs(one.dh) > 2.0) && (fabs(one.dh) < 5)) h.push_back(one);
 					dh = sign * one.dh;
 					if (dold > dh) {
 						Rprintf("convex2?\n");
@@ -620,7 +620,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 					ub = one.x;
 					one.x += sign * step;
 					wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
-					if ((abs(one.dh) > 2.0) && (abs(one.dh) < 5)) h.push_back(one);
+					if ((fabs(one.dh) > 2.0) && (fabs(one.dh) < 5)) h.push_back(one);
 					dh = sign * one.dh;
 					if (dh > dold) {
 						Rprintf("convex2?\n");
@@ -634,7 +634,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 		while ((dh <= 2.0) || (dh >= 5.0)) {
 			one.x = (lb + ub) / 2.0;
 			wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
-			if (abs(one.dh) < 5) h.push_back(one);
+			if (fabs(one.dh) < 5) h.push_back(one);
 			dh = sign * one.dh;
 			if (dh <= 2.0) { lb = one.x; }
 			if (dh >= 5.0) { ub = one.x; }
