@@ -211,7 +211,7 @@ NEW:
 
 
 
-void method1_one(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
+void method1_one(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
 
 	if(R == 2) {
 		v = -v;
@@ -230,7 +230,7 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
     std::vector<std::thread> threads(AmntOfThreads-1);
 
 		/* prepare global ars_archiv */
-		if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store1);
+		if (!use_store) initialize_ars(a, v, w, sw, sv, bound-t0, *ars_store1);
 		ars_archiv ars_str_tmp = *ars_store1;
 
     /* starting threads while ... */
@@ -239,7 +239,12 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
 				ars_archiv ars_str_local = ars_str_tmp;
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
           // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
-					q[i] = make_rwiener2(ars_str_local, ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG, 1);
+          double tau = 0;
+          if (t0) {
+            tau = t0;
+            if (st0) tau += st0*oneuni();
+          }
+					q[i] = tau + make_rwiener2(ars_str_local, ars_store1, bound-t0, a, v, w, sw, sv, err, K, epsFLAG, 1);
 					resp[i] = R;
         }
       });
@@ -250,7 +255,12 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
 		ars_archiv ars_str_local = ars_str_tmp;
     for (int i = last; i < N; i++) {
       // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
-			q[i] = make_rwiener2(ars_str_local, ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG, 1);
+      double tau = 0;
+      if (t0) {
+        tau = t0;
+        if (st0) tau += st0*oneuni();
+      }
+			q[i] = tau + make_rwiener2(ars_str_local, ars_store1, bound-t0, a, v, w, sw, sv, err, K, epsFLAG, 1);
 			resp[i] = R;
     }
 
@@ -264,10 +274,15 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
   /* START "WITH _NO_ PARALLELIZATION" */
   else {
 
-		if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store1);
+		if (!use_store) initialize_ars(a, v, w, sw, sv, bound-t0, *ars_store1);
 		for (int i = 0; i != N; i++) {
 			if (i % 1024 == 0) R_CheckUserInterrupt();
-			q[i] = make_rwiener2(*ars_store1, nullptr, bound, a, v, w, sw, sv, err, K, epsFLAG, 0);
+			double tau = 0;
+			if (t0) {
+			  tau = t0;
+			  if (st0) tau += st0*oneuni();
+			}
+			q[i] = tau + make_rwiener2(*ars_store1, nullptr, bound-t0, a, v, w, sw, sv, err, K, epsFLAG, 0);
 			resp[i] = R;
 		}
 
@@ -275,7 +290,7 @@ void method1_one(int N, double a, double v, double w, double sv, double sw, int 
 
 }
 
-void method1_both(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
+void method1_both(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
 
   bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 	double Rerr = 99.9;
@@ -319,8 +334,8 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
 
 		/* prepare global ars_archives */
 		if (!use_store) {
-			initialize_ars(a, -v, 1-w, sw, sv, bound, *ars_store1);
-			initialize_ars(a, v, w, sw, sv, bound, *ars_store2);
+			initialize_ars(a, -v, 1-w, sw, sv, bound-t0, *ars_store1);
+			initialize_ars(a, v, w, sw, sv, bound-t0, *ars_store2);
 		}
 		ars_archiv ars_str_tmp1 = *ars_store1;
 		ars_archiv ars_str_tmp2 = *ars_store2;
@@ -331,13 +346,23 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
 				ars_archiv ars_str_local1 = ars_str_tmp1;
         for (int i = j*NperThread1; i < (j+1)*NperThread1; i++) {
           // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
-					q[i] = make_rwiener2(ars_str_local1, ars_store1, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG, 1);
+          double tau = 0;
+          if (t0) {
+            tau = t0;
+            if (st0) tau += st0*oneuni();
+          }
+					q[i] = tau + make_rwiener2(ars_str_local1, ars_store1, bound-t0, a, -v, 1-w, sw, sv, err, K, epsFLAG, 1);
 					resp[i] = 2;
         }
 				ars_archiv ars_str_local2 = ars_str_tmp2;
 				for (int i = j*NperThread2+cnt_up; i < (j+1)*NperThread2+cnt_up; i++) {
 				  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
-					q[i] = make_rwiener2(ars_str_local2, ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG, 2);
+				  double tau = 0;
+				  if (t0) {
+				    tau = t0;
+				    if (st0) tau += st0*oneuni();
+				  }
+					q[i] = tau + make_rwiener2(ars_str_local2, ars_store2, bound-t0, a, v, w, sw, sv, err, K, epsFLAG, 2);
 					resp[i] = 1;
         }
       });
@@ -349,13 +374,23 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
 		ars_archiv ars_str_local1 = ars_str_tmp1;
 		for (int i = last1; i < cnt_up; i++) {
 		  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
-			q[i] = make_rwiener2(ars_str_local1, ars_store1, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG, 1);
+		  double tau = 0;
+		  if (t0) {
+		    tau = t0;
+		    if (st0) tau += st0*oneuni();
+		  }
+			q[i] = tau + make_rwiener2(ars_str_local1, ars_store1, bound-t0, a, -v, 1-w, sw, sv, err, K, epsFLAG, 1);
 			resp[i] = 2;
     }
 		ars_archiv ars_str_local2 = ars_str_tmp2;
 		for (int i = last2; i < N; i++) {
 		  // if (i % 1024 == 0) R_CheckUserInterruptGuarded();
-			q[i] = make_rwiener2(ars_str_local2, ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG, 2);
+		  double tau = 0;
+		  if (t0) {
+		    tau = t0;
+		    if (st0) tau += st0*oneuni();
+		  }
+			q[i] = tau + make_rwiener2(ars_str_local2, ars_store2, bound-t0, a, v, w, sw, sv, err, K, epsFLAG, 2);
 			resp[i] = 1;
     }
 
@@ -398,17 +433,27 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
 			cnt_up += oneuni()<=p_up ? 1 : 0;
 		}
 
-		if (!use_store) initialize_ars(a, -v, 1-w, sw, sv, bound, *ars_store1);
+		if (!use_store) initialize_ars(a, -v, 1-w, sw, sv, bound-t0, *ars_store1);
 		for (int i = 0; i != cnt_up; i++) {
 			if (i % 1024 == 0) R_CheckUserInterrupt();
-			q[i] = make_rwiener2(*ars_store1, nullptr, bound, a, -v, 1-w, sw, sv, err, K, epsFLAG, 0);
+			double tau = 0;
+			if (t0) {
+			  tau = t0;
+			  if (st0) tau += st0*oneuni();
+			}
+			q[i] = tau + make_rwiener2(*ars_store1, nullptr, bound-t0, a, -v, 1-w, sw, sv, err, K, epsFLAG, 0);
 			resp[i] = 2;
 		}
 
-		if (!use_store) initialize_ars(a, v, w, sw, sv, bound, *ars_store2);
+		if (!use_store) initialize_ars(a, v, w, sw, sv, bound-t0, *ars_store2);
 		for (int i = cnt_up; i != N; i++) {
 			if (i % 1024 == 0) R_CheckUserInterrupt();
-			q[i] = make_rwiener2(*ars_store2, nullptr, bound, a, v, w, sw, sv, err, K, epsFLAG, 0);
+			double tau = 0;
+			if (t0) {
+			  tau = t0;
+			  if (st0) tau += st0*oneuni();
+			}
+			q[i] = tau + make_rwiener2(*ars_store2, nullptr, bound-t0, a, v, w, sw, sv, err, K, epsFLAG, 0);
 			resp[i] = 1;
 		}
 
@@ -417,7 +462,7 @@ void method1_both(int N, double a, double v, double w, double sv, double sw, int
 }
 
 
-void method2_one(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
+void method2_one(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
 
   bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 
@@ -460,7 +505,7 @@ void method2_one(int N, double a, double v, double w, double sv, double sw, int 
               ws = 1 - ws;
             }
           }
-          q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws);
+          q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws, t0, st0);
           resp[i] = R;
         }
       });
@@ -493,7 +538,7 @@ void method2_one(int N, double a, double v, double w, double sv, double sw, int 
           ws = 1 - ws;
         }
       }
-      q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws);
+      q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws, t0, st0);
       resp[i] = R;
     }
 
@@ -532,7 +577,7 @@ void method2_one(int N, double a, double v, double w, double sv, double sw, int 
           ws = 1 - ws;
         }
       }
-      q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws);
+      q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws, t0, st0);
       resp[i] = R;
     }
 
@@ -540,7 +585,7 @@ void method2_one(int N, double a, double v, double w, double sv, double sw, int 
 
 }
 
-void method2_both(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
+void method2_both(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
 
   bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 
@@ -579,7 +624,7 @@ void method2_both(int N, double a, double v, double w, double sv, double sw, int
             if (sv) vs += sv*onenorm();
             if (sw) ws += sw*(oneuni()-0.5);
           }
-          q[i] = rdiffusion_UPbound(bound, a, vs, ws);
+          q[i] = rdiffusion_UPbound(bound, a, vs, ws, t0, st0);
           resp[i] = q[i] > 0 ? 2 : 1;
           if (resp[i] == 1) q[i] = fabs(q[i]);
         }
@@ -609,7 +654,7 @@ void method2_both(int N, double a, double v, double w, double sv, double sw, int
         if (sv) vs += sv*onenorm();
         if (sw) ws += sw*(oneuni()-0.5);
       }
-      q[i] = rdiffusion_UPbound(bound, a, vs, ws);
+      q[i] = rdiffusion_UPbound(bound, a, vs, ws, t0, st0);
       resp[i] = q[i] > 0 ? 2 : 1;
       if (resp[i] == 1) q[i] = fabs(q[i]);
     }
@@ -645,7 +690,7 @@ void method2_both(int N, double a, double v, double w, double sv, double sw, int
         if (sv) vs += sv*onenorm();
         if (sw) ws += sw*(oneuni()-0.5);
       }
-      q[i] = rdiffusion_UPbound(bound, a, vs, ws);
+      q[i] = rdiffusion_UPbound(bound, a, vs, ws, t0, st0);
       resp[i] = q[i] > 0 ? 2 : 1;
       if (resp[i] == 1) q[i] = fabs(q[i]);
     }
@@ -655,7 +700,7 @@ void method2_both(int N, double a, double v, double w, double sv, double sw, int
 }
 
 
-void method3_one(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
+void method3_one(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
 
   bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 
@@ -701,7 +746,12 @@ void method3_one(int N, double a, double v, double w, double sv, double sw, int 
               }
             }
           }
-          q[i] = rwiener_diag2(R-1, bound, a, vs, ws, err, K, epsFLAG);
+          double tau = 0;
+          if (t0) {
+            tau = t0;
+            if (st0) tau += st0*oneuni();
+          }
+          q[i] = tau + rwiener_diag2(R-1, bound-t0, a, vs, ws, err, K, epsFLAG);
           resp[i] = R;
         }
       });
@@ -736,7 +786,12 @@ void method3_one(int N, double a, double v, double w, double sv, double sw, int 
           }
         }
       }
-      q[i] = rwiener_diag2(R-1, bound, a, vs, ws, err, K, epsFLAG);
+      double tau = 0;
+      if (t0) {
+        tau = t0;
+        if (st0) tau += st0*oneuni();
+      }
+      q[i] = tau + rwiener_diag2(R-1, bound-t0, a, vs, ws, err, K, epsFLAG);
       resp[i] = R;
     }
 
@@ -777,7 +832,12 @@ void method3_one(int N, double a, double v, double w, double sv, double sw, int 
           }
         }
       }
-      q[i] = rwiener_diag2(R-1, bound, a, vs, ws, err, K, epsFLAG);
+      double tau = 0;
+      if (t0) {
+        tau = t0;
+        if (st0) tau += st0*oneuni();
+      }
+      q[i] = tau + rwiener_diag2(R-1, bound-t0, a, vs, ws, err, K, epsFLAG);
       resp[i] = R;
     }
 
@@ -785,7 +845,7 @@ void method3_one(int N, double a, double v, double w, double sv, double sw, int 
 
 }
 
-void method3_both(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
+void method3_both(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
 
   bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 
@@ -841,7 +901,12 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
         		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
         		up_or_down = oneuni() < p_lo ? 0 : 1;
           }
-      		q[i] = rwiener_diag2(up_or_down, bound, a, vs, ws, err, K, epsFLAG);
+          double tau = 0;
+          if (t0) {
+            tau = t0;
+            if (st0) tau += st0*oneuni();
+          }
+      		q[i] = tau + rwiener_diag2(up_or_down, bound-t0, a, vs, ws, err, K, epsFLAG);
       		resp[i] = up_or_down + 1;
         }
       });
@@ -887,7 +952,12 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
     		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
       }
-  		q[i] = rwiener_diag2(up_or_down, bound, a, vs, ws, err, K, epsFLAG);
+      double tau = 0;
+      if (t0) {
+        tau = t0;
+        if (st0) tau += st0*oneuni();
+      }
+  		q[i] = tau + rwiener_diag2(up_or_down, bound-t0, a, vs, ws, err, K, epsFLAG);
   		resp[i] = up_or_down + 1;
     }
 
@@ -939,7 +1009,12 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
     		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
       }
-  		q[i] = rwiener_diag2(up_or_down, bound, a, vs, ws, err, K, epsFLAG);
+      double tau = 0;
+      if (t0) {
+        tau = t0;
+        if (st0) tau += st0*oneuni();
+      }
+  		q[i] = tau + rwiener_diag2(up_or_down, bound-t0, a, vs, ws, err, K, epsFLAG);
   		resp[i] = up_or_down + 1;
   	}
 
@@ -948,7 +1023,7 @@ void method3_both(int N, double a, double v, double w, double sv, double sw, int
 }
 
 
-void method4_one(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
+void method4_one(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
 
 	bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 
@@ -992,8 +1067,13 @@ void method4_one(int N, double a, double v, double w, double sv, double sw, int 
             }
           }
 					ars_archiv ars_store_t;
-					initialize_ars(a, vs, ws, 0.0, 0.0, bound, ars_store_t);
-					q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
+					initialize_ars(a, vs, ws, 0.0, 0.0, bound-t0, ars_store_t);
+					double tau = 0;
+					if (t0) {
+					  tau = t0;
+					  if (st0) tau += st0*oneuni();
+					}
+					q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
           resp[i] = R;
         }
       });
@@ -1027,8 +1107,13 @@ void method4_one(int N, double a, double v, double w, double sv, double sw, int 
         }
       }
 			ars_archiv ars_store1;
-			initialize_ars(a, vs, ws, 0.0, 0.0, bound, ars_store1);
-			q[i] = make_rwiener2(ars_store1, nullptr, bound, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
+			initialize_ars(a, vs, ws, 0.0, 0.0, bound-t0, ars_store1);
+			double tau = 0;
+			if (t0) {
+			  tau = t0;
+			  if (st0) tau += st0*oneuni();
+			}
+			q[i] = tau + make_rwiener2(ars_store1, nullptr, bound-t0, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
       resp[i] = R;
     }
 
@@ -1068,8 +1153,13 @@ void method4_one(int N, double a, double v, double w, double sv, double sw, int 
         }
       }
 			ars_archiv ars_store1;
-			initialize_ars(a, vs, ws, 0.0, 0.0, bound, ars_store1);
-			q[i] = make_rwiener2(ars_store1, nullptr, bound, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
+			initialize_ars(a, vs, ws, 0.0, 0.0, bound-t0, ars_store1);
+			double tau = 0;
+			if (t0) {
+			  tau = t0;
+			  if (st0) tau += st0*oneuni();
+			}
+			q[i] = tau + make_rwiener2(ars_store1, nullptr, bound-t0, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
       resp[i] = R;
     }
 
@@ -1077,7 +1167,7 @@ void method4_one(int N, double a, double v, double w, double sv, double sw, int 
 
 }
 
-void method4_both(int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
+void method4_both(int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp) {
 
 	bool truncated = R_FINITE(bound), sv_or_sw = (sv > 0 || sw > 0);
 
@@ -1135,12 +1225,22 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
           }
 					ars_archiv ars_store_t;
 					if (up_or_down == 1) {
-						initialize_ars(a, -vs, 1-ws, 0.0, 0.0, bound, ars_store_t);
-						q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, -vs, 1-ws, 0.0, 0.0, err, K, epsFLAG, 0);
+						initialize_ars(a, -vs, 1-ws, 0.0, 0.0, bound-t0, ars_store_t);
+					  double tau = 0;
+					  if (t0) {
+					    tau = t0;
+					    if (st0) tau += st0*oneuni();
+					  }
+						q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, -vs, 1-ws, 0.0, 0.0, err, K, epsFLAG, 0);
 					}
 					else {
-						initialize_ars(a, vs, ws, 0.0, 0.0, bound, ars_store_t);
-						q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
+						initialize_ars(a, vs, ws, 0.0, 0.0, bound-t0, ars_store_t);
+					  double tau = 0;
+					  if (t0) {
+					    tau = t0;
+					    if (st0) tau += st0*oneuni();
+					  }
+						q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
 					}
       		resp[i] = up_or_down + 1;
         }
@@ -1189,12 +1289,22 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
       }
 			ars_archiv ars_store_t;
 			if (up_or_down == 1) {
-				initialize_ars(a, -vs, 1-ws, 0.0, 0.0, bound, ars_store_t);
-				q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, -vs, 1-ws, 0.0, 0.0, err, K, epsFLAG, 0);
+				initialize_ars(a, -vs, 1-ws, 0.0, 0.0, bound-t0, ars_store_t);
+			  double tau = 0;
+			  if (t0) {
+			    tau = t0;
+			    if (st0) tau += st0*oneuni();
+			  }
+				q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, -vs, 1-ws, 0.0, 0.0, err, K, epsFLAG, 0);
 			}
 			else {
-				initialize_ars(a, vs, ws, 0.0, 0.0, bound, ars_store_t);
-				q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
+				initialize_ars(a, vs, ws, 0.0, 0.0, bound-t0, ars_store_t);
+			  double tau = 0;
+			  if (t0) {
+			    tau = t0;
+			    if (st0) tau += st0*oneuni();
+			  }
+				q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
 			}
 			resp[i] = up_or_down + 1;
     }
@@ -1249,12 +1359,22 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
       }
 			ars_archiv ars_store_t;
 			if (up_or_down == 1) {
-				initialize_ars(a, -vs, 1-ws, 0.0, 0.0, bound, ars_store_t);
-				q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, -vs, 1-ws, 0.0, 0.0, err, K, epsFLAG, 0);
+				initialize_ars(a, -vs, 1-ws, 0.0, 0.0, bound-t0, ars_store_t);
+			  double tau = 0;
+			  if (t0) {
+			    tau = t0;
+			    if (st0) tau += st0*oneuni();
+			  }
+				q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, -vs, 1-ws, 0.0, 0.0, err, K, epsFLAG, 0);
 			}
 			else {
-				initialize_ars(a, vs, ws, 0.0, 0.0, bound, ars_store_t);
-				q[i] = make_rwiener2(ars_store_t, nullptr, bound, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
+				initialize_ars(a, vs, ws, 0.0, 0.0, bound-t0, ars_store_t);
+			  double tau = 0;
+			  if (t0) {
+			    tau = t0;
+			    if (st0) tau += st0*oneuni();
+			  }
+				q[i] = tau + make_rwiener2(ars_store_t, nullptr, bound-t0, a, vs, ws, 0.0, 0.0, err, K, epsFLAG, 0);
 			}
 			resp[i] = up_or_down + 1;
   	}
@@ -1265,7 +1385,7 @@ void method4_both(int N, double a, double v, double w, double sv, double sw, int
 
 
 // R=0 is lower bound and R=1 is upper bound
-void run_make_rwiener(int choice, int N, double a, double v, double w, double sv, double sw, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
+void run_make_rwiener(int choice, int N, double a, double v, double w, double t0, double sv, double sw, double st0, int R, double bound, double err, int K, int epsFLAG, int NThreads, double *q, int *resp, ars_archiv *ars_store1, ars_archiv *ars_store2, int use_store) {
 	// double vs, ws;
 	// printf("h1 size = %d\n", static_cast<int>(ars_store1->hstore.size()));
 	// printf("h2 size = %d\n", static_cast<int>(ars_store2->hstore.size()));
@@ -1285,7 +1405,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 				// 	q[i] = make_rwiener2(*ars_store1, bound, a, v, w, sw, sv, err, K, epsFLAG);
 				// 	resp[i] = R;
 				// }
-				method1_one(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp, ars_store1, ars_store2, use_store);
+				method1_one(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp, ars_store1, ars_store2, use_store);
 
 			} else { // R = 0 -- both sides
 
@@ -1333,7 +1453,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 				// 	q[i] = make_rwiener2(*ars_store2, ars_store2, bound, a, v, w, sw, sv, err, K, epsFLAG, 0);
 				// 	resp[i] = 1;
 				// }
-				method1_both(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp, ars_store1, ars_store2, use_store);
+				method1_both(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp, ars_store1, ars_store2, use_store);
 
 			}
 			break;
@@ -1364,7 +1484,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 				// 	q[i] = -rdiffusion_lower_trunc(bound, a, vs, ws);
 				// 	resp[i] = R;
 				// }
-        method2_one(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp);
+        method2_one(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp);
 
 			} else { // R = 0 -- both sides
 			// 	if (std::isfinite(bound)) { // truncated
@@ -1397,7 +1517,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 			// 			if (resp[i] == 1) q[i] = fabs(q[i]);
 			// 		}
 			//  }
-      method2_both(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp);
+      method2_both(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp);
 			}
 			break;
 
@@ -1433,7 +1553,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 				// 	q[i] = rwiener_diag2(R-1, bound, a, vs, ws, err, K, epsFLAG);
 				// 	resp[i] = R;
 				// }
-        method3_one(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp);
+        method3_one(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp);
 
 			} else { // R = 0 -- both sides
 
@@ -1482,7 +1602,7 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 				// 		resp[i] = up_or_down + 1;
 				// 	}
 				// }
-        method3_both(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp);
+        method3_both(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp);
 
 			}
 			break;
@@ -1491,11 +1611,11 @@ void run_make_rwiener(int choice, int N, double a, double v, double w, double sv
 
 			if (R != 0) { // one-sided
 
-				method4_one(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp);
+				method4_one(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp);
 
 			} else { // R = 0 -- both sides
 
-				method4_both(N, a, v, w, sv, sw, R, bound, err, K, epsFLAG, NThreads, q, resp);
+				method4_both(N, a, v, w, t0, sv, sw, st0, R, bound, err, K, epsFLAG, NThreads, q, resp);
 
 			}
 			break;

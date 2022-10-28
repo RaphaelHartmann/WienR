@@ -1102,17 +1102,19 @@ extern "C" {
 
 extern "C" {
 
-	SEXP randWiener(SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1, SEXP bo2) {
+	SEXP randWiener(SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP re10, SEXP re11, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1, SEXP bo2) {
 
 		/* define input variables */
 		double a = REAL(re2)[0];
 		double v = REAL(re3)[0];
 		double w = REAL(re4)[0];
-		double sv = REAL(re5)[0];
-		double sw = REAL(re6)[0];
-		double eps = REAL(re7)[0];
-		double bound = REAL(re8)[0];
-		double *list = REAL(re9);
+		double t0 = REAL(re5)[0];
+		double sv = REAL(re6)[0];
+		double sw = REAL(re7)[0];
+		double st0 = REAL(re8)[0];
+		double eps = REAL(re9)[0];
+		double bound = REAL(re10)[0];
+		double *list = REAL(re11);
 
 		int R = INTEGER(in1)[0];
 		int K = INTEGER(in2)[0];
@@ -1252,7 +1254,7 @@ extern "C" {
 
 
 		/* sampling */
-		run_make_rwiener(choice, N, a, v, w, sv, sw, R, bound, eps, K, epsFLAG, NThreads, Rq, Rresp, &ars_arch1, &ars_arch2, use_store);
+		run_make_rwiener(choice, N, a, v, w, t0, sv, sw, st0, R, bound, eps, K, epsFLAG, NThreads, Rq, Rresp, &ars_arch1, &ars_arch2, use_store);
 
 
 		/* fill list store */

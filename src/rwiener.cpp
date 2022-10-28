@@ -769,39 +769,41 @@ double rdiffusion(double drift, double a) {
 	else return(a2*invgauss_proposal(fabs(drift)));
 }
 
-double rdiffusion_UPbound(double bound, double a, double drift, double w)
+double rdiffusion_UPbound(double bound, double a, double drift, double w, double t0, double st0)
 {
 	double b_lo = -w * a; double b_up = (1 - w)*a;
 START:
 	double x = 0.0, t = 0.0;
+  double tau = t0 + st0*oneuni();
+  double bnd = bound - tau;
 	while (true) {
 		const double xlo = fabs(x - b_lo);
 		const double xup = fabs(x - b_up);
 		if (fabs(xlo - xup) < 1e-5) {
 			// symmetric bounds, diffusion model in [x - xup, x + xup]
 			t += rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() < 1 / (1 + exp(-2 * drift * xup)))
-				return t;
+				return t+tau;
 			else
-				return -t;
+				return -t-tau;
 // symmetric; need lower bound
 		}
 		else if (xlo > xup) {
 			// x closer to upper bound, diffusion model in [x - xup, x + xup]
 			t += rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() < 1 / (1 + exp(-2 * drift*xup)))
-				return t;
+				return t+tau;
 			x -= xup;
 			// 			bound-=step;
 		}
 		else {
 			// x closer to lower bound, diffusion model in [x-xlo, x+xlo]
 			t += rdiffusion(drift, (2 * xlo));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() > 1 / (1 + exp(-2 * drift*xlo)))
-				return -t;
+				return -t-tau;
 			x += xlo;
 		}
 	}
@@ -809,10 +811,12 @@ START:
 
 
 
-double rdiffusion_lower_trunc(double bound, double a, double drift, double w)
+double rdiffusion_lower_trunc(double bound, double a, double drift, double w, double t0, double st0)
 {
 	double b_lo = -w * a; double b_up = (1 - w) * a;
 START:
+  double tau = t0 + st0*oneuni();
+  double bnd = bound - tau;
 	double x = 0.0, t = 0.0;
 	while (true) {
 		const double xlo = fabs(x - b_lo);
@@ -820,16 +824,16 @@ START:
 		if (fabs(xlo - xup) < 1e-5) {
 			// symmetric bounds, diffusion model in [x - xup, x + xup]
 			t += rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 //			if (oneuni(rst) < 1 / (1 + exp(-2 * drift * xup)))
 //				goto START;
 			//				return t;
-			return -t;
+			return -t-tau;
 			// symmetric; need lower bound
 		}	else if (xlo > xup) {
 			// x closer to upper bound, diffusion model in [x - xup, x + xup]
 			t+= rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() < 1 / (1 + exp(-2 * drift * xup))) goto START;
 //				return t;
 			x -= xup;
@@ -837,9 +841,9 @@ START:
 		}	else {
 			// x closer to lower bound, diffusion model in [x-xlo, x+xlo]
 			t+=rdiffusion(drift, (2 * xlo));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() > 1 / (1 + exp(-2 * drift * xlo)))
-				return -t;
+				return -t-tau;
 			x += xlo;
 		}
 	}

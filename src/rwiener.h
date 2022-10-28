@@ -31,8 +31,8 @@ double invnorm(double drift);
 double invgauss_proposal(double drift);
 
 double rdiffusion(double drift, double a);
-double rdiffusion_UPbound(double bound, double a, double drift, double w);
-double rdiffusion_lower_trunc(double bound, double a, double drift, double w);
+double rdiffusion_UPbound(double bound, double a, double drift, double w, double t0, double st0);
+double rdiffusion_lower_trunc(double bound, double a, double drift, double w, double t0, double st0);
 double rwiener_diag2(int pm, double bound, double a, double v, double w, double err, int K, int epsFLAG);
 
 #endif

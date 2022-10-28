@@ -129,6 +129,15 @@ sampWiener <- function(N,
   } else {
     resp <- response
   } 
+  
+  # bound checks
+  if(bound <= t0) stop("bound must be larger thatn t0")
+  if(bound > 0 & st0 > 0) {
+    if(method != "rs") {
+      warning(paste0("sampling from truncated distribution with st0>0 not (yet) implemented for method \"", method, "\". Method = \"rs\" is used instead."))
+      method = "rs"
+    }
+  }
 
   # precision checks
   if(!is.numeric(precision) & !is.null(precision)) stop("precision must either be NULL or some numeric value")
@@ -190,9 +199,11 @@ sampWiener <- function(N,
   samp_list <- .Call("randWiener", 
                      a, 
                      v, 
-                     w, 
+                     w,
+                     t0,
                      sv, 
-                     sw, 
+                     sw,
+                     st0,
                      precision, 
                      bound, 
                      ars_vector, 
@@ -205,13 +216,6 @@ sampWiener <- function(N,
                      as.integer(1), 
                      as.integer(ARS_STORE)
   )
-  
-  
-  # add t0
-  if(t0 != 0) {
-    temp <- t0 + ifelse(st0 != 0, st0 * runif(N), 0)
-    samp_list$q <- samp_list$q + temp
-  }
   
   
   # responses
