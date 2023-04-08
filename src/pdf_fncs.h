@@ -36,23 +36,27 @@ void logdxfl(double, double, int, int, double &, double &, int &, int &);
 /*-----------------------------------------------*/
 
 /* DENSITY */
-double dwiener(double, double, double, double, double, int, int);
+double dwiener(double, double, double, double, double, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dt DENSITY */
-void dtdwiener(double, double, double, double, double, double *, double, int, int);
+void dtdwiener(double, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/da DENSITY */
-void dadwiener(double, double, double, double, double, double *, double, int, int);
+void dadwiener(double, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dv DENSITY */
-void dvdwiener(double, double, double, double, double, double *);
+void dvdwiener(double, double, double, double, double, double, double *);
 /*-----------------------------------------------*/
 
 /* d/dw DENSITY */
-void dwdwiener(double, double, double, double, double, double *, double, int, int);
+void dwdwiener(double, double, double, double, double, double, double *, double, int, int);
+/*-----------------------------------------------*/
+
+/* d/dsv DENSITY */
+void dsvdwiener(double, double, double, double, double, double, double *, double, int, int);
 /*-----------------------------------------------*/
 
 /* d/dt d/da d/dv d/dw DENSITY */

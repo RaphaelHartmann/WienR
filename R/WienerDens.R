@@ -32,11 +32,17 @@
 #'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
 #' @references
-#' Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. \emph{Journal of Mathematical Psychology, 60}, 20–22. doi:10.1016/j.jmp.2014.05.002
+#' Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time distribution for the diffusion model with variable drift. \emph{Journal of Mathematical Psychology, 76}, 7–12. \doi{10.1016/j.jmp.2016.11.003}
+#' 
+#' Foster, K., & Singmann, H. (2021). Another Approximation of the First-Passage Time Densities for the Ratcliff Diffusion Decision Model. \emph{arXiv preprint arXiv:2104.01902}.
+#' 
+#' Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. \emph{Journal of Mathematical Psychology, 60}, 20–22. \doi{10.1016/j.jmp.2014.05.002}
 #'
-#' Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate calculations for first-passage times in Wiener diffusion models. Journal of Mathematical Psychology, 53(4), 222–230. doi:10.1016/j.jmp.2009.02.003
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
+#' 
+#' Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate calculations for first-passage times in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 53}(4), 222–230. \doi{10.1016/j.jmp.2009.02.003}
 #'
-#' Wabersich, D., & Vandekerckhove, J. (2014). The RWiener Package: an R Package Providing Distribution Functions for the Wiener Diffusion Model. \emph{The R Journal, 6(1)}, 49. doi:10.32614/rj-2014-005
+#' Wabersich, D., & Vandekerckhove, J. (2014). The RWiener Package: an R Package Providing Distribution Functions for the Wiener Diffusion Model. \emph{The R Journal, 6(1)}, 49. \doi{10.32614/rj-2014-005}
 #' @examples
 #' WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 #' @author Raphael Hartmann
@@ -111,7 +117,7 @@ WienerPDF <- function(t,
   if(n.threads < 2) n.threads <- 0
 
   # num. integral evaluation checks
-  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+  if(any(sw!=0) | any(st0!=0)) {
     if(!is.numeric(n.evals)) stop("n.evals must numeric")
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
@@ -119,10 +125,10 @@ WienerPDF <- function(t,
 
   # --- C++ FUNCTION CALL ---- #
 
-  indW <- which(sw==0 & sv==0 & st0==0)
+  indW <- which(sw==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
-  out <- list(pdf = rep(NA, max_len), logpdf = rep(NA, max_len))
+  out <- list(pdf = rep(NA, max_len), logpdf = rep(NA, max_len), err = rep(precision, max_len))
 
   if (length(indW) > 0) {
     tt <- t[indW]-t0[indW]
@@ -131,6 +137,7 @@ WienerPDF <- function(t,
                   as.numeric(a[indW]),
                   as.numeric(v[indW]),
                   as.numeric(w[indW]),
+                  as.numeric(sv[indW]),
                   as.numeric(precision),
                   as.integer(resps[indW]),
                   as.integer(K),
@@ -152,7 +159,7 @@ WienerPDF <- function(t,
                   as.numeric(sv[indD]),
                   as.numeric(st0[indD]),
                   as.numeric(precision),
-                  as.integer(resps),
+                  as.integer(resps[indD]),
                   as.integer(K),
                   as.integer(length(indD)),
                   as.integer(n.threads),
@@ -162,15 +169,24 @@ WienerPDF <- function(t,
     )
     out$pdf[indD] <- temp$pdf
     out$logpdf[indD] <- temp$logpdf
+    out$err[indD] <- temp$err
   }
 
 
   #print(out)
 
   outcome <- list(value = out$pdf, logvalue = out$logpdf, call = match.call())
-
+  if (length(indD) > 0) outcome$err = out$err
+  
   # output
   class(outcome) <- "Diffusion_pdf"
   return(outcome)
 
 }
+
+
+#' @rdname WienerPDF
+#' @examples
+#' dWDM(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' @export
+dWDM <- WienerPDF

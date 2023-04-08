@@ -71,6 +71,9 @@ Calculates the gradient of the first-passage time cumulative distribution functi
 gradWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6,
               t0 = .3, sv = .1, sw = .1, st0 = .1)
 }
+\references{
+Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
+}
 \author{
 Raphael Hartmann
 }

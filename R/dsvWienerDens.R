@@ -30,6 +30,8 @@
 #'     \item \code{call}: the function call,
 #'     \item \code{err}: the absolute error.
 #'   }
+#' @references
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
 #' @examples
 #' dsvWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sv = .2)
 #' @author Raphael Hartmann
@@ -105,37 +107,64 @@ dsvWienerPDF <- function(t,
   if(n.threads < 2) n.threads <- 0
 
   # num. integral evaluation checks
-  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+  if(any(sw!=0) | any(st0!=0)) {
     if(!is.numeric(n.evals)) stop("n.evals must numeric")
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
 
 
   # --- C++ FUNCTION CALL ---- #
-
-  out <- .Call("dDiffusion7",
-               as.numeric(t),
-               as.numeric(a),
-               as.numeric(v),
-               as.numeric(t0),
-               as.numeric(w),
-               as.numeric(sw),
-               as.numeric(sv),
-               as.numeric(st0),
-               as.numeric(precision),
-               as.integer(resps),
-               as.integer(K),
-               as.integer(max_len),
-               as.integer(n.threads),
-               as.integer(6),
-               as.integer(n.evals),
-               as.logical(PRECISION_FLAG)
-  )
+  
+  indW <- which(sw==0 & st0==0)
+  if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
+  
+  out <- list(deriv = rep(NA, max_len), err = rep(precision, max_len))
+  
+  if (length(indW) > 0) {
+    tt <- t[indW]-t0[indW]
+    temp <- .Call("dsvdWiener",
+                  as.numeric(ifelse(tt<0, 0, tt)),
+                  as.numeric(a[indW]),
+                  as.numeric(v[indW]),
+                  as.numeric(w[indW]),
+                  as.numeric(sv[indW]),
+                  as.numeric(precision),
+                  as.integer(resps[indW]),
+                  as.integer(K),
+                  as.integer(length(indW)),
+                  as.integer(n.threads),
+                  as.logical(PRECISION_FLAG)
+    )
+    out$deriv[indW] <- temp$deriv
+  }
+  if (length(indD) > 0){
+    temp <- .Call("dDiffusion7",
+                 as.numeric(t[indD]),
+                 as.numeric(a[indD]),
+                 as.numeric(v[indD]),
+                 as.numeric(t0[indD]),
+                 as.numeric(w[indD]),
+                 as.numeric(sw[indD]),
+                 as.numeric(sv[indD]),
+                 as.numeric(st0[indD]),
+                 as.numeric(precision),
+                 as.integer(resps[indD]),
+                 as.integer(K),
+                 as.integer(length(indD)),
+                 as.integer(n.threads),
+                 as.integer(6),
+                 as.integer(n.evals),
+                 as.logical(PRECISION_FLAG)
+    )
+    out$deriv[indD] <- temp$deriv
+    out$err[indD] <- temp$err
+  }
 
 
   #print(out)
 
-  derivative <- list(deriv = out$deriv, call = match.call(), err = out$err)
+  derivative <- list(deriv = out$deriv, call = match.call())
+  if (length(indD) > 0) derivative$err = out$err
 
   # output
   class(derivative) <- "Diffusion_deriv"

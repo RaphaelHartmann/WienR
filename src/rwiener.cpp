@@ -4,7 +4,7 @@
 #include "cdf_fncs.h"
 #include "pdf_fncs.h"
 #include "rwiener.h"
-#include "cubature.h"
+#include "gauss.h"
 #include <cmath>
 #include <algorithm>    // std::sort
 
@@ -196,7 +196,7 @@ double inverse_distribution(int k, double xstar, std::vector<piece> upper, std::
 
 
 
-double dwiener_d(double q, double a, double vn, double wn, double leps) {
+double dwiener_d(double q, double a, double vn, double wn, double sv, double leps) {
 	double kll, kss, ans, v, w;
 	double errziel = leps;
 	double err = leps * 1.2;
@@ -213,7 +213,10 @@ double dwiener_d(double q, double a, double vn, double wn, double leps) {
 	}
 
 	double q_asq = q / pow(a, 2);
-	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2) - 2 * std::log(a);
+	double eta_sqr = pow(sv, 2);
+	double temp = 1 + eta_sqr * q;
+	double lg1 = (eta_sqr * pow(a * w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 *std::log(a) - 0.5 *std::log(temp);
+	//double lg1 = (-v * a * w - (pow(v, 2)) * q / 2) - 2 * std::log(a);
 
 NEW:
 	ans = 0;
@@ -223,11 +226,14 @@ NEW:
 	kll = kl(q_asq, v, w, el);
 
 
-	if (2 * kss < kll)  // if small t is better
+	if (2 * kss < kll) {  // if small t is better
 		ans = lg1 + logfs(q_asq, w, static_cast<int>(kss));
-	else
-	// if large t is better...
-	ans = lg1 + logfl(q_asq, v, w, static_cast<int>(kll));
+	}
+	else {// if large t is better...
+	  ans = lg1 + logfl(q_asq, v, w, static_cast<int>(kll));
+  }
+
+
 
 	zahl++; // MONITOR(0, 5)++;
 	if (zahl == 10) {
@@ -243,7 +249,7 @@ NEW:
 	return ans;
 }
 
-double dtdwiener_d(double q, double a, double v, double w, double &ld, double leps)
+double dtdwiener_d(double q, double a, double v, double w, double sv, double &ld, double leps)
 {
 	double kll, kss, ans;
 	//	double err = 1e-12;
@@ -253,10 +259,13 @@ double dtdwiener_d(double q, double a, double v, double w, double &ld, double le
 	//1.e-12
 
 	double q_asq = q / pow(a, 2);
-
-	double ans0 = -pow(v, 2) / 2.0;
 	double la = 2.0 * std::log(a);
-	double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	//double ans0 = -pow(v, 2) / 2.0;
+	//double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	double eta_sqr = pow(sv, 2);
+	double tempx = (1 + eta_sqr * q);
+	double ans0 = -0.5 * (pow(eta_sqr, 2) * (q + pow(a * w, 2)) + eta_sqr * (1 - 2 * a * v * w) + pow(v, 2)) / pow(tempx, 2);
+	double lg1 = (eta_sqr * pow(a * w,  2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / tempx - la - 0.5 * std::log(tempx);
 	double factor = lg1 - la;
 
 
@@ -306,7 +315,7 @@ NEW:
 //		std::cout << setw(20) << err << setw(20) << check << std::endl;
 //		MONITOR(1, 6)++;
 		err = errziel*(1 + zahl*0.1) - check;
-		ld = dwiener_d(-q, a, v, w, err);
+		ld = dwiener_d(-q, a, v, w, sv, err);
 		goto NEW;
 	}
 //	else std::cout << "okay" << std::endl;
@@ -331,19 +340,19 @@ int int_ddiff_d(unsigned dim, const double *x, void *p, unsigned fdim, double *r
 	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
+	//double temp = sv ? pow(x[0], 2) : 0;
+	//double y = sv ? x[0] / (1 - temp) : 0;
+	//double nu = sv ? v + sv * y : v;
+	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t - tau), a, nu, omega, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t - tau), a, v, omega, sv, errorW, 0, 1);
 		// double ldW = dwiener_d(low_or_up * (t - tau), a, nu, omega, std::log(errorW));
 
 		double temp2 = 0;
-		if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
+		//if (sv) temp2 = -0.5 * pow(y, 2) - M_LN_SQRT_PI - 0.5 * M_LN2 + log1p(temp) - 2 * log1p(-temp);
 
 		double integrand = exp(ldW + temp2);
 // if (integrand == 0) integrand = exp(-700);
@@ -369,24 +378,24 @@ NEW:
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, 0, 1, val_ptr};
 
-	int dim = (sw!=0)+(sv!=0)+(st!=0);
+	int dim = (sw!=0)+(st!=0);
 
-	double *xmin = (double*)malloc(dim * sizeof(double));
-	double *xmax = (double*)malloc(dim * sizeof(double));
+	double *xmin = (double*)R_Calloc(dim, double);
+	double *xmax = (double*)R_Calloc(dim, double);
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
-	if(sv) {
-		xmin[0] = -1; xmax[0] = 1;
-		for (int i = 1; i < dim; i++) {
-			xmin[i] = 0;
-			xmax[i] = 1;
-		}
-	} else {
+	// if(sv) {
+	// 	xmin[0] = -1; xmax[0] = 1;
+	// 	for (int i = 1; i < dim; i++) {
+	// 		xmin[i] = 0;
+	// 		xmax[i] = 1;
+	// 	}
+	// } else {
 		for (int i = 0; i < dim; i++) {
 			xmin[i] = 0;
 			xmax[i] = 1;
 		}
-	}
+	// }
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
@@ -396,13 +405,13 @@ NEW:
 
 	int Meval = 6000;
 
-	hcubature(1, int_ddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
+	hcubature(int_ddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err);
 // Rprintf("val = %g", val);
 	double logval = std::log(val);
 	cnt++;
 	if (cnt == 10) {
 		Rprintf("cnt = 10 %20g%20g%20g%20g%20g\n", t, a, v, w, newerror*.1);
-		free(xmin); free(xmax);
+		R_Free(xmin); R_Free(xmax);
 		return logval;
 	}
 
@@ -411,7 +420,7 @@ NEW:
 		goto NEW;
 	}
 
-	free(xmin); free(xmax);
+	R_Free(xmin); R_Free(xmax);
 	return logval;
 
 }
@@ -433,24 +442,24 @@ int int_dtddiff_d(unsigned dim, const double* x, void* p, unsigned fdim, double*
 	// double *val_ptr = (params->val_ptr);
 
 	// usually: 0  = s (v); 1 = u (w), 2 = v (t), depending on whether sv, sw, or st = 0
-	double temp = sv ? pow(x[0], 2) : 0;
-	double y = sv ? x[0] / (1 - temp) : 0;
-	double nu = sv ? v + sv * y : v;
-	double omega = sv ? (sw ? w + sw * (x[1] - 0.5) : w) : (sw ? w + sw * (x[0] - 0.5) : w);
-	double tau = sv ? ( sw ? (st ? t0 + st * x[2] : t0) : (st ? t0 + st * x[1] : t0) ) : ( sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0) );
+	//double temp = sv ? pow(x[0], 2) : 0;
+	//double y = sv ? x[0] / (1 - temp) : 0;
+	//double nu = sv ? v + sv * y : v;
+	double omega = sw ? w + sw * (x[0] - 0.5) : w;
+	double tau = sw ? (st ? t0 + st * x[1] : t0) : (st ? t0 + st * x[0] : t0);
 
 	if (t - tau <= 0) retval[0] = 0.0;
 	else {
-		double ldW = dwiener(low_or_up * (t-tau), a, nu, omega, errorW, 0, 1);
+		double ldW = dwiener(low_or_up * (t-tau), a, v, omega, sv, errorW, 0, 1);
 
 		double temp2 = 0;
-		if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
+		//if (sv) temp2 = - 0.5*pow(y, 2) - M_LN_SQRT_PI - 0.5*M_LN2 + log1p(temp) - 2*log1p(-temp);
 
 		double wn = omega;
 		if (low_or_up==1) wn = 1-omega;
 
 		double dt;
-		dtdwiener(t-tau, a, -low_or_up*nu, wn, ldW, &dt, errorW, 0, 1);
+		dtdwiener(t-tau, a, -low_or_up*v, wn, sv, ldW, &dt, errorW, 0, 1);
 
 		double integrand = dt * exp(temp2);
 
@@ -474,24 +483,24 @@ NEW:
 
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, 0, 1, val_ptr};
 
-	int dim = (sw!=0)+(sv!=0)+(st!=0);
+	int dim = (sw!=0)+(st!=0);
 
-	double *xmin = (double*)malloc(dim * sizeof(double));
-	double *xmax = (double*)malloc(dim * sizeof(double));
+	double *xmin = (double*)R_Calloc(dim, double);
+	double *xmax = (double*)R_Calloc(dim, double);
 
 	// 0  = s (v); 1 = u (w), 2 = v (w)
-	if(sv) {
-		xmin[0] = -1; xmax[0] = 1;
-		for (int i = 1; i < dim; i++) {
-			xmin[i] = 0;
-			xmax[i] = 1;
-		}
-	} else {
+	// if(sv) {
+	// 	xmin[0] = -1; xmax[0] = 1;
+	// 	for (int i = 1; i < dim; i++) {
+	// 		xmin[i] = 0;
+	// 		xmax[i] = 1;
+	// 	}
+	// } else {
 		for (int i = 0; i < dim; i++) {
 			xmin[i] = 0;
 			xmax[i] = 1;
 		}
-	}
+	// }
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
@@ -501,13 +510,13 @@ NEW:
 
 	int Meval = 6000;
 
-	hcubature(1, int_dtddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, ERROR_INDIVIDUAL, &val, &err);
+	hcubature(int_dtddiff_d, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err);
 	// val = val;
 
 	cnt++;
 	if(cnt == 10) {
 		Rprintf("cnt dt = 10\n");
-		free(xmin); free(xmax);
+		R_Free(xmin); R_Free(xmax);
 		return val * exp(-d);
 	}
 
@@ -528,7 +537,7 @@ NEW:
 	}
 
 
-	free(xmin); free(xmax);
+	R_Free(xmin); R_Free(xmax);
 	return val * exp(-d);
 
 }
@@ -537,9 +546,9 @@ void wiener_comp(double start, double scale, double norm, double alpha, double a
 	h.x = alpha;
 	double t = exp(alpha * scale + start);
 
-	if (sv == 0.0 && sw == 0.0) {
-		h.h = dwiener_d(-t, a, v, w, -27.63102);
-		h.dh = dtdwiener_d(t, a, v, w, h.h, -23.02585);
+	if (sw == 0.0) {
+		h.h = dwiener_d(-t, a, v, w, sv, -27.63102);
+		h.dh = dtdwiener_d(t, a, v, w, sv, h.h, -23.02585);
 	} else {
 		h.h = ddiff_d(t, -1, a, v, 0.0, w, sw, sv, 0.0, 1.e-9);
 		h.dh = dtdiff_d(t, -1, a, v, 0.0, w, sw, sv, 0.0, 1.e-7, h.h);
@@ -596,7 +605,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 					one.x -= sign * step;
 
 					wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
-					if ((abs(one.dh) > 2.0) && (abs(one.dh) < 5)) h.push_back(one);
+					if ((fabs(one.dh) > 2.0) && (fabs(one.dh) < 5)) h.push_back(one);
 					dh = sign * one.dh;
 					if (dold > dh) {
 						Rprintf("convex2?\n");
@@ -611,7 +620,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 					ub = one.x;
 					one.x += sign * step;
 					wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
-					if ((abs(one.dh) > 2.0) && (abs(one.dh) < 5)) h.push_back(one);
+					if ((fabs(one.dh) > 2.0) && (fabs(one.dh) < 5)) h.push_back(one);
 					dh = sign * one.dh;
 					if (dh > dold) {
 						Rprintf("convex2?\n");
@@ -625,7 +634,7 @@ void initialize_ars(double a, double v, double w, double sw, double sv, double b
 		while ((dh <= 2.0) || (dh >= 5.0)) {
 			one.x = (lb + ub) / 2.0;
 			wiener_comp(start, scale, norm, one.x, a, v, w, sw, sv, one);
-			if (abs(one.dh) < 5) h.push_back(one);
+			if (fabs(one.dh) < 5) h.push_back(one);
 			dh = sign * one.dh;
 			if (dh <= 2.0) { lb = one.x; }
 			if (dh >= 5.0) { ub = one.x; }
@@ -760,39 +769,41 @@ double rdiffusion(double drift, double a) {
 	else return(a2*invgauss_proposal(fabs(drift)));
 }
 
-double rdiffusion_UPbound(double bound, double a, double drift, double w)
+double rdiffusion_UPbound(double bound, double a, double drift, double w, double t0, double st0)
 {
 	double b_lo = -w * a; double b_up = (1 - w)*a;
 START:
 	double x = 0.0, t = 0.0;
+  double tau = t0 + st0*oneuni();
+  double bnd = bound - tau;
 	while (true) {
 		const double xlo = fabs(x - b_lo);
 		const double xup = fabs(x - b_up);
 		if (fabs(xlo - xup) < 1e-5) {
 			// symmetric bounds, diffusion model in [x - xup, x + xup]
 			t += rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() < 1 / (1 + exp(-2 * drift * xup)))
-				return t;
+				return t+tau;
 			else
-				return -t;
+				return -t-tau;
 // symmetric; need lower bound
 		}
 		else if (xlo > xup) {
 			// x closer to upper bound, diffusion model in [x - xup, x + xup]
 			t += rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() < 1 / (1 + exp(-2 * drift*xup)))
-				return t;
+				return t+tau;
 			x -= xup;
 			// 			bound-=step;
 		}
 		else {
 			// x closer to lower bound, diffusion model in [x-xlo, x+xlo]
 			t += rdiffusion(drift, (2 * xlo));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() > 1 / (1 + exp(-2 * drift*xlo)))
-				return -t;
+				return -t-tau;
 			x += xlo;
 		}
 	}
@@ -800,10 +811,12 @@ START:
 
 
 
-double rdiffusion_lower_trunc(double bound, double a, double drift, double w)
+double rdiffusion_lower_trunc(double bound, double a, double drift, double w, double t0, double st0)
 {
 	double b_lo = -w * a; double b_up = (1 - w) * a;
 START:
+  double tau = t0 + st0*oneuni();
+  double bnd = bound - tau;
 	double x = 0.0, t = 0.0;
 	while (true) {
 		const double xlo = fabs(x - b_lo);
@@ -811,16 +824,16 @@ START:
 		if (fabs(xlo - xup) < 1e-5) {
 			// symmetric bounds, diffusion model in [x - xup, x + xup]
 			t += rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 //			if (oneuni(rst) < 1 / (1 + exp(-2 * drift * xup)))
 //				goto START;
 			//				return t;
-			return -t;
+			return -t-tau;
 			// symmetric; need lower bound
 		}	else if (xlo > xup) {
 			// x closer to upper bound, diffusion model in [x - xup, x + xup]
 			t+= rdiffusion(drift, (2 * xup));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() < 1 / (1 + exp(-2 * drift * xup))) goto START;
 //				return t;
 			x -= xup;
@@ -828,9 +841,9 @@ START:
 		}	else {
 			// x closer to lower bound, diffusion model in [x-xlo, x+xlo]
 			t+=rdiffusion(drift, (2 * xlo));
-			if (t > bound) goto START;
+			if (t > bnd) goto START;
 			if (oneuni() > 1 / (1 + exp(-2 * drift * xlo)))
-				return -t;
+				return -t-tau;
 			x += xlo;
 		}
 	}

@@ -30,6 +30,8 @@
 #'     \item \code{call}: the function call,
 #'     \item \code{err}: the absolute error. Only provided if sv, sw, or st0 is non-zero. If numerical integration is used, the precision cannot always be guaranteed.
 #'   }
+#' @references
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
 #' @examples
 #' daWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 #' @author Raphael Hartmann
@@ -104,7 +106,7 @@ daWienerPDF <- function(t,
   if(n.threads < 2) n.threads <- 0
   
   # num. integral evaluation checks
-  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+  if(any(sw!=0) | any(st0!=0)) {
     if(!is.numeric(n.evals)) stop("n.evals must numeric")
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
@@ -112,7 +114,7 @@ daWienerPDF <- function(t,
 
   # --- C++ FUNCTION CALL ---- #
 
-  indW <- which(sw==0 & sv==0 & st0==0)
+  indW <- which(sw==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
 
   out <- list(deriv = rep(NA, max_len), err = rep(precision, max_len))
@@ -124,6 +126,7 @@ daWienerPDF <- function(t,
                   as.numeric(a[indW]),
                   as.numeric(v[indW]),
                   as.numeric(w[indW]),
+                  as.numeric(sv[indW]),
                   as.numeric(precision),
                   as.integer(resps[indW]),
                   as.integer(K),
@@ -144,7 +147,7 @@ daWienerPDF <- function(t,
                   as.numeric(sv[indD]),
                   as.numeric(st0[indD]),
                   as.numeric(precision),
-                  as.integer(resps),
+                  as.integer(resps[indD]),
                   as.integer(K),
                   as.integer(length(indD)),
                   as.integer(n.threads),

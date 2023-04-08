@@ -9,14 +9,15 @@
 
 extern "C" {
 
-	SEXP dWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -41,7 +42,7 @@ extern "C" {
 		double *Rlogpdf = REAL(logpdf);
 
 		/* calculate the derivatives */
-		PDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rpdf, Rlogpdf, NThreads);
+		PDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rpdf, Rlogpdf, NThreads);
 
 
 		/* set elements of list out */
@@ -71,14 +72,15 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dtdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dtdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -101,7 +103,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dtPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
+		dtPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
@@ -129,14 +131,15 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dadWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dadWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -159,7 +162,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		daPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
+		daPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
@@ -187,14 +190,15 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dvdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dvdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -217,7 +221,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dvPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
+		dvPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
@@ -245,14 +249,15 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dwdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dwdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -275,7 +280,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dwPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
+		dwPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
 
 
 		/* set elements of list out */
@@ -298,6 +303,64 @@ extern "C" {
 
 }
 
+
+
+
+extern "C" {
+  
+  SEXP dsvdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+    
+    /* define input variables */
+    double *t = REAL(re1);
+    double *a = REAL(re2);
+    double *v = REAL(re3);
+    double *w = REAL(re4);
+    double *sv = REAL(re5);
+    double eps = REAL(re6)[0];
+    
+    int *resp = INTEGER(in1);
+    int K = INTEGER(in2)[0];
+    int N = INTEGER(in3)[0];
+    int NThreads = INTEGER(in4)[0];
+    
+    int epsFLAG = INTEGER(bo1)[0];
+    
+    
+    /* declare R objects for output */
+    int outCnt = 0, prtCnt = 0;
+    SEXP deriv = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
+    prtCnt = outCnt + 1;
+    
+    
+    /* declare C++ pointers for R objects */
+    double *Rderiv = REAL(deriv);
+    
+    
+    /* calculate the derivatives */
+    dsvPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rderiv, NThreads);
+    
+    
+    /* set elements of list out */
+    SET_VECTOR_ELT(out,0,deriv);
+    
+    
+    /* make name vector and set element names */
+    SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
+    prtCnt++;
+    SET_STRING_ELT(names,0,Rf_mkChar("deriv"));
+    
+    Rf_setAttrib(out,R_NamesSymbol,names);
+    
+    
+    /* Unprotect the out and names objects */
+    UNPROTECT(prtCnt);
+    
+    return(out);
+  }
+  
+}
 
 
 
@@ -539,14 +602,15 @@ extern "C" {
 
 extern "C" {
 
-	SEXP dxdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+	SEXP dxdWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
 
 		/* define input variables */
 		double *t = REAL(re1);
 		double *a = REAL(re2);
 		double *v = REAL(re3);
 		double *w = REAL(re4);
-		double eps = REAL(re5)[0];
+		double *sv = REAL(re5);
+		double eps = REAL(re6)[0];
 
 		int *resp = INTEGER(in1);
 		int K = INTEGER(in2)[0];
@@ -575,7 +639,7 @@ extern "C" {
 
 
 		/* calculate the derivatives */
-		dxPDF(t, a, v, w, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
+		dxPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
 
 
 		/* set elements of list out */
@@ -1038,17 +1102,19 @@ extern "C" {
 
 extern "C" {
 
-	SEXP randWiener(SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1, SEXP bo2) {
+	SEXP randWiener(SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP re10, SEXP re11, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1, SEXP bo2) {
 
 		/* define input variables */
 		double a = REAL(re2)[0];
 		double v = REAL(re3)[0];
 		double w = REAL(re4)[0];
-		double sv = REAL(re5)[0];
-		double sw = REAL(re6)[0];
-		double eps = REAL(re7)[0];
-		double bound = REAL(re8)[0];
-		double *list = REAL(re9);
+		double t0 = REAL(re5)[0];
+		double sv = REAL(re6)[0];
+		double sw = REAL(re7)[0];
+		double st0 = REAL(re8)[0];
+		double eps = REAL(re9)[0];
+		double bound = REAL(re10)[0];
+		double *list = REAL(re11);
 
 		int R = INTEGER(in1)[0];
 		int K = INTEGER(in2)[0];
@@ -1188,7 +1254,7 @@ extern "C" {
 
 
 		/* sampling */
-		run_make_rwiener(choice, N, a, v, w, sv, sw, R, bound, eps, K, epsFLAG, NThreads, Rq, Rresp, &ars_arch1, &ars_arch2, use_store);
+		run_make_rwiener(choice, N, a, v, w, t0, sv, sw, st0, R, bound, eps, K, epsFLAG, NThreads, Rq, Rresp, &ars_arch1, &ars_arch2, use_store);
 
 
 		/* fill list store */

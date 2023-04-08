@@ -138,6 +138,7 @@ double logdiff(double, double);
 double rexp(double);
 double lognormal(double);
 double logMill(double);
+void R_CheckUserInterruptGuarded();
 
 /*------------------------------------------------*/
 
@@ -157,7 +158,6 @@ double gsl_cdf_ugaussian_Pinv(const double);
        return value ; \
        } while (0)
 
-static inline int cheb_eval_e(const cheb_series * cs, const double x, gsl_sf_result * result);
 
 /* modified gsl_ran_gaussian */
 double onenorm();

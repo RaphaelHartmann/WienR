@@ -1,5 +1,5 @@
 Package: WienR
-Version: 0.3-0
+Version: 0.3-9
 Title: Derivatives of the First-Passage Time Density and Cumulative Distribution Function, and Random Sampling from the (Truncated) First-Passage Time Distribution
 Authors@R: c(person("Raphael", "Hartmann", email = "raphael.hartmann@protonmail.com", role = c("aut", "cre")),
              person("Karl C.", "Klauer", email="christoph.klauer@psychologie.uni-freiburg.de", role=c("cph", "aut", "ctb", "ths")),
@@ -36,4 +36,4 @@ Description: First, we provide functions to calculate the partial derivative of 
     "pseudo" adaptive rejection sampler that builds on the first method. For more details see the corresponding help files.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

@@ -14,18 +14,23 @@
 
 /* P term in the distribution function */
 double logP(int pm, double a, double v, double w) {
+	const double em1 = 1.0-1.0e-6;
 	if (pm == 1) { v = -v; w = 1.0 - w; }
 	if (fabs(v) == 0.0) return log1p(-w);
-
+	// if (fabs(v) < 1.0e-16) return log1p(-w);
+	
 	double prob;
 	double e = (-2.0 * v * a * (1.0 - w));
 	if (e < 0) {
 		double tt = exp(e);
+	  if (tt >= em1) return log1p(-w);
 		tt = log1p(-tt) - logdiff(2 * v * a * w, e);
 		prob = tt;
 	}
 	else {
-		double tt = log1p(-exp(-e)) - log1p(-exp(2 * v * a));
+		double tt = exp(-e);
+	  if (tt >= em1) return log1p(-w);
+	  tt = log1p(-tt) - log1p(-exp(2 * v * a));
 		prob = tt;
 	}
 	return prob;
@@ -112,7 +117,7 @@ double pwiener(double q, double a, double v, double w, double err, int K, int ep
 	Kll = Kl(q, v, a, w, err);
 	double lg = M_LN2 + M_LNPI - 2.0 * std::log(a);
 
-  if (3 * Kss < Kll) {
+  if (3 * Kss < Kll /*|| fabs(v) < 1.0e-1*/) {
 		if((epsFLAG && Kss<K) || !epsFLAG) Kss = K;
 		ans = logFs(q, v, a, w, static_cast<int>(Kss));
 		//Rprintf("short hier\n");
@@ -134,62 +139,66 @@ double pwiener(double q, double a, double v, double w, double err, int K, int ep
 /* P term in the derivative with respect to d/da and d/dv */
 double davlogP(int pm, double a, double v, double w) {
 
+  const double em1 = 1.0-1.1*1.0e-5;
 	double tt;
 	if (pm == 1) {
 		w = 1.0 - w;
 		v = -v;
 	}
 
-	if (fabs(v)==0.0) return(-w);
+	if (fabs(v)==0.0) return -w;
 
 	if (v < 0) {
 		double emw = (2.0 * v * a * (1.0 - w)), ew = 2 * a * v * w, e = 2 * a * v;
-		tt = M_LN2 + emw - log1p(-exp(emw));
-		double temp = log1p(-exp(ew)) - log1p(-exp(e));
+		double eemw = exp(emw), eew = exp(ew), ee = exp(e);
+		if (((eemw >= em1) || (eew >= em1)) || (ee >= em1)) return -w;
+		tt = M_LN2 + emw - log1p(-eemw);
+		double temp = log1p(-eew) - log1p(-ee);
 		if (std::log(w) > temp) {
 			tt += logdiff(std::log(w), temp);
-			tt = rexp(tt);
+			tt = exp(tt);
 		}
 		else {
 			tt += logdiff(temp, std::log(w));
-			tt = -rexp(tt);
+			tt = -exp(tt);
 		}
-
-
 	}
 	else {
-		double emw = (-2.0 * v * a * (1.0 - w)), e = (-2 * a * v);
-		tt = M_LN2 - log1p(-exp(emw));
-		double temp = logdiff(emw, e) - log1p(-exp(e));
+	  double emw = (-2.0 * v * a * (1.0 - w)), e = (-2 * a * v);
+	  double eemw = exp(emw), ee = exp(e);
+	  if ((eemw >= em1) || (ee >= em1)) return -w;
+		tt = M_LN2 - log1p(-eemw);
+		double temp = logdiff(emw, e) - log1p(-ee);
 		if (std::log(w) > temp) {
 			tt += logdiff(std::log(w), temp);
-			tt = -rexp(tt);
+			tt = -exp(tt);
 		}
 		else {
 			tt += logdiff(temp, std::log(w));
-			tt = rexp(tt);
+			tt = exp(tt);
 		}
 	}
-	if (R_FINITE(tt)) return(tt);
+	if (R_FINITE(tt)) return tt;
 	else {
 		Rprintf("dalogprob %20g%20g%20g\n", a, v, w);
 		//std::cout << "dalogprob " << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
-		return(-INFINITY);
+		return -INFINITY;
 	}
 	return tt;
 }
 
 /* extension for d/da */
 double dalogP(int pm, double a, double v, double w, double dav) {
-	if (fabs(v) == 0.0) return 0.0;
-	double tt;
+  if (fabs(v) == 0.0) return 0.0;
+  // if (fabs(v) < 1.0e-16) return 0.0;
+  double tt;
 	tt = dav * v;
 	tt = (pm == 1) ? -tt : tt;
-	if (R_FINITE(tt)) return(tt);
+	if (R_FINITE(tt)) return tt;
 	else {
 		Rprintf("dalogprob %20g%20g%20g\n", a, v, w);
 		//std::cout << "dalogprob " << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
-		return(-INFINITY);
+		return -INFINITY;
 	}
 	return tt;
 }
@@ -316,13 +325,16 @@ void dapwiener(int pm, double q, double a, double v, double w, double lp, double
 	if (pm == -1) dakS(q, a, v, w, err, Kas); else dakS(q, a, -v, 1.0 - w, err, Kas);
 
 	double erg;
-	if (Kal < 4 * Kas) {
-    if((epsFLAG && Kal<K) || !epsFLAG) Kal = K;
-    logdaFl(pm, static_cast<int>(Kal), q, a, v, w, erg, lp);
+	if (Kal > 4 * Kas /*|| fabs(v) < 1.0e-1*/) {
+	  if((epsFLAG && Kas<K) || !epsFLAG) Kas = K;
+	  logdaFs(pm, static_cast<int>(Kas), q, a, v, w, erg, lp);
+	  // if(v == 1e-13) Rprintf("hier2");
+	  
   }
 	else {
-    if((epsFLAG && Kas<K) || !epsFLAG) Kas = K;
-    logdaFs(pm, static_cast<int>(Kas), q, a, v, w, erg, lp);
+	  if((epsFLAG && Kal<K) || !epsFLAG) Kal = K;
+	  logdaFl(pm, static_cast<int>(Kal), q, a, v, w, erg, lp);
+	  // if(v == 1e-13) Rprintf("hier");
   }
   *derivF = erg;
 }
@@ -336,11 +348,11 @@ void dapwiener(int pm, double q, double a, double v, double w, double lp, double
 double dvlogP(int pm, double a, double v, double w, double dav) {
 	int sign = 1; if (pm == 1) sign = -1;
 	double tt = dav * a * sign;
-	if (R_FINITE(tt)) return(tt); else
+	if (R_FINITE(tt)) return tt; else
 	{
 		Rprintf("dvlogprob %20g%20g%20g\n", a, v, w);
 		//std::cout << "dvlogprob " << setw(20) << a << setw(20) << v << setw(20) << w << std::endl;
-		return(-INFINITY);
+		return -INFINITY;
 	}
 	return tt;
 }
@@ -436,7 +448,7 @@ void logdvFl(int pm,  int Kvl, double q, double a, double v, double w, double &d
 	for (int k = Kvl; k >= 1; k--) {
 		double sin1 = sin(M_PI * k * w), kpi = k * M_PI, kpia2 = pow((kpi / a), 2), ekpia2q = exp(-0.5 * kpia2 * q), denom = 1.0 / (pow(v, 2) + kpia2), denomk = k * denom;
 		double last = denomk * denom * ekpia2q;
-		derF = derF - last * sin1;
+		derF += - last * sin1;
 	}
 
 	double evaw = exp(-v * a * w - 0.5 * pow(v, 2) * q);
@@ -447,6 +459,7 @@ void logdvFl(int pm,  int Kvl, double q, double a, double v, double w, double &d
 	lp = exp(lp);
 	double tempv = dvlogP(0, a, v, w, dav) * temp;
 	derF = (-w * a - v * q) * (lp-temp) + derF * (-2 * v) * pia2 * evaw;
+
 	derF = (tempv + derF) * sign;
 //	derF /= lp;
 }
@@ -466,13 +479,13 @@ void dvpwiener(int pm, double q, double a, double v, double w, double lp, double
 	if (pm == -1) dvkS(q, a, v, w, err, Kvs); else dvkS(q, a, -v, 1.0 - w, err, Kvs);
 
 	double erg;
-	if (Kvl < 4 * Kvs) {
-		if((epsFLAG && Kvl<K) || !epsFLAG) Kvl = K;
-		logdvFl(pm, static_cast<int>(Kvl), q, a, v, w, erg, lp);
+	if (Kvl > 4 * Kvs /*|| fabs(v) < 1.0e-1*/) {
+	  if((epsFLAG && Kvs<K) || !epsFLAG) Kvs = K;
+	  logdvFs(pm, static_cast<int>(Kvs), q, a, v, w, erg, lp);
 	}
 	else {
-	 	if((epsFLAG && Kvs<K) || !epsFLAG) Kvs = K;
-	 	logdvFs(pm, static_cast<int>(Kvs), q, a, v, w, erg, lp);
+	  if((epsFLAG && Kvl<K) || !epsFLAG) Kvl = K;
+	  logdvFl(pm, static_cast<int>(Kvl), q, a, v, w, erg, lp);
 	}
 	*derivF = erg;
 }
@@ -484,6 +497,8 @@ void dvpwiener(int pm, double q, double a, double v, double w, double lp, double
 
 /* extension for d/dw */
 double dwlogP(int pm, double a, double v, double w) {
+	
+	const double em1 = 1.0 - 1.0e-6;
 	double tt = 1.0;
 	if (pm == 1) {
 		w = 1.0 - w;
@@ -492,16 +507,22 @@ double dwlogP(int pm, double a, double v, double w) {
 	}
 
 	if (fabs(v) == 0.0) return -tt / (1.0 - w);
+	// if (fabs(v) < 1.0e-16) return -tt / (1.0 - w);
+
 	if (v < 0) {
-		double e = (2.0 * v * a * (1.0 - w));
-		double temp = M_LN2 + e + std::log(fabs(v)) + std::log(a) - log1p(-exp(e));
-		tt *= -exp(temp);
+	  double e = (2.0 * v * a * (1.0 - w));
+	  double ee = exp(e);
+	  if (ee >= em1) return -tt / (1.0 - w);
+	  double temp = M_LN2 + e + std::log(fabs(v)) + std::log(a) - log1p(-ee);
+	  tt *= -exp(temp);
 	}
 	else
 	{
-		double e = -(2.0 * v * a * (1.0 - w));
-		double temp = M_LN2 + std::log(fabs(v)) + std::log(a) - log1p(-exp(e));
-		tt *= -exp(temp);
+	  double e = -(2.0 * v * a * (1.0 - w));
+	  double ee = exp(e);
+	  if (ee >= em1) return -tt / (1.0 - w);
+	  double temp = M_LN2 + std::log(fabs(v)) + std::log(a) - log1p(-ee);
+	  tt *= -exp(temp);
 	}
 	return tt;
 }
@@ -625,13 +646,15 @@ void dwpwiener(int pm, double q, double a, double v, double w, double lp, double
 	if (pm == -1) dwkS(q, a, v, w, err, Kws); else dwkS(q, a, -v, 1.0 - w, err, Kws);
 
 	double erg;
-	if (Kwl < 4 * Kws) {
-		if((epsFLAG && Kwl<K) || !epsFLAG) Kwl = K;
-		logdwFl(pm, static_cast<int>(Kwl), q, a, v, w, erg, lp);
+	if (Kwl > 4 * Kws /*|| fabs(v) < 1.0e-1*/) {
+	  if((epsFLAG && Kws<K) || !epsFLAG) Kws = K;
+	  logdwFs(pm, static_cast<int>(Kws), q, a, v, w, erg, lp);
+	  // if (fabs(v) == 1e-14) Rprintf("hier2\n");
 	}
 	else {
-	 	if((epsFLAG && Kws<K) || !epsFLAG) Kws = K;
-	 	logdwFs(pm, static_cast<int>(Kws), q, a, v, w, erg, lp);
+	  if((epsFLAG && Kwl<K) || !epsFLAG) Kwl = K;
+	  logdwFl(pm, static_cast<int>(Kwl), q, a, v, w, erg, lp);
+	  // if (fabs(v) == 1e-14) Rprintf("hier1\n");
 	}
 	*derivF = erg;
 }
@@ -834,13 +857,13 @@ void dxpwiener(int pm, double q, double a, double v, double w, double lp, double
 	double L =  Kal + Kvl + Kwl;
 
 	double Fa = 0.0, Fv = 0.0, Fw = 0.0;
-	if (L < 4*S) {
-		if((epsFLAG && L < 3*K) || !epsFLAG) Kal = Kvl = Kwl = K;
-		logdxFl(pm, static_cast<int>(Kal), static_cast<int>(Kvl), static_cast<int>(Kwl), q, a, v, w, lp, Fa, Fv, Fw);
+	if (L > 4*S /*|| fabs(v) < 1.0e-1*/) {
+	  if((epsFLAG && S < 3*K) || !epsFLAG) Kas = Kvs = Kws = K;
+	  logdxFs(pm, static_cast<int>(Kas), static_cast<int>(Kvs), static_cast<int>(Kws), q, a, v, w, lp, Fa, Fv, Fw);
 	}
 	else {
-		if((epsFLAG && S < 3*K) || !epsFLAG) Kas = Kvs = Kws = K;
-		logdxFs(pm, static_cast<int>(Kas), static_cast<int>(Kvs), static_cast<int>(Kws), q, a, v, w, lp, Fa, Fv, Fw);
+	  if((epsFLAG && L < 3*K) || !epsFLAG) Kal = Kvl = Kwl = K;
+	  logdxFl(pm, static_cast<int>(Kal), static_cast<int>(Kvl), static_cast<int>(Kwl), q, a, v, w, lp, Fa, Fv, Fw);
 	}
 	// -----------d/da------------
 	*da = Fa;

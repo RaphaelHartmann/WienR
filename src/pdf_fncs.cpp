@@ -56,7 +56,7 @@ double logfl(double q, double v, double w, int K) {
 }
 
 /* calculate density */
-double dwiener(double q, double a, double vn, double wn, double err, int K, int epsFLAG) {
+double dwiener(double q, double a, double vn, double wn, double sv, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		return -INFINITY;
 	}
@@ -82,7 +82,10 @@ double dwiener(double q, double a, double vn, double wn, double err, int K, int 
 	ans = 0.0;
 
 	/* calculate the number of terms needed for short t*/
-	double lg1 = (-v * a * w - (pow(v, 2)) * q / 2.0) - 2.0*std::log(a);
+	double eta_sqr = pow(sv, 2);
+	double temp = 1 + eta_sqr * q;
+	double lg1 = (eta_sqr * pow(a * w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 *std::log(a) - 0.5 *std::log(temp);
+	//double lg1 = (-v * a * w - (pow(v, 2)) * q / 2.0) - 2.0*std::log(a);
 	double es = (err - lg1);
 	kss = ks(q_asq, w, es);
 	/* calculate the number of terms needed for large t*/
@@ -165,7 +168,7 @@ void logdtfl(double q, double w, int K, double &erg, int &newsign) {
 }
 
 /* calculate derivative of density with respect to t */
-void dtdwiener(double q, double a, double v, double w, double ld, double *derivF, double err, int K, int epsFLAG) {
+void dtdwiener(double q, double a, double v, double w, double sv, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
 	} else {
@@ -179,9 +182,13 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 
 		/* prepare some variables */
 	  double q_asq = q / pow(a, 2);
-	  double ans0 = -pow(v, 2) / 2.0;
 	  double la = 2.0*std::log(a);
-	  double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	  //double ans0 = -pow(v, 2) / 2.0;
+	  //double lg1 = -v * a * w - pow(v, 2) * q / 2.0 - la;
+	  double eta_sqr = pow(sv, 2);
+	  double temp = (1 + eta_sqr * q);
+	  double ans0 = -0.5 * (pow(eta_sqr, 2) * (q + pow(a * w, 2)) + eta_sqr * (1 - 2 * a * v * w) + pow(v, 2)) / pow(temp, 2);
+	  double lg1 = (eta_sqr * pow(a * w,  2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - la - 0.5 * std::log(temp);
 	  double factor = lg1 - la;
 
 
@@ -220,10 +227,11 @@ void dtdwiener(double q, double a, double v, double w, double ld, double *derivF
 /* d/da DENSITY */
 
 /* calculate derivative of density with respect to a */
-void dadwiener(double q, double a, double vn, double wn, double ld, double *derivF, double err, int K, int epsFLAG) {
+void dadwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
 	} else {
+	  
 		double kll, kss, ans, v, w;
 		if(!epsFLAG && K==0) {
 			err = -27.63102; // exp(err) = 1.e-12
@@ -246,8 +254,12 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 		/* prepare some variables */
 		double q_asq = q / pow(a, 2);
-		double ans0 =  - v * w;
-		double lg1 = -v * a*w - pow(v, 2)*q / 2.0 - 2.0*la;
+		double eta_sqr = pow(sv, 2);
+		double temp = (1 + eta_sqr * q);
+		double ans0 = (-v * w + eta_sqr * pow(w, 2) * a) / temp;
+		double lg1 = (eta_sqr * pow(a * w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 * la - 0.5 *std::log(temp);
+		//double ans0 =  - v * w;
+		//double lg1 = -v * a*w - pow(v, 2)*q / 2.0 - 2.0*la;
 		double factor = lg1 - 3.0*la;
 
 		/* calculate the number of terms needed for short t */
@@ -277,6 +289,7 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 		}
 		//return ans;
 		*derivF = ans*exp(ld);
+		
 	}
 }
 /*-----------------------------------------------*/
@@ -286,7 +299,7 @@ void dadwiener(double q, double a, double vn, double wn, double ld, double *deri
 /* d/dv DENSITY */
 
 /* calculate derivative of density with respect to v */
-void dvdwiener(double q, double a, double vn, double wn, double ld, double *derivF) {
+void dvdwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF) {
 	if (q == 0.0) {
 		*derivF = 0.0;
 	} else {
@@ -303,8 +316,11 @@ void dvdwiener(double q, double a, double vn, double wn, double ld, double *deri
 			w = wn;
 			v = vn;
 		}
+		
+		double temp = 1 + pow(sv, 2) * q;
 
-		ans =  sign*(- a * w - v * q);
+		ans = sign*(-a * w - v * q) / temp;
+		//¨ans =  sign*(- a * w - v * q);
 
 		*derivF = ans*exp(ld);
 	}
@@ -370,7 +386,7 @@ void logdwfl(double q, double v,  double w, int K, double &erg, int &sign) {
 }
 
 /* calculate derivative of density with respect to w */
-void dwdwiener(double q, double a, double vn, double wn, double ld, double *derivF, double err, int K, int epsFLAG) {
+void dwdwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF, double err, int K, int epsFLAG) {
 	if (q == 0.0) {
 		*derivF = 0.0;
 	} else {
@@ -397,8 +413,12 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 		/* prepare some variables */
 		double q_asq = q / pow(a, 2);
-		double ans0 = -v * a;
-		double lg1 = (-v * a*w - pow(v, 2)*(q) / 2.0) - 2.0*std::log(a);
+		//double ans0 = -v * a;
+		double eta_sqr = pow(sv, 2);
+		double temp = (1 + eta_sqr * q);
+		double ans0 = (-v * a + eta_sqr * pow(a, 2) * w) / temp;
+		//double lg1 = (-v*a*w - pow(v, 2)*(q) / 2.0) - 2.0*std::log(a);
+		double lg1 = (eta_sqr * pow(a*w, 2) - 2 * a * v * w - pow(v, 2) * q) / 2.0 / temp - 2 *std::log(a) - 0.5 *std::log(temp);
 		double ls = -lg1 + ld;
 		double ll = -lg1 + ld;
 
@@ -428,7 +448,36 @@ void dwdwiener(double q, double a, double vn, double wn, double ld, double *deri
 
 
 
-/* d/dw DENSITY */
+/* d/dsv DENSITY */
+
+void dsvdwiener(double q, double a, double vn, double wn, double sv, double ld, double *derivF, double err, int K, int epsFLAG) {
+  if (q == 0.0) {
+    *derivF = 0.0;
+  } else {
+    double v, w;
+    
+    if (q < 0) {
+      v = vn;
+      w = wn;
+      q = fabs(q);
+    }
+    else {
+      v = -vn;
+      w = 1 - wn;
+    }
+    double temp = 1 + pow(sv, 2) * q;
+    double t1 = -q / temp;
+    double t2 = (pow(a * w, 2) + 2 * a * v * w * q + pow(v * q, 2)) / pow(temp, 2);
+    
+    //return ans*sign;
+    *derivF = sv * (t1 + t2) * exp(ld);
+  }
+}
+/*-----------------------------------------------*/
+
+
+
+/* grad DENSITY */
 
 /* calculate number of terms needed for short t */
 void dxks(double q, double t, double w, double a, double eps, double &Kas, double &Kws) {

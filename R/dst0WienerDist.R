@@ -30,6 +30,8 @@
 #'     \item \code{call}: the function call,
 #'     \item \code{err}: the absolute error.
 #'   }
+#' @references
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}
 #' @examples
 #' dst0WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, t0 = .3, st0 = .1)
 #' @author Raphael Hartmann
@@ -105,7 +107,7 @@ dst0WienerCDF <- function(t,
   if(n.threads < 2) n.threads <- 0
 
   # num. integral evaluation checks
-  if(any(sv!=0) | any(sw!=0) | any(st0!=0)) {
+  if(any(sw!=0) | any(st0!=0)) {
     if(!is.numeric(n.evals)) stop("n.evals must numeric")
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
@@ -113,7 +115,7 @@ dst0WienerCDF <- function(t,
 
   # --- C++ FUNCTION CALL ---- #
 
-  out <- .Call("pDiffusion7",
+  out <- .Call("dDiffusion7",
                as.numeric(t),
                as.numeric(a),
                as.numeric(v),
@@ -127,7 +129,7 @@ dst0WienerCDF <- function(t,
                as.integer(K),
                as.integer(max_len),
                as.integer(n.threads),
-               as.integer(7),
+               as.integer(9),
                as.integer(n.evals),
                as.logical(PRECISION_FLAG)
   )

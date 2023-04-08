@@ -72,8 +72,7 @@
 #' 
 #' Gilks, W. R., & Wild, P. (1992). Adaptive Rejection Sampling for Gibbs Sampling. \emph{Applied Statistics, 41}(2), 337. \doi{10.2307/2347565}
 #' 
-#' Hartmann, R., & Klauer, K. C. (in press). Partial Derivatives for the First-Passage Time Distribution in Wiener Diffusion Models. \emph{Journal of Mathematical Psychology}.
-#' 
+#' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550} 
 #' @examples
 #' sample_list1 <- sampWiener(N = 100000, a = 1, v = .3, w = .5)
 #' hist(sample_list1$q, 200)
@@ -130,6 +129,15 @@ sampWiener <- function(N,
   } else {
     resp <- response
   } 
+  
+  # bound checks
+  if(bound <= t0) stop("bound must be larger thatn t0")
+  if(bound > 0 & !is.infinite(bound) & st0 > 0) {
+    if(method != "rs") {
+      warning(paste0("sampling from truncated distribution with st0>0 not (yet) implemented for method \"", method, "\". Method = \"rs\" is used instead."))
+      method = "rs"
+    }
+  }
 
   # precision checks
   if(!is.numeric(precision) & !is.null(precision)) stop("precision must either be NULL or some numeric value")
@@ -191,9 +199,11 @@ sampWiener <- function(N,
   samp_list <- .Call("randWiener", 
                      a, 
                      v, 
-                     w, 
+                     w,
+                     t0,
                      sv, 
-                     sw, 
+                     sw,
+                     st0,
                      precision, 
                      bound, 
                      ars_vector, 
@@ -206,13 +216,6 @@ sampWiener <- function(N,
                      as.integer(1), 
                      as.integer(ARS_STORE)
   )
-  
-  
-  # add t0
-  if(t0 != 0) {
-    temp <- t0 + ifelse(st0 != 0, st0 * runif(N), 0)
-    samp_list$q <- samp_list$q + temp
-  }
   
   
   # responses
@@ -233,3 +236,19 @@ sampWiener <- function(N,
   return(output)
 
 }
+
+
+#' @rdname sampWiener
+#' @examples
+#' @examples
+#' sample_list1 <- rWDM(N = 100000, a = 1, v = .3, w = .5)
+#' hist(sample_list1$q, 200)
+#' 
+#' sample_list2 <- rWDM(N = 100000, a = 1, v = .3, w = .5, ARS_STORE = TRUE)
+#' hist(sample_list2$q, 200)
+#' sample_list2$ars_store
+#' 
+#' sample_list3 <- rWDM(N = 100000, a = 1, v = .3, w = .5, ars_list = sample_list2$ars_store)
+#' hist(sample_list3$q, 200)
+#' #' @export
+rWDM <- sampWiener
