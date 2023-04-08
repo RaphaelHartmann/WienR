@@ -132,7 +132,7 @@ sampWiener <- function(N,
   
   # bound checks
   if(bound <= t0) stop("bound must be larger thatn t0")
-  if(bound > 0 & st0 > 0) {
+  if(bound > 0 & !is.infinite(bound) & st0 > 0) {
     if(method != "rs") {
       warning(paste0("sampling from truncated distribution with st0>0 not (yet) implemented for method \"", method, "\". Method = \"rs\" is used instead."))
       method = "rs"
@@ -236,3 +236,19 @@ sampWiener <- function(N,
   return(output)
 
 }
+
+
+#' @rdname sampWiener
+#' @examples
+#' @examples
+#' sample_list1 <- rWDM(N = 100000, a = 1, v = .3, w = .5)
+#' hist(sample_list1$q, 200)
+#' 
+#' sample_list2 <- rWDM(N = 100000, a = 1, v = .3, w = .5, ARS_STORE = TRUE)
+#' hist(sample_list2$q, 200)
+#' sample_list2$ars_store
+#' 
+#' sample_list3 <- rWDM(N = 100000, a = 1, v = .3, w = .5, ars_list = sample_list2$ars_store)
+#' hist(sample_list3$q, 200)
+#' #' @export
+rWDM <- sampWiener

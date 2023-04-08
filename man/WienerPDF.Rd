@@ -2,9 +2,26 @@
 % Please edit documentation in R/WienerDens.R
 \name{WienerPDF}
 \alias{WienerPDF}
+\alias{dWDM}
 \title{First-passage time probability density function of the diffusion model}
 \usage{
 WienerPDF(
+  t,
+  response,
+  a,
+  v,
+  w,
+  t0 = 0,
+  sv = 0,
+  sw = 0,
+  st0 = 0,
+  precision = NULL,
+  K = NULL,
+  n.threads = FALSE,
+  n.evals = 6000
+)
+
+dWDM(
   t,
   response,
   a,
@@ -70,6 +87,7 @@ Calculate the first-passage time probability density function of the diffusion m
 }
 \examples{
 WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+dWDM(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
 }
 \references{
 Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time distribution for the diffusion model with variable drift. \emph{Journal of Mathematical Psychology, 76}, 7–12. \doi{10.1016/j.jmp.2016.11.003}

@@ -183,3 +183,10 @@ WienerPDF <- function(t,
   return(outcome)
 
 }
+
+
+#' @rdname WienerPDF
+#' @examples
+#' dWDM(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' @export
+dWDM <- WienerPDF

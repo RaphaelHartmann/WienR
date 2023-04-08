@@ -176,3 +176,10 @@ WienerCDF <- function(t,
   return(outcome)
 
 }
+
+
+#' @rdname WienerCDF
+#' @examples
+#' pWDM(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' @export
+pWDM <- WienerCDF
