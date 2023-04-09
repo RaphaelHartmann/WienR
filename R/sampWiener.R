@@ -74,6 +74,7 @@
 #' 
 #' Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550} 
 #' @examples
+#' 
 #' sample_list1 <- sampWiener(N = 100000, a = 1, v = .3, w = .5)
 #' hist(sample_list1$q, 200)
 #' 
@@ -240,7 +241,7 @@ sampWiener <- function(N,
 
 #' @rdname sampWiener
 #' @examples
-#' @examples
+#' 
 #' sample_list1 <- rWDM(N = 100000, a = 1, v = .3, w = .5)
 #' hist(sample_list1$q, 200)
 #' 
@@ -250,5 +251,5 @@ sampWiener <- function(N,
 #' 
 #' sample_list3 <- rWDM(N = 100000, a = 1, v = .3, w = .5, ars_list = sample_list2$ars_store)
 #' hist(sample_list3$q, 200)
-#' #' @export
+#' @export
 rWDM <- sampWiener
