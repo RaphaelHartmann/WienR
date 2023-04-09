@@ -1,7 +1,7 @@
 
 #' Wrapper function for the partial derivative of the first-passage time probability density function of the diffusion model
 #' 
-#' Calculates the partial derivative of the first-passage time probability density function of the diffusion model with respect to one of t, a, v, w, to, sv, sw, or st0, or calculate the gradient.
+#' Calculates the partial derivative of the first-passage time probability density function of the diffusion model with respect to one of t, a, v, w, t0, sv, sw, or st0, or calculate the gradient.
 #' @param wrt partial derivative w.r.t. one of the following:
 #'   \itemize{
 #'     \item \code{"t"} the first-passage time,
@@ -84,7 +84,7 @@ ddWDM <- function(wrt,
 
 #' Wrapper function for the partial derivative of the first-passage time cumulative distribution function of the diffusion model
 #' 
-#' Calculates the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to one of a, v, w, to, sv, sw, or st0, or calculate the gradient.
+#' Calculates the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to one of a, v, w, t0, sv, sw, or st0, or calculate the gradient.
 #' @param wrt partial derivative w.r.t. one of the following:
 #'   \itemize{
 #'     \item \code{"a"} the upper barrier,
