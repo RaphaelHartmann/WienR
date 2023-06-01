@@ -628,6 +628,8 @@ extern "C" {
 		outCnt++;
 		SEXP dw = PROTECT(Rf_allocVector(REALSXP, N));
 		outCnt++;
+		SEXP dsv = PROTECT(Rf_allocVector(REALSXP, N));
+		outCnt++;
 		SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
 		prtCnt = outCnt + 1;
 
@@ -636,17 +638,19 @@ extern "C" {
 		double *Rda = REAL(da);
 		double *Rdv = REAL(dv);
 		double *Rdw = REAL(dw);
+		double *Rdsv = REAL(dsv);
 
 
 		/* calculate the derivatives */
-		dxPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, NThreads);
+		dxPDF(t, a, v, w, sv, eps, resp, K, N, epsFLAG, Rda, Rdv, Rdw, Rdsv, NThreads);
 
 
 		/* set elements of list out */
 		SET_VECTOR_ELT(out,0,da);
 		SET_VECTOR_ELT(out,1,dv);
 		SET_VECTOR_ELT(out,2,dw);
-
+		SET_VECTOR_ELT(out,3,dsv);
+		
 
 		/* make name vector and set element names */
 		SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
@@ -654,7 +658,8 @@ extern "C" {
 		SET_STRING_ELT(names,0,Rf_mkChar("da"));
 		SET_STRING_ELT(names,1,Rf_mkChar("dv"));
 		SET_STRING_ELT(names,2,Rf_mkChar("dw"));
-
+		SET_STRING_ELT(names,3,Rf_mkChar("dsv"));
+		
 		Rf_setAttrib(out,R_NamesSymbol,names);
 
 

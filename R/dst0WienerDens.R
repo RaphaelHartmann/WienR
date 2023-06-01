@@ -76,7 +76,8 @@ dst0WienerPDF <- function(t,
   if(any(t0 < 0) | any(sw < 0) | any(sv < 0) | any(st0 < 0)) stop("t0, sw, sv, and st0 must be positive or zero")
   if(any(w >= 1)) stop("w must be lower than one")
   if(any(w-0.5*sw <= 0) | any(w+0.5*sw >= 1)) stop("w-0.5*sw must be greater than zero and w+0.5*sw must be lower than one")
-  if(any(st0<=0)) stop("st0 must be larger than zero for this partial derivative (d/dst0)")
+  # if(any(st0<=0)) stop("st0 must be larger than zero for this partial derivative (d/dst0)")
+  if(any(st0<=0)) message("Note: st0 <= 0 produces NaN")
 
   # response checks
   if(!is.character(response) & !is.numeric(response)) stop("response must be a character with the values \"upper\" and/or \"lower\" OR numerics with the values 1=\"lower\" or 2=\"upper\"")
@@ -112,22 +113,26 @@ dst0WienerPDF <- function(t,
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
 
-
+  # prepare output vector
+  ind_n0 <- which(st0!=0)
+  derivative <- list(deriv = rep(NaN, max_len), call = match.call(), err = rep(NaN, max_len))
+  
+  
   # --- C++ FUNCTION CALL ---- #
 
   out <- .Call("dDiffusion7",
-               as.numeric(t),
-               as.numeric(a),
-               as.numeric(v),
-               as.numeric(t0),
-               as.numeric(w),
-               as.numeric(sw),
-               as.numeric(sv),
-               as.numeric(st0),
+               as.numeric(t[ind_n0]),
+               as.numeric(a[ind_n0]),
+               as.numeric(v[ind_n0]),
+               as.numeric(t0[ind_n0]),
+               as.numeric(w[ind_n0]),
+               as.numeric(sw[ind_n0]),
+               as.numeric(sv[ind_n0]),
+               as.numeric(st0[ind_n0]),
                as.numeric(precision),
-               as.integer(resps),
+               as.integer(resps[ind_n0]),
                as.integer(K),
-               as.integer(max_len),
+               as.integer(length(ind_n0)),
                as.integer(n.threads),
                as.integer(7),
                as.integer(n.evals),
@@ -137,8 +142,10 @@ dst0WienerPDF <- function(t,
 
 
   #print(out)
-
-  derivative <- list(deriv = out$deriv, call = match.call(), err = out$err)
+  derivative$deriv[ind_n0] <- out$deriv
+  derivative$err[ind_n0] <- out$err
+  
+  # derivative <- list(deriv = out$deriv, call = match.call(), err = out$err)
 
   # output
   class(derivative) <- "Diffusion_deriv"

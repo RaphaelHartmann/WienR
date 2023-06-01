@@ -76,8 +76,9 @@ dsvWienerPDF <- function(t,
   if(any(t0 < 0) | any(sw < 0) | any(sv < 0) | any(st0 < 0)) stop("t0, sw, sv, and st0 must be positive or zero")
   if(any(w >= 1)) stop("w must be lower than one")
   if(any(w-0.5*sw <= 0) | any(w+0.5*sw >= 1)) stop("w-0.5*sw must be greater than zero and w+0.5*sw must be lower than one")
-  if(any(sv<=0)) stop("sv must be larger than zero for this partial derivative (d/dsv)")
-
+  # if(any(sv<=0)) stop("sv must be larger than zero for this partial derivative (d/dsv)")
+  if(any(sv<=0)) message("Note: sv <= 0 produces NaN")
+  
   # response checks
   if(!is.character(response) & !is.numeric(response)) stop("response must be a character with the values \"upper\" and/or \"lower\" OR numerics with the values 1=\"lower\" or 2=\"upper\"")
   if(!all(response %in% c("upper", "lower")) & !all(response %in% c(1,2)) ) stop("response cannot include values other than \"upper\" and/or \"lower\" OR 1=\"lower\" or 2=\"upper\"")
@@ -112,52 +113,59 @@ dsvWienerPDF <- function(t,
     if(n.evals %% 1 != 0 | n.evals < 0) stop("n.evals must be an integer and larger or equal to 0")
   }
 
+  # prepare output vector
+  # ind_n0 <- which(sv!=0)
+  # derivative <- list(deriv = rep(NaN, max_len), call = match.call(), err = rep(NaN, max_len))
+  
 
   # --- C++ FUNCTION CALL ---- #
   
   indW <- which(sw==0 & st0==0)
   if(length(indW)==0) indD <- 1:max_len else indD <- (1:max_len)[-indW]
   
-  out <- list(deriv = rep(NA, max_len), err = rep(precision, max_len))
+  out <- list(deriv = rep(NaN, max_len), err = rep(NaN, max_len))
   
   if (length(indW) > 0) {
-    tt <- t[indW]-t0[indW]
+    indW_sv0 <- intersect(indW, which(sv!=0))
+    tt <- t[indW_sv0]-t0[indW_sv0]
     temp <- .Call("dsvdWiener",
                   as.numeric(ifelse(tt<0, 0, tt)),
-                  as.numeric(a[indW]),
-                  as.numeric(v[indW]),
-                  as.numeric(w[indW]),
-                  as.numeric(sv[indW]),
+                  as.numeric(a[indW_sv0]),
+                  as.numeric(v[indW_sv0]),
+                  as.numeric(w[indW_sv0]),
+                  as.numeric(sv[indW_sv0]),
                   as.numeric(precision),
-                  as.integer(resps[indW]),
+                  as.integer(resps[indW_sv0]),
                   as.integer(K),
-                  as.integer(length(indW)),
+                  as.integer(length(indW_sv0)),
                   as.integer(n.threads),
                   as.logical(PRECISION_FLAG)
     )
-    out$deriv[indW] <- temp$deriv
+    out$deriv[indW_sv0] <- temp$deriv
+    out$err[indW_sv0] <- precision
   }
   if (length(indD) > 0){
+    indD_sv0 <- intersect(indD, which(sv!=0))
     temp <- .Call("dDiffusion7",
-                 as.numeric(t[indD]),
-                 as.numeric(a[indD]),
-                 as.numeric(v[indD]),
-                 as.numeric(t0[indD]),
-                 as.numeric(w[indD]),
-                 as.numeric(sw[indD]),
-                 as.numeric(sv[indD]),
-                 as.numeric(st0[indD]),
+                 as.numeric(t[indD_sv0]),
+                 as.numeric(a[indD_sv0]),
+                 as.numeric(v[indD_sv0]),
+                 as.numeric(t0[indD_sv0]),
+                 as.numeric(w[indD_sv0]),
+                 as.numeric(sw[indD_sv0]),
+                 as.numeric(sv[indD_sv0]),
+                 as.numeric(st0[indD_sv0]),
                  as.numeric(precision),
-                 as.integer(resps[indD]),
+                 as.integer(resps[indD_sv0]),
                  as.integer(K),
-                 as.integer(length(indD)),
+                 as.integer(length(indD_sv0)),
                  as.integer(n.threads),
                  as.integer(6),
                  as.integer(n.evals),
                  as.logical(PRECISION_FLAG)
     )
-    out$deriv[indD] <- temp$deriv
-    out$err[indD] <- temp$err
+    out$deriv[indD_sv0] <- temp$deriv
+    out$err[indD_sv0] <- temp$err
   }
 
 

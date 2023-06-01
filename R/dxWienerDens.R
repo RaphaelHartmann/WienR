@@ -121,6 +121,8 @@ gradWienerPDF <- function(t,
   out <- list(da = rep(NaN, max_len), dv = rep(NaN, max_len), dw = rep(NaN, max_len), dt0 = rep(NaN, max_len), dsv = rep(NaN, max_len), dsw = rep(NaN, max_len), dst = rep(NaN, max_len), err = rep(precision, max_len))
 
   if (length(indW) > 0) {
+    ind_sv0 <- which(sv[indW]!=0)
+    indW_sv0 <- intersect(indW, which(sv!=0))
     tt <- t[indW]-t0[indW]
     temp <- .Call("dxdWiener",
                   as.numeric(ifelse(tt<0, 0, tt)),
@@ -148,9 +150,11 @@ gradWienerPDF <- function(t,
                   as.integer(n.threads),
                   as.logical(PRECISION_FLAG)
     )
-    out$da[indW] <- temp$da; out$dv[indW] <- temp$dv; out$dw[indW] <- temp$dw; out$dt0[indW] <- -temp2$deriv; out$dsv[indW] <- 0; out$dsw[indW] <- 0; out$dst[indW] <- 0;
+    out$da[indW] <- temp$da; out$dv[indW] <- temp$dv; out$dw[indW] <- temp$dw; out$dt0[indW] <- -temp2$deriv; out$dsv[indW_sv0] <- temp$dsv[ind_sv0]; out$dsw[indW] <- NaN; out$dst[indW] <- NaN;
   }
   if (length(indD) > 0){
+    ind_sv0 <- which(sv[indD]!=0)
+    indD_sv0 <- intersect(indD, which(sv!=0))
     temp <- .Call("dxdDiffusion7",
                   as.numeric(t[indD]),
                   as.numeric(a[indD]),
@@ -168,7 +172,7 @@ gradWienerPDF <- function(t,
                   as.integer(n.evals),
                   as.logical(PRECISION_FLAG)
     )
-    out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD] <- temp$dsv; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst;
+    out$da[indD] <- temp$da; out$dv[indD] <- temp$dv; out$dw[indD] <- temp$dw; out$dt0[indD] <- temp$dt0; out$dsv[indD_sv0] <- temp$dsv[ind_sv0]; out$dsw[indD] <- temp$dsw; out$dst[indD] <- temp$dst;
     out$err[indD] <- temp$err
   }
 

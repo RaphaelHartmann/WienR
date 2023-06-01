@@ -555,7 +555,7 @@ void dxPDF_old(double *t, double *a, double *v, double *w, double eps, int *resp
 
 }
 
-void dxPDF(double *t, double *a, double *v, double *w, double *sv, double eps, int *resp, int K, int N, int epsFLAG, double *da, double *dv, double *dw, int NThreads) {
+void dxPDF(double *t, double *a, double *v, double *w, double *sv, double eps, int *resp, int K, int N, int epsFLAG, double *da, double *dv, double *dw, double *dsv, int NThreads) {
 
   if (NThreads) {
     /* prepare threads */
@@ -575,6 +575,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double *sv, double eps, i
           dadwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &da[i], eps, K, epsFLAG);
           dvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dv[i]);
           dwdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dw[i], eps, K, epsFLAG);
+          dsvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dsv[i], eps, K, epsFLAG);
         }
       });
     }
@@ -586,6 +587,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double *sv, double eps, i
       dadwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &da[i], eps, K, epsFLAG);
       dvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dv[i]);
       dwdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dw[i], eps, K, epsFLAG);
+      dsvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dsv[i], eps, K, epsFLAG);
     }
 
     for (int j = 0; j < AmntOfThreads-1; j++) {
@@ -601,6 +603,7 @@ void dxPDF(double *t, double *a, double *v, double *w, double *sv, double eps, i
       dadwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &da[i], eps, K, epsFLAG);
       dvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dv[i]);
       dwdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dw[i], eps, K, epsFLAG);
+      dsvdwiener(t[i]*pm, a[i], v[i], w[i], sv[i], ld, &dsv[i], eps, K, epsFLAG);
     }
   }
 

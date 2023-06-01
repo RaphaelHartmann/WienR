@@ -37,7 +37,7 @@
 /* gradient of PDF and CDF */
   /* derivative of PDF with respect to all params */
   void dxPDF_old(double *, double *, double *, double *, double, int *, int, int, int, double *, double *, double *, int);
-  void dxPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, double *, double *, int);
+  void dxPDF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, double *, double *, double *, int);
   /* derivative of CDF with respect to all params */
   void dxCDF_old(double *, double *, double *, double *, double, int *, int, int, int, double *, double *, double *, int);
   void dxCDF(double *, double *, double *, double *, double, int *, int, int, int, double *, double *, double *, int);
