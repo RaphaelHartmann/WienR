@@ -197,7 +197,7 @@ void R_CheckUserInterruptGuarded() {
   std::lock_guard<std::mutex> guard(mtx_RCUI);
   R_CheckUserInterrupt();
 }
-  
+
 
 /* ----------------------------------- */
 

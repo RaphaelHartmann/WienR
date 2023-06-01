@@ -315,7 +315,8 @@ void method1_both(int N, double a, double v, double w, double t0, double sv, dou
 			if (sv_or_sw) {
 				pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, Neval, &p_up, &Rerr);
 			} else {
-				p_up = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
+				p_up = exp( logdiff(log(1), 2*v*a*w) - logdiff(-2*v*a*(1-w), 2*v*a*w) );
+				// = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
 			}
 		}
 		int cnt_up = 0;
@@ -424,8 +425,9 @@ void method1_both(int N, double a, double v, double w, double t0, double sv, dou
 				// p_lo = 1-p_up;
 			} else {
 				// p_up = exp(pwiener(bound, a, -v, 1-w, err, K, epsFLAG));
-				p_up = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
-				// p_lo = 1-p_up;
+				//p_up = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
+				p_up = exp( logdiff(log(1), 2*v*a*w) - logdiff(-2*v*a*(1-w), 2*v*a*w) );
+				// = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
 			}
 		}
 		int cnt_up = 0;
