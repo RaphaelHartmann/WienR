@@ -455,8 +455,32 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	// double valueln;
 
 	double *val_ptr = &value;
-	double errorW = myerr ? myerr*0.1 : 1.e-12*0.1;
-
+	double errorW1 = sw, errorW2 = sw, abstol1 = sw, abstol2 = sw;
+	if (!myerr) myerr = 1.e-12;
+	if (choice == 5 || choice == 7) {
+	  if (st) {
+	    errorW1 *= myerr*0.05;
+	    errorW2 *= myerr*0.05;
+	    abstol1 *= myerr*0.9*2/3;
+	    abstol2 *= myerr*0.9*1/3;
+	  } else{
+	    errorW1 *= myerr*0.05;
+	    errorW2 *= myerr*0.05;
+	    abstol1 *= myerr*0.9;
+	  }
+	}
+	double errorW = myerr*0.1;
+	
+	my_params params1; my_params params2; my_params params3;
+	if (choice == 7) {
+	  params1 = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW1, K, epsFLAG, val_ptr};
+	  params2 = {t, low_or_up, a, v, t0+st, w, sw, sv, 0, errorW2, K, epsFLAG, val_ptr};
+	}
+	if (choice == 5) {
+	  params1 = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW1, K, epsFLAG, val_ptr};
+	  params2 = {t, low_or_up, a, v, t0, w+0.5*sw, 0, sv, st, errorW2/2, K, epsFLAG, val_ptr};
+	  params3 = {t, low_or_up, a, v, t0, w-0.5*sw, 0, sv, st, errorW2/2, K, epsFLAG, val_ptr};
+	}
 	my_params params = {t, low_or_up, a, v, t0, w, sw, sv, st, errorW, K, epsFLAG, val_ptr};
 
 	int dim = (sw!=0)+(st!=0);
@@ -480,7 +504,8 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	if (st) xmax[dim-1] = fmin(1.0, (t-t0)/st);
 
 	double reltol = 0.0;
-	double abstol = myerr ? myerr*0.9 : 1.e-12*0.9;
+	
+  double abstol = myerr*0.9;
 
 	double val, err;
 
@@ -493,9 +518,46 @@ void ddiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 		case 2: hcubature(int_dvddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
 		case 3: hcubature(int_dt0ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
 		case 4: hcubature(int_dwddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
-		case 5: hcubature(int_dswddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
+		case 5: //hcubature(int_dswddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
+		  double tmp5, tmp5err;
+		  if (st) {
+		    hcubature(int_ddiff, &params1, dim, xmin, xmax, Meval, abstol1, reltol, &val, &err);
+		    tmp5 = -val;
+		    tmp5err = err;
+		    hcubature(int_ddiff, &params2, 1, xmin, xmax, Meval, abstol2/2, reltol, &val, &err);
+		    tmp5 += 0.5*val;
+		    tmp5err += err;
+		    hcubature(int_ddiff, &params3, 1, xmin, xmax, Meval, abstol2/2, reltol, &val, &err);
+		    val = 1/sw*(tmp5 + 0.5*val);
+		    err += tmp5err;
+		    errorW = errorW1 + errorW2;
+		  } else {
+		    hcubature(int_ddiff, &params1, dim, xmin, xmax, Meval, abstol1, reltol, &val, &err);
+		    tmp5 = val;
+		    val = 1/sw*(-tmp5 + 
+		      0.5*(exp(dwiener(low_or_up * (t-t0), a, v, w+0.5*sw, sv, errorW2/2, K, epsFLAG)) +
+		           exp(dwiener(low_or_up * (t-t0), a, v, w-0.5*sw, sv, errorW2/2, K, epsFLAG))));
+		    errorW = errorW1 + errorW2;
+		  }
+		  break;
 		case 6: hcubature(int_dsvddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
-		case 7: hcubature(int_dst0ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
+		case 7: //hcubature(int_dst0ddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
+		  double tmp7, tmp7err;
+		  if (sw) {
+		    hcubature(int_ddiff, &params1, dim, xmin, xmax, Meval, abstol1, reltol, &val, &err);
+		    tmp7 = val;
+		    tmp7err = err;
+		    hcubature(int_ddiff, &params2, 1, xmin, xmax, Meval, abstol2, reltol, &val, &err);
+		    val = 1/st*(val - tmp7);
+		    err += tmp7err;
+		    errorW = errorW1 + errorW2;
+		  } else {
+		    hcubature(int_ddiff, &params1, dim, xmin, xmax, Meval, abstol1, reltol, &val, &err);
+		    tmp7 = val;
+		    val = 1/st*(-tmp7 + exp(dwiener(low_or_up * (t-(t0+st)), a, v, w, sv, errorW2, K, epsFLAG)));
+		    errorW = errorW1 + errorW2;
+		  }
+		  break;
 		case 8: hcubature(int_dtddiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
 	  case 9: hcubature(int_dst0pdiff, &params, dim, xmin, xmax, Meval, abstol, reltol, &val, &err); break;
 	}
