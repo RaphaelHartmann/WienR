@@ -44,7 +44,7 @@
 #'
 #' Wabersich, D., & Vandekerckhove, J. (2014). The RWiener Package: an R Package Providing Distribution Functions for the Wiener Diffusion Model. \emph{The R Journal, 6(1)}, 49. \doi{10.32614/rj-2014-005}
 #' @examples
-#' WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' WienerPDF(t = 1.2, response = "upper", a = 1.1, v = 2, w = .6, precision = NULL, K = NULL)
 #' @author Raphael Hartmann
 #' @useDynLib "WienR", .registration=TRUE
 #' @export
@@ -187,6 +187,6 @@ WienerPDF <- function(t,
 
 #' @rdname WienerPDF
 #' @examples
-#' dWDM(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+#' dWDM(t = 1.2, response = "upper", a = 1.1, v = 2, w = .6, precision = NULL, K = NULL)
 #' @export
 dWDM <- WienerPDF
