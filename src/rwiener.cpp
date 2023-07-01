@@ -1,12 +1,13 @@
 
 
-#include "tools.h"
+#include <cmath>
+#include <algorithm>    // std::sort
 #include "cdf_fncs.h"
 #include "pdf_fncs.h"
 #include "rwiener.h"
 #include "gauss.h"
-#include <cmath>
-#include <algorithm>    // std::sort
+#include "tools.h"
+
 
 #define t_tilde 2.5
 

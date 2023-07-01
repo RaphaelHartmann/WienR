@@ -2,12 +2,12 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
 
-#include "tools.h"
+#include <cmath>
+#include <thread>
 #include "pdf_fncs.h"
 #include "cdf_fncs.h"
 #include "fncs_seven.h"
-#include <cmath>
-#include <thread>
+#include "tools.h"
 
 
 
@@ -975,3 +975,58 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
     }
 
   }
+/* ------------------------------------------------ */
+
+
+/* Quantile of Wiener diffusion */
+void quantile(double *t, double *a, double *v, double *w, double eps, int *resp, int K, int N, int epsFLAG, double *Rcdf, double *Rlogcdf, int NThreads) {
+  
+  if (NThreads) {
+    /* prepare threads */
+    int maxThreads = std::thread::hardware_concurrency();
+    if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+    int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+    int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+    int NperThread = N / AmntOfThreads;
+    std::vector<std::thread> threads(AmntOfThreads-1);
+    
+    /* calculate derivative with parallelization */
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j] = std::thread([=]() {
+        for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          // int pm = (resp[i]==1) ? 1 : -1;
+          // int mp = -1*pm;
+          // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
+          // Rlogcdf[i] = lp;
+          // Rcdf[i] = exp(lp);
+        }
+      });
+    }
+    
+    int last = NperThread * (AmntOfThreads-1);
+    for (int i = last; i < N; i++) {
+      // int pm = (resp[i]==1) ? 1 : -1;
+      // int mp = -1*pm;
+      // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
+      // Rlogcdf[i] = lp;
+      // Rcdf[i] = exp(lp);
+    }
+    
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j].join();
+    }
+    
+  } else {
+    /* calculate derivative without parallelization */
+    for(int i = 0; i < N; i++) {
+      // if (i % 1024 == 0) R_CheckUserInterrupt();
+      // int pm = (resp[i]==1) ? 1 : -1;
+      // int mp = -1*pm;
+      // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
+      // Rlogcdf[i] = lp;
+      // Rcdf[i] = exp(lp);
+    }
+  }
+  
+}
+/* ------------------------------------------------ */

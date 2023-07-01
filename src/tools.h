@@ -7,8 +7,9 @@
 
 #include <cmath>
 #include <vector>
-#include <R.h>
 // #include <mutex>
+#include <R.h>
+
 //
 // extern std::mutex mtx_R_CUI; // mutex for R_CheckUserInterrupt
 

@@ -1,11 +1,11 @@
 
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
-
-#include <Rinternals.h>
-#include <cmath>
-#include "tools.h"
+#define R_NO_REMAP
+//#include <cmath>
 #include <mutex>
+#include "tools.h"
+#include <Rinternals.h>
 
 std::mutex mtx_samp, mtx_RCUI;
 

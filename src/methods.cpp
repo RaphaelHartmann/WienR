@@ -2,14 +2,14 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
 
-#include "tools.h"
-#include "cdf_fncs.h"
-#include "fncs_seven.h"
-#include "rwiener.h"
 #include <cmath>
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include "cdf_fncs.h"
+#include "fncs_seven.h"
+#include "rwiener.h"
+#include "tools.h"
 
 
 std::mutex mtx_ars1, mtx_ars2; // mutexes for global ars_archiv's

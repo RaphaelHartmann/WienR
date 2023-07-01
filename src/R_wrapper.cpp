@@ -1,10 +1,10 @@
 
 // Chair of Social Psychology, University of Freiburg
 // Authors: Raphael Hartmann and Christoph Klauer
-
-#include "tools.h"
+#define R_NO_REMAP
 #include "derivs.h"
 #include "methods.h"
+#include "tools.h"
 #include <Rinternals.h>
 
 extern "C" {

@@ -425,10 +425,10 @@ void increment(vector<bool>& index, int k, double lambda, int n, int* c, vector<
     return;
   }
   int first_zero = 0;
-  while ((first_zero < index.size()) && index[first_zero]) first_zero++;
-  if (first_zero == index.size()) {
+  while ((first_zero < static_cast<int>(index.size())) && index[first_zero]) first_zero++;
+  if (first_zero == static_cast<int>(index.size())) {
     index.flip();
-    for (int j = 0; j != index.size(); j++) temp[c[j] - 1] *= -1;
+    for (int j = 0; j != static_cast<int>(index.size()); j++) temp[c[j] - 1] *= -1;
     index.push_back(true);
     temp[c[index.size() - 1] - 1] = -lambda;
   }
@@ -651,7 +651,7 @@ int hcubature(int integrand(unsigned dim, const double* x, void* p, unsigned fdi
   err[0] = out.err;
   val[0] = out.result;
   // convergence test
-  if ((err[0] <= std::max(reqRelError * fabs(val[0]), reqAbsError)) || ((maxEval!=0) && (numevals >= maxEval))) {
+  if ((err[0] <= std::max(reqRelError * fabs(val[0]), reqAbsError)) || ((maxEval!=0) && (numevals >= static_cast<int>(maxEval)))) {
     //        std::cout << numevals << std::endl;
     return 0;
   }
@@ -689,7 +689,7 @@ int hcubature(int integrand(unsigned dim, const double* x, void* p, unsigned fdi
     numevals += 2 * evals_per_box;
     delete_box(box);
     free(ma); free(mb);
-    if (((err[0] <= std::max(reqRelError * fabs(val[0]), reqAbsError)) || ((maxEval != 0) && (numevals >= maxEval))) || !(std::isfinite(val[0])) ) {
+    if (((err[0] <= std::max(reqRelError * fabs(val[0]), reqAbsError)) || ((maxEval != 0) && (numevals >= static_cast<int>(maxEval)))) || !(std::isfinite(val[0])) ) {
       break;
     }
   }

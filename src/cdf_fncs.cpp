@@ -2,12 +2,12 @@
 // Chair of Social Psychology, University of Freiburg
 // Authors: Christoph Klauer and Raphael Hartmann
 
-#include "cstdio"
+//#include "cstdio"
 #include "cdf_fncs.h"
 #include "tools.h"
-#include <Rinternals.h>
-#include <cmath>
-#include <limits>
+//#include <cmath>
+//#include <limits>
+//#include <Rinternals.h>
 
 
 /* DISTRIBUTION */
@@ -729,7 +729,7 @@ void logdxFs(int pm, int Ksa, int Ksv, int Ksw, double t, double a, double v, do
 
 	int K = int(fmax(Ksa, Ksv)); K = int(fmax(K, Ksw));
 
-	int Kaw = int(fmax(Ksa, Ksw));
+	// int Kaw = int(fmax(Ksa, Ksw));
 
 	for (int k = K; k >= 0; k--)
 	{
