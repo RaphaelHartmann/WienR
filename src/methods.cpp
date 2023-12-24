@@ -15,7 +15,9 @@
 std::mutex mtx_ars1, mtx_ars2; // mutexes for global ars_archiv's
 std::atomic<int> atm_ars1 (3), atm_ars2 (3); // atomic counters
 
-
+double p_low(double a, double v, double w) {
+  return exp( logdiff(0, -2*v*a*(1-w)) - logdiff(2*v*a*w, -2*v*a*(1-w)) );
+}
 
 double arst(ars_archiv& ars_store, ars_archiv* ars_str_glob, double scale, double totallow, double start, double bound, double a, double v, double w, double sw, double sv, int Nars_parallel,
 	void generic2(double start, double scale, double norm, double alpha, double a, double v, double w, double sw, double sv, point& h)) {
@@ -315,7 +317,7 @@ void method1_both(int N, double a, double v, double w, double t0, double sv, dou
 			if (sv_or_sw) {
 				pdiff(0, bound, 1.0, a, v, 0, w, sw, sv, 0, err, K, epsFLAG, Neval, &p_up, &Rerr);
 			} else {
-				p_up = exp( logdiff(log(1), 2*v*a*w) - logdiff(-2*v*a*(1-w), 2*v*a*w) );
+				p_up = p_low(a, -v, 1-w); // exp( logdiff(0, 2*v*a*w) - logdiff(-2*v*a*(1-w), 2*v*a*w) );
 				// = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
 			}
 		}
@@ -426,7 +428,7 @@ void method1_both(int N, double a, double v, double w, double t0, double sv, dou
 			} else {
 				// p_up = exp(pwiener(bound, a, -v, 1-w, err, K, epsFLAG));
 				//p_up = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
-				p_up = exp( logdiff(log(1), 2*v*a*w) - logdiff(-2*v*a*(1-w), 2*v*a*w) );
+				p_up = p_low(a, -v, 1-w); // exp( logdiff(0, 2*v*a*w) - logdiff(-2*v*a*(1-w), 2*v*a*w) );
 				// = (1-exp(2*v*a*w))/(exp(-2*v*a*(1-w))-exp(2*v*a*w));
 			}
 		}
@@ -497,7 +499,8 @@ void method2_one(int N, double a, double v, double w, double t0, double sv, doub
               if (truncated) { // truncated
                 P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
               } else { // not truncated
-                P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+                P = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+                // P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
               }
               REPEAT = oneuni() > P;
             }
@@ -530,7 +533,8 @@ void method2_one(int N, double a, double v, double w, double t0, double sv, doub
           if (truncated) { // truncated
             P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
           } else { // not truncated
-            P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+            P = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+            // P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
           }
           REPEAT = oneuni() > P;
         }
@@ -569,7 +573,8 @@ void method2_one(int N, double a, double v, double w, double t0, double sv, doub
           if (truncated) { // truncated
             P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
           } else { // not truncated
-            P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+            P = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+            // P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
           }
           REPEAT = oneuni() > P;
         }
@@ -742,7 +747,8 @@ void method3_one(int N, double a, double v, double w, double t0, double sv, doub
                 }
               } else { // not truncated
                 // p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-                p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+                p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+                // p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
                 if (R == 1) REPEAT = oneuni() > p_lo;
                 if (R == 2) REPEAT = oneuni() > 1-p_lo;
               }
@@ -782,7 +788,8 @@ void method3_one(int N, double a, double v, double w, double t0, double sv, doub
             }
           } else { // not truncated
             // p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-            p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+            p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+            // p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
             if (R == 1) REPEAT = oneuni() > p_lo;
             if (R == 2) REPEAT = oneuni() > 1-p_lo;
           }
@@ -828,7 +835,8 @@ void method3_one(int N, double a, double v, double w, double t0, double sv, doub
             }
           } else { // not truncated
             // p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-            p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+            p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+            // p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
             if (R == 1) REPEAT = oneuni() > p_lo;
             if (R == 2) REPEAT = oneuni() > 1-p_lo;
           }
@@ -900,7 +908,8 @@ void method3_both(int N, double a, double v, double w, double t0, double sv, dou
             if (sv) vs += sv * onenorm();
         		if (sw) ws += sw * (oneuni()-0.5);
         		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-        		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+        		p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+        		// p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
         		up_or_down = oneuni() < p_lo ? 0 : 1;
           }
           double tau = 0;
@@ -951,7 +960,8 @@ void method3_both(int N, double a, double v, double w, double t0, double sv, dou
         if (sv) {vs += sv * onenorm();}
     		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-    		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+    		p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+    		// p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
       }
       double tau = 0;
@@ -1008,7 +1018,8 @@ void method3_both(int N, double a, double v, double w, double t0, double sv, dou
         if (sv) {vs += sv * onenorm();}
     		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-    		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+    		p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+    		// p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
       }
       double tau = 0;
@@ -1058,7 +1069,8 @@ void method4_one(int N, double a, double v, double w, double t0, double sv, doub
               if (truncated) { // truncated
                 P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
               } else { // not truncated
-                P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+                P = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+                // P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
               }
               REPEAT = oneuni() > P;
             }
@@ -1098,7 +1110,8 @@ void method4_one(int N, double a, double v, double w, double t0, double sv, doub
           if (truncated) { // truncated
             P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
           } else { // not truncated
-            P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+            P = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+            // P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
           }
           REPEAT = oneuni() > P;
         }
@@ -1144,7 +1157,8 @@ void method4_one(int N, double a, double v, double w, double t0, double sv, doub
           if (truncated) { // truncated
             P = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
           } else { // not truncated
-            P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+            P = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+            // P = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
           }
           REPEAT = oneuni() > P;
         }
@@ -1222,7 +1236,8 @@ void method4_both(int N, double a, double v, double w, double t0, double sv, dou
             if (sv) vs += sv * onenorm();
         		if (sw) ws += sw * (oneuni()-0.5);
         		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-        		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+        		p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+        		// p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
         		up_or_down = oneuni() < p_lo ? 0 : 1;
           }
 					ars_archiv ars_store_t;
@@ -1286,7 +1301,8 @@ void method4_both(int N, double a, double v, double w, double t0, double sv, dou
         if (sv) {vs += sv * onenorm();}
     		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-    		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+    		p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+    		// p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
       }
 			ars_archiv ars_store_t;
@@ -1356,7 +1372,8 @@ void method4_both(int N, double a, double v, double w, double t0, double sv, dou
         if (sv) {vs += sv * onenorm();}
     		if (sw) {ws += sw * (oneuni()-0.5);}
     		// p_lo = exp(pwiener(bound, a, vs, ws, err, K, epsFLAG));
-    		p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
+    		p_lo = p_low(a, vs, ws); // exp( logdiff(0, -2*vs*a*(1-ws)) - logdiff(2*vs*a*ws, -2*vs*a*(1-ws)) );
+    		// p_lo = (1-exp(-2*vs*a*(1-ws)))/(exp(2*vs*a*ws)-exp(-2*vs*a*(1-ws)));
     		up_or_down = oneuni() < p_lo ? 0 : 1;
       }
 			ars_archiv ars_store_t;
