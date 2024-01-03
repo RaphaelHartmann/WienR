@@ -876,3 +876,39 @@ void dxpwiener(int pm, double q, double a, double v, double w, double lp, double
 
 }
 /*-----------------------------------------------*/
+
+
+double quantile(double p, int pm, double bound, double a, double v, double w, double err, int K, int epsFLAG) {
+  
+  double eps = err/2;
+  double pmid = 0;
+  double qmin = 0;
+  
+  double qmax = bound;
+  double q = std::isinf(bound) ? 1.0 : bound / 2;
+
+  double qold;
+  
+  if (pm == 1) {
+    v = -v;
+    w = 1.0 - w;
+  }
+  double total = pwiener(bound, a, v, w, err/2, K, epsFLAG);
+
+  do {
+    qold = q;
+    pmid = pwiener(q, a, v, w, err/2, K, epsFLAG) - total;
+    if (p <= pmid) {
+      qmax = q;
+      q = qmin + (qmax - qmin) / 2.0;
+    }
+    else {
+      qmin = q;
+      q = std::isinf(qmax) ? q * 2 : qmin + (qmax - qmin) / 2.0;
+    }
+    
+  } while (fabs(q - qold) > eps);
+  
+  return(q);
+  
+}

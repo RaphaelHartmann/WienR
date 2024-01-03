@@ -60,6 +60,10 @@
 /* ------------------------------------------------ */
 
 
+/* quantile function */
+  void QF(double *, double *, double *, double *, double *, double, int *, int, int, int, double *, double *, int);
+  void QF7(int, double *, int *, double *, double *, double *, double *, double *, double *, double *, double, int, int, int, double *, double *, double *, int, int);
+/* ------------------------------------------------ */
 
 
 

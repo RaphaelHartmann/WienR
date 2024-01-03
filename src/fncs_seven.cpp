@@ -7,7 +7,7 @@
 #include "cdf_fncs.h"
 #include "fncs_seven.h"
 #include "gauss.h"
-
+#include <thread>
 
 
 /* DENSITY */
@@ -971,4 +971,37 @@ void pdiff(int choice, double t, int low_or_up, double a, double v, double t0, d
 	*derivF = val;
 	if (*Rerr < err+errorW) *Rerr = err+errorW;
 
+}
+
+
+
+double quantile7(double total, double p, int pm, double bound, double a, double v, double w, double t0, double sv, double sw, double st0, double err, int K, int epsFLAG, int Neval, double *val, double *Rerr) {
+  
+  double eps = err/2;
+  double pmid = 0;
+  double qmin = 0;
+  
+  double qmax = bound;
+  double q = std::isinf(bound) ? 1.0 : bound / 2;
+  double qold;
+  // pdiff(0, bound, pm, a, v, t0, w, sw, sv, st0, err/2, K, epsFLAG, Neval, val, Rerr);
+  // double total = log(val[0]);
+  
+  do {
+    qold = q;
+    pdiff(0, q, pm == 1 ? 1 : -1, a, v, t0, w, sw, sv, st0, err/2, K, epsFLAG, Neval, val, Rerr);
+    pmid = log(val[0]) - total;
+    if (p <= pmid) {
+      qmax = q;
+      q = qmin + (qmax - qmin) / 2.0;
+    }
+    else {
+      qmin = q;
+      q = std::isinf(qmax) ? q * 2 : qmin + (qmax - qmin) / 2.0;
+    }
+    
+  } while (fabs(q - qold) > eps);
+  
+  return(q);
+  
 }

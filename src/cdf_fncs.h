@@ -67,5 +67,8 @@ void dwpwiener(int, double, double, double, double, double, double *, double, in
 void dxpwiener(int, double, double, double, double, double, double, int, int, double *, double *, double *);
 /*-----------------------------------------------*/
 
+/* QUANTILE FUNCTION */
+double quantile(double, int, double, double, double, double, double, int, int);
+/*-----------------------------------------------*/
 
 #endif

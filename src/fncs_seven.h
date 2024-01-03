@@ -35,5 +35,7 @@ void pdiff(int, double, int, double, double, double, double, double, double, dou
 /*-----------------------------------------------*/
 
 
+double quantile7(double, double, int, double, double, double, double, double, double, double, double, double, int, int, int, double *, double *);
+
 
 #endif

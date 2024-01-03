@@ -979,7 +979,7 @@ void dxCDF7(double *t, int *resp, double *a, double *v, double *t0, double *w, d
 
 
 /* Quantile of Wiener diffusion */
-void quantile(double *t, double *a, double *v, double *w, double eps, int *resp, int K, int N, int epsFLAG, double *Rcdf, double *Rlogcdf, int NThreads) {
+void QF(double *p, double *a, double *v, double *w, double *t0, double eps, int *resp, int K, int N, int epsFLAG, double *Rquant, double *Rlogquant, int NThreads) {
   
   if (NThreads) {
     /* prepare threads */
@@ -994,22 +994,38 @@ void quantile(double *t, double *a, double *v, double *w, double eps, int *resp,
     for (int j = 0; j < AmntOfThreads-1; j++) {
       threads[j] = std::thread([=]() {
         for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
-          // int pm = (resp[i]==1) ? 1 : -1;
-          // int mp = -1*pm;
-          // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
-          // Rlogcdf[i] = lp;
-          // Rcdf[i] = exp(lp);
+          double P;
+          if (resp[i] == 0) {
+            P = logdiff(0, -2*v[i]*a[i]*(1-w[i])) - logdiff(2*v[i]*a[i]*w[i], -2*v[i]*a[i]*(1-w[i]));
+          } else{
+            P = logdiff(0, 2*v[i]*a[i]*w[i]) - logdiff(-2*v[i]*a[i]*(1-w[i]), 2*v[i]*a[i]*w[i]);
+          }
+          if (log(p[i]) <= P) {
+            Rquant[i] = t0[i] + quantile(log(p[i])-P, resp[i], INFINITY, a[i], v[i], w[i], eps, K, epsFLAG);
+            Rlogquant[i] = log(Rquant[i]);
+          } else {
+            Rquant[i] = nan("");
+            Rlogquant[i] = nan("");
+          }
         }
       });
     }
     
     int last = NperThread * (AmntOfThreads-1);
     for (int i = last; i < N; i++) {
-      // int pm = (resp[i]==1) ? 1 : -1;
-      // int mp = -1*pm;
-      // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
-      // Rlogcdf[i] = lp;
-      // Rcdf[i] = exp(lp);
+      double P;
+      if (resp[i] == 0) {
+        P = logdiff(0, -2*v[i]*a[i]*(1-w[i])) - logdiff(2*v[i]*a[i]*w[i], -2*v[i]*a[i]*(1-w[i]));
+      } else{
+        P = logdiff(0, 2*v[i]*a[i]*w[i]) - logdiff(-2*v[i]*a[i]*(1-w[i]), 2*v[i]*a[i]*w[i]);
+      }
+      if (log(p[i]) <= P) {
+        Rquant[i] = t0[i] + quantile(log(p[i])-P, resp[i], INFINITY, a[i], v[i], w[i], eps, K, epsFLAG);
+        Rlogquant[i] = log(Rquant[i]);
+      } else {
+        Rquant[i] = nan("");
+        Rlogquant[i] = nan("");
+      }
     }
     
     for (int j = 0; j < AmntOfThreads-1; j++) {
@@ -1019,14 +1035,89 @@ void quantile(double *t, double *a, double *v, double *w, double eps, int *resp,
   } else {
     /* calculate derivative without parallelization */
     for(int i = 0; i < N; i++) {
-      // if (i % 1024 == 0) R_CheckUserInterrupt();
-      // int pm = (resp[i]==1) ? 1 : -1;
-      // int mp = -1*pm;
-      // double lp = pwiener(t[i], a[i], v[i]*mp, pm*(resp[i]-w[i]), eps, K, epsFLAG);
-      // Rlogcdf[i] = lp;
-      // Rcdf[i] = exp(lp);
+      if (i % 1024 == 0) R_CheckUserInterrupt();
+      double P;
+      if (resp[i] == 0) {
+        P = logdiff(0, -2*v[i]*a[i]*(1-w[i])) - logdiff(2*v[i]*a[i]*w[i], -2*v[i]*a[i]*(1-w[i]));
+      } else{
+        P = logdiff(0, 2*v[i]*a[i]*w[i]) - logdiff(-2*v[i]*a[i]*(1-w[i]), 2*v[i]*a[i]*w[i]);
+      }
+      if (log(p[i]) <= P) {
+        Rquant[i] = t0[i] + quantile(log(p[i])-P, resp[i], INFINITY, a[i], v[i], w[i], eps, K, epsFLAG);
+        Rlogquant[i] = log(Rquant[i]);
+      } else {
+        Rquant[i] = nan("");
+        Rlogquant[i] = nan("");
+      }
     }
   }
   
 }
 /* ------------------------------------------------ */
+
+
+/* QUANT of 7-param diffusion */
+void QF7(int choice, double *p, int *resp, double *a, double *v, double *t0, double *w, double *sw, double *sv, double *st, double err, int K, int N, int epsFLAG, double *Rval, double *Rlogval, double *Rerr, int NThreads, int Neval) {
+  
+  if (NThreads) {
+    /* prepare threads */
+    int maxThreads = std::thread::hardware_concurrency();
+    if (maxThreads == 0) Rprintf("Could not find out number of threads. Taking 2 threads.\n");
+    int suppThreads = maxThreads == 0 ? 2 : maxThreads;
+    int AmntOfThreads = suppThreads > NThreads ? NThreads : suppThreads;
+    int NperThread = N / AmntOfThreads;
+    std::vector<std::thread> threads(AmntOfThreads-1);
+    
+    /* calculate derivative with parallelization */
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j] = std::thread([=]() {
+        for (int i = j*NperThread; i < (j+1)*NperThread; i++) {
+          int pm = (resp[i]==1) ? 1 : -1;
+          pdiff(0, INFINITY, pm, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err/2, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
+          double P = log(Rval[i]);
+          if (p[i] <= Rval[i]) {
+            Rval[i] = quantile7(P, log(p[i])-P, pm, INFINITY, a[i], v[i], w[i], t0[i], sv[i], sw[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
+            Rerr[i] += err/2;
+          } else {
+            Rerr[i] = nan("");
+            Rval[i] = nan("");
+          }
+        }
+      });
+    }
+    
+    int last = NperThread * (AmntOfThreads-1);
+    for (int i = last; i < N; i++) {
+      int pm = (resp[i]==1) ? 1 : -1;
+      pdiff(0, INFINITY, pm, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err/2, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
+      double P = log(Rval[i]);
+      if (p[i] <= Rval[i]) {
+        Rval[i] = quantile7(P, log(p[i])-P, pm, INFINITY, a[i], v[i], w[i], t0[i], sv[i], sw[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
+        Rerr[i] += err/2;
+      } else {
+        Rerr[i] = nan("");
+        Rval[i] = nan("");
+      }
+    }
+    
+    for (int j = 0; j < AmntOfThreads-1; j++) {
+      threads[j].join();
+    }
+    
+  } else {
+    /* calculate derivative without parallelization */
+    for(int i = 0; i < N; i++) {
+      if (i % 1024 == 0) R_CheckUserInterrupt();
+      int pm = (resp[i]==1) ? 1 : -1;
+      pdiff(0, INFINITY, pm, a[i], v[i], t0[i], w[i], sw[i], sv[i], st[i], err/2, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
+      double P = log(Rval[i]);
+      if (p[i] <= Rval[i]) {
+        Rval[i] = quantile7(P, log(p[i])-P, pm, INFINITY, a[i], v[i], w[i], t0[i], sv[i], sw[i], st[i], err, K, epsFLAG, Neval, &Rval[i], &Rerr[i]);
+        Rerr[i] += err/2;
+      } else {
+        Rerr[i] = nan("");
+        Rval[i] = nan("");
+      }
+    }
+  }
+}

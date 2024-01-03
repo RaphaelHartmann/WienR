@@ -740,6 +740,69 @@ extern "C" {
 }
 
 
+
+extern "C" {
+  
+  SEXP qWiener(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP bo1) {
+    
+    /* define input variables */
+    double *p = REAL(re1);
+    double *a = REAL(re2);
+    double *v = REAL(re3);
+    double *w = REAL(re4);
+    double *t0 = REAL(re5);
+    double eps = REAL(re6)[0];
+    
+    int *resp = INTEGER(in1);
+    int K = INTEGER(in2)[0];
+    int N = INTEGER(in3)[0];
+    int NThreads = INTEGER(in4)[0];
+    
+    int epsFLAG = INTEGER(bo1)[0];
+    
+    
+    /* declare R objects for output */
+    int outCnt = 0, prtCnt = 0;
+    SEXP quant = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP logquant = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
+    prtCnt = outCnt + 1;
+    
+    
+    /* declare C++ pointers for R objects */
+    double *Rquant = REAL(quant);
+    double *Rlogquant = REAL(logquant);
+    
+    
+    /* calculate the derivatives */
+    QF(p, a, v, w, t0, eps, resp, K, N, epsFLAG, Rquant, Rlogquant, NThreads);
+    
+    
+    /* set elements of list out */
+    SET_VECTOR_ELT(out,0,quant);
+    SET_VECTOR_ELT(out,1,logquant);
+    
+    
+    /* make name vector and set element names */
+    SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
+    prtCnt++;
+    SET_STRING_ELT(names,0,Rf_mkChar("q"));
+    SET_STRING_ELT(names,1,Rf_mkChar("logq"));
+    
+    Rf_setAttrib(out,R_NamesSymbol,names);
+    
+    
+    /* Unprotect the out and names objects */
+    UNPROTECT(prtCnt);
+    
+    return(out);
+  }
+  
+}
+
+
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 /*--------------------7-PARAM DIFFUSION-------------------------*/
@@ -1479,3 +1542,79 @@ extern "C" {
 	}
 
 }
+
+
+
+extern "C" {
+  
+  SEXP qDiffusion7(SEXP re1, SEXP re2, SEXP re3, SEXP re4, SEXP re5, SEXP re6, SEXP re7, SEXP re8, SEXP re9, SEXP in1, SEXP in2, SEXP in3, SEXP in4, SEXP in5, SEXP in6, SEXP bo1) {
+    
+    /* define input variables */
+    double *p = REAL(re1);
+    double *a = REAL(re2);
+    double *v = REAL(re3);
+    double *t0 = REAL(re4);
+    double *w = REAL(re5);
+    double *sw = REAL(re6);
+    double *sv = REAL(re7);
+    double *st = REAL(re8);
+    double eps = REAL(re9)[0];
+    
+    int *resp = INTEGER(in1);
+    int K = INTEGER(in2)[0];
+    int N = INTEGER(in3)[0];
+    int NThreads = INTEGER(in4)[0];
+    int choice = INTEGER(in5)[0];
+    int Neval = INTEGER(in6)[0];
+    
+    int epsFLAG = INTEGER(bo1)[0];
+    
+    
+    /* declare R objects for output */
+    int outCnt = 0, prtCnt = 0;
+    SEXP value = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP value_ln = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP err = PROTECT(Rf_allocVector(REALSXP, N));
+    outCnt++;
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, outCnt));
+    prtCnt = outCnt + 1;
+    
+    
+    /* declare C++ pointers for R objects */
+    double *Rvalue = REAL(value);
+    double *Rvalue_ln = REAL(value_ln);
+    double *Rerr = REAL(err);
+    
+    
+    /* calculate the QUANTILE */
+    QF7(choice, p, resp, a, v, t0, w, sw, sv, st, eps, K, N, epsFLAG, Rvalue, Rvalue_ln, Rerr, NThreads, Neval);
+      
+    
+    /* set elements of list out */
+    SET_VECTOR_ELT(out,0,value);
+    // SET_VECTOR_ELT(out,1,value_ln);
+    SET_VECTOR_ELT(out,1,err);
+    
+    
+    /* make name vector and set element names */
+    SEXP names = PROTECT(Rf_allocVector(STRSXP, outCnt));
+    prtCnt++;
+    
+    SET_STRING_ELT(names,0,Rf_mkChar("q"));
+    // SET_STRING_ELT(names,1,Rf_mkChar("logq"));
+    SET_STRING_ELT(names,1,Rf_mkChar("err"));
+    
+    
+    Rf_setAttrib(out,R_NamesSymbol,names);
+    
+    
+    /* Unprotect the out and names objects */
+    UNPROTECT(prtCnt);
+    
+    return(out);
+  }
+  
+}
+
