@@ -38,3 +38,13 @@ print.Diffusion_cdf <- function(x, ...) {
   print(x$logvalue)
   cat("\n---------------------------\n\n")
 }
+
+#' @export
+print.Diffusion_quantile <- function(x, ...) {
+  cat(paste0("\nFirst-passage time quantile function\n\n"))
+  print(x$q)
+  cat("\n---------------------------\n")
+  # cat(paste0("\nLog of first-passage time CDF\n\n"))
+  # print(x$logq)
+  # cat("\n---------------------------\n\n")
+}
