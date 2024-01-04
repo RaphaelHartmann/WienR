@@ -68,7 +68,7 @@ A list of the class \code{Diffusion_deriv} containing
 Calculates the partial derivative of the first-passage time probability density function of the diffusion model with respect to the drift rate v.
 }
 \examples{
-dvWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+dvWienerPDF(t = 1.2, response = "upper", a = 1.1, v = 2, w = .6, precision = NULL, K = NULL)
 }
 \references{
 Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}

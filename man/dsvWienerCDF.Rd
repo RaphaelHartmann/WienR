@@ -68,7 +68,7 @@ A list of the class \code{Diffusion_deriv} containing
 Calculates the partial derivative of the first-passage time cumulative distribution function of the diffusion model with respect to the inter-trial variability of the drift rate sv.
 }
 \examples{
-dsvWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, sv = .1)
+dsvWienerCDF(t = 1.2, response = "upper", a = 1.1, v = 2, w = .6, sv = .1)
 }
 \references{
 Hartmann, R., & Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 103}, 102550. \doi{10.1016/j.jmp.2021.102550}

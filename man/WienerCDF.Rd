@@ -86,8 +86,8 @@ A list of the class \code{Diffusion_cdf} containing
 Calculates the first-passage time cumulative distribution function of the diffusion model.
 }
 \examples{
-WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
-pWDM(t = 1.2, response = "upper", a = 1.1, v = 13, w = .6, precision = NULL, K = NULL)
+WienerCDF(t = 1.2, response = "upper", a = 1.1, v = 2, w = .6, precision = NULL, K = NULL)
+pWDM(t = 1.2, response = "upper", a = 1.1, v = 2, w = .6, precision = NULL, K = NULL)
 }
 \references{
 Blurton, S. P., Kesselmeier, M., & Gondan, M. (2012). Fast and accurate calculations for cumulative first-passage time distributions in Wiener diffusion models. \emph{Journal of Mathematical Psychology, 56(6)}, 470–475. \doi{10.1016/j.jmp.2012.09.002}

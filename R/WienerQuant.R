@@ -1,7 +1,7 @@
 
-#' First-passage time cumulative distribution function of the diffusion model
+#' First-passage time quantile function of the diffusion model
 #'
-#' Calculates the first-passage time cumulative distribution function of the diffusion model.
+#' Calculates the first-passage time quantile function of the diffusion model.
 #' @param p Probability. Numeric vector.
 #' @param response Response boundary. Character vector with \code{"upper"} and \code{"lower"} as possible values. Alternatively a numeric vector with
 #'   \code{1}=lower and \code{2}=upper.
@@ -158,7 +158,7 @@ WienerQuant <- function(p,
     out$err[indD] <- temp$err
   }
   
-  if (any(is.na(out$q))) message("the probability values for some requested quantiles were larger than the limit of the corresponding defective CDF")
+  if (any(is.na(out$q))) message("at least one of the probability values for some requested quantiles were larger than the limit of the corresponding defective CDF")
   #print(out)
   
   outcome <- list(q = out$q, call = match.call())
